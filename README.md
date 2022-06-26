@@ -2,11 +2,14 @@
 
 ## Overview
 
-vuh script allows you to  
- - suggest relevant version according to your local and main versions with '***vuh sv***' or '***vuh suggesting-version***'
- - check is your input version allowed to be new main branch version with '***vuh sv -v=1.6.5***' or '***vuh suggesting-version -v=1.6.5***'
- - easily get local project's version with '***vuh lv***' or '***vuh local-version***'
- - easily get version of origin/MAIN_BRANCH_NAME branch with '***vuh lv***' or '***vuh main-version***'
+vuh script allows you to
+
+- suggest relevant version according to your local and main versions with '***vuh sv***' or '***vuh
+  suggesting-version***'
+- check is your input version allowed to be new main branch version with '***vuh sv -v=1.6.5***' or '***vuh
+  suggesting-version -v=1.6.5***'
+- easily get local project's version with '***vuh lv***' or '***vuh local-version***'
+- easily get version of origin/MAIN_BRANCH_NAME branch with '***vuh lv***' or '***vuh main-version***'
 
 ## Installation
 
@@ -16,9 +19,10 @@ Installing vuh.bash is simple:
     $ cd version-update-helper
     $ ./installer.sh
 
-That will install vuh to `$HOME/bin` by default. 
+That will install vuh to `$HOME/bin` by default.
 
 ## Usage
+
     Usage: vuh [-v | --version] [-h | --help] <command> [<args>]
 
     Options:
@@ -41,3 +45,5 @@ That will install vuh to `$HOME/bin` by default.
 
 * Web: <https://github.com/Greewil/version-update-helper>
 * Mail: <shishkin.sergey.d@gmail.com>
+
+[LICENSE]: https://github.com/Greewil/version-update-helper/blob/master/LICENSE
