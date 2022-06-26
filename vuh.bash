@@ -13,6 +13,7 @@
 #/        [-v=<version>]           to specify your own version which also will be taken into account
 #/
 #/ Suggest relevant version for your current project or even update your local project's version.
+#/ Script can work with your project's versions from any directory of your local repository.
 #
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 

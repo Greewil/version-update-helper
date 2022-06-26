@@ -36,6 +36,7 @@ That will install vuh to `$HOME/bin` by default.
            [-v=<version>]           to specify your own version which also will be taken into account
     
     Suggests relevant version for your local project or even updates your local project's version.
+    Script can work with your project's versions from any directory of your local repository.
 
 ## License
 
