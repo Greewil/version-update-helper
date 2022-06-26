@@ -18,7 +18,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current version of version_manager.sh.
-VERSION_MANAGER_VERSION="0.1.1"
+VUH_VERSION="0.1.1"
 
 # ------------------------------------- custom project parameters ------------------------------------- #
 # MAIN_BRANCH_NAME:
@@ -193,7 +193,7 @@ function get_suggesting_version {
 }
 
 function show_vuh_version {
-  echo "vuh version: $VERSION_MANAGER_VERSION"
+  echo "vuh version: $VUH_VERSION"
 }
 
 function show_help {
