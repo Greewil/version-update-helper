@@ -1,9 +1,4 @@
-#!/bin/bash
-
-if [ ! "$BASH_VERSION" ] ; then
-    exec /usr/bin/bash "$0" "$@"
-    exit 0
-fi
+#!/usr/bin/env bash
 
 #/ Usage: vuh [-v | --version] [-h | --help] <command> [<args>]
 #/

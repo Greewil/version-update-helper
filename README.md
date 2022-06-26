@@ -39,7 +39,7 @@ That will install vuh to `$HOME/bin` by default.
 
 ## License
 
-* version-update-helper is licensed under the terms of the MIT License. See [LICENSE] file.
+version-update-helper is licensed under the terms of the MIT License. See [LICENSE] file.
 
 ## Contact
 

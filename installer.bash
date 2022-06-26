@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function install_for_gitbash {
   if [ -n "$HOME" ]; then
@@ -14,7 +14,7 @@ function install_for_gitbash {
 
     # show success message
     printf '\n'
-    echo 'vuh successfully installed'
+    echo 'vuh was successfully installed'
     echo 'Autocompletion will be available only after restarting your terminal!'
   else
     echo "HOME variable not found! aborting"
