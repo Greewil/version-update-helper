@@ -46,7 +46,7 @@ VERSION_REG_EXP='^[0-9]\+\.[0-9]\+\.[0-9]\+$'
 VERSION_UPDATE_COMMIT_TEXT='автоматическая накрутка версии (version_manager.sh)'
 # ------------------------------------- custom project parameters ------------------------------------- #
 
-CUR_DIR=$(pwd)
+ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SUGGESTING_VERSION=''
@@ -127,6 +127,13 @@ function _get_incremented_version {
   echo "$v_syncing_versions.$v_minor_version"
 }
 
+function _get_root_repo_dir {
+  ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
+    echo "Can't find root repo directory!"
+    exit 1
+  }
+}
+
 function _get_version_from_file {
   version_file=$1
   version=${version_file##*$TEXT_BEFORE_VERSION_CODE} || return 1
@@ -137,12 +144,13 @@ function _get_version_from_file {
 
 function _read_local_version {
   _show_function_title 'getting local version'
-  version_file=$(<$VERSION_FILE) || {
-    echo "Failed to load file $CUR_DIR/$VERSION_FILE!"
+  _get_root_repo_dir
+  version_file=$(<$ROOT_REPO_DIR/$VERSION_FILE) || {
+    echo "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
     return 1
   }
   LOCAL_VERSION=$(_get_version_from_file "$version_file") || {
-    echo "Failed to get local version from $CUR_DIR/$VERSION_FILE!"
+    echo "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
     return 1
   }
   echo "local: $LOCAL_VERSION"
