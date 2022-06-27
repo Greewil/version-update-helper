@@ -23,7 +23,11 @@ function install_for_gitbash {
       case "$answer" in
       y|Y|Yes|yes)
         echo 'restarting current bash terminal session ...'
-        exec bash -l || exit 1
+        exec bash -l || exec zsh -l || {
+          echo "failed to restart current bash terminal session!"
+          echo 'Autocompletion will be available only after restarting your terminal!'
+          return 1
+        }
         ;;
       n|N|No|no)
         echo 'Autocompletion will be available only after restarting your terminal!'
