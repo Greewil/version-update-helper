@@ -50,6 +50,7 @@ VUH_VERSION='0.1.0'
 ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
+SPECIFIED_VERSION=''
 SUGGESTING_VERSION=''
 
 function _show_function_title {
@@ -169,6 +170,16 @@ function _load_local_conf_file {
 #  echo "env_vars:" "$MAIN_BRANCH_NAME" "$VERSION_FILE" "$TEXT_BEFORE_VERSION_CODE" "$TEXT_AFTER_VERSION_CODE" "$VERSION_REG_EXP"
 }
 
+function _show_suggested_versions_comparison {
+  if [ "$SUGGESTING_VERSION" = "$LOCAL_VERSION" ]; then
+    echo "(suggested to use your local version)"
+  elif [ "$SUGGESTING_VERSION" = "$SPECIFIED_VERSION" ]; then
+    echo "(suggested to use version specified in start arguments)"
+  else
+    echo "(suggested to use new version)"
+  fi
+}
+
 function _read_local_version {
   _show_function_title 'getting local version'
   _get_root_repo_dir || return 1
@@ -218,7 +229,7 @@ function get_suggesting_version {
   else
     SUGGESTING_VERSION=$largest_version
   fi
-
+  _show_suggested_versions_comparison
   echo "suggesting: $SUGGESTING_VERSION"
   _check_version_syntax "$SUGGESTING_VERSION" || {
     echo "Suggesting version format is incorrect! Something went wrong ..."
