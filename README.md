@@ -11,6 +11,10 @@ vuh script allows you to
 - easily get local project's version with '***vuh lv***' or '***vuh local-version***'
 - easily get version of origin/MAIN_BRANCH_NAME branch with '***vuh lv***' or '***vuh main-version***'
 
+## Requirements
+
+git version 2.24
+
 ## Installation
 
 Installing vuh.bash is simple:
