@@ -58,7 +58,7 @@ function _show_function_title {
   echo "$1"
 }
 
-function load_project_variables_from_config {
+function _load_project_variables_from_config {
   config_file=$1
   tmp_conf_file="/tmp/vuh_projects_conf_file.conf"
   echo "$config_file" > $tmp_conf_file
@@ -160,8 +160,24 @@ function _load_local_conf_file {
     echo "Failed to read local configuration file $ROOT_REPO_DIR/vuh.conf!"
     return 1
   }
-  load_project_variables_from_config "$conf_file" || {
+  _load_project_variables_from_config "$conf_file" || {
     echo "Failed to load variables from local configuration file $ROOT_REPO_DIR/vuh.conf!"
+    return 1
+  }
+# TODO check is conf file actually loaded
+# TODO check is conf file is correct
+# TODO check is conf file has unsupported version
+#  echo "env_vars:" "$MAIN_BRANCH_NAME" "$VERSION_FILE" "$TEXT_BEFORE_VERSION_CODE" "$TEXT_AFTER_VERSION_CODE" "$VERSION_REG_EXP"
+}
+
+function _load_remote_conf_file {
+  branch_name=$1
+  main_branch_config_file=$(git show "origin/$branch_name:vuh.conf") || {
+    echo "Failed to read remote configuration file origin/$branch_name:vuh.conf!"
+    return 1
+  }
+  _load_project_variables_from_config "$main_branch_config_file" || {
+    echo "Failed to load variables from remote configuration file origin/$branch_name:vuh.conf!"
     return 1
   }
 # TODO check is conf file actually loaded
@@ -199,8 +215,10 @@ function _read_main_version {
   _show_function_title 'getting main version'
   _load_local_conf_file || return 1
   handling_file="origin/$MAIN_BRANCH_NAME:$VERSION_FILE"
-  main_branch_config_file=$(git show "origin/$MAIN_BRANCH_NAME:vuh.conf") || return 1
-  load_project_variables_from_config "$main_branch_config_file" || return 1
+  _load_remote_conf_file "$MAIN_BRANCH_NAME" || {
+    echo "can't parse remote conf file"
+#    TODO ask: Do you want to use local conf file for origin/main branch?
+  }
   main_branch_file=$(git show "$handling_file") || {
     echo "Failed to load file $handling_file"
     return 1
