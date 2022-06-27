@@ -13,7 +13,7 @@ vuh script allows you to
 
 ## Requirements
 
-git version 2.24
+- git version 2.24 (Version 2.24 was tested. You can use lower versions at your own risk)
 
 ## Installation
 
