@@ -18,34 +18,34 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current version of version_manager.sh.
-VUH_VERSION="0.1.1"
+VUH_VERSION='0.1.0'
 
-# ------------------------------------- custom project parameters ------------------------------------- #
-# MAIN_BRANCH_NAME:
-#   the name of the main project's branch
-# example: 'main' or 'master'
-MAIN_BRANCH_NAME='master'
-# VERSION_FILE:
-#   file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
-# example: 'package.json' (for node.js application)
-VERSION_FILE='package.json'
-# TEXT_BEFORE_VERSION_CODE:
-#   unique text which will be just before version number (including spaces)
-# example: '\"version\": \"' (for variable "version" in json files so it can find line "version": "1.6.2")
-TEXT_BEFORE_VERSION_CODE='\"version\": \"'
-# TEXT_AFTER_VERSION_CODE:
-#   unique text which will be just after version number (including spaces)
-# example: '\",' (for variable "version" in json files so it can find line "version": "1.6.2")
-TEXT_AFTER_VERSION_CODE='\",'
-# VERSION_REG_EXP:
-#   regular expression which will work only on version number
-# example: '^[0-9]\+\.[0-9]\+\.[0-9]\+$' (for versions like 1.63.20)
-VERSION_REG_EXP='^[0-9]\+\.[0-9]\+\.[0-9]\+$'
-# VERSION_UPDATE_COMMIT_TEXT:
-#   regular expression which will work only on version number
-# example: 'automatic version update (version_manager.sh)' (for versions like 1.63.20)
-VERSION_UPDATE_COMMIT_TEXT='автоматическая накрутка версии (version_manager.sh)'
-# ------------------------------------- custom project parameters ------------------------------------- #
+## ------------------------------------- custom project parameters ------------------------------------- #
+## MAIN_BRANCH_NAME:
+##   the name of the main project's branch
+## example: 'main' or 'master'
+#MAIN_BRANCH_NAME='master'
+## VERSION_FILE:
+##   file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
+## example: 'package.json' (for node.js application)
+#VERSION_FILE='package.json'
+## TEXT_BEFORE_VERSION_CODE:
+##   unique text which will be just before version number (including spaces)
+## example: '\"version\": \"' (for variable "version" in json files so it can find line "version": "1.6.2")
+#TEXT_BEFORE_VERSION_CODE='\"version\": \"'
+## TEXT_AFTER_VERSION_CODE:
+##   unique text which will be just after version number (including spaces)
+## example: '\",' (for variable "version" in json files so it can find line "version": "1.6.2")
+#TEXT_AFTER_VERSION_CODE='\",'
+## VERSION_REG_EXP:
+##   regular expression which will work only on version number
+## example: '^[0-9]\+\.[0-9]\+\.[0-9]\+$' (for versions like 1.63.20)
+#VERSION_REG_EXP='^[0-9]\+\.[0-9]\+\.[0-9]\+$'
+## VERSION_UPDATE_COMMIT_TEXT:
+##   regular expression which will work only on version number
+## example: 'automatic version update (version_manager.sh)' (for versions like 1.63.20)
+#VERSION_UPDATE_COMMIT_TEXT='автоматическая накрутка версии (version_manager.sh)'
+## ------------------------------------- custom project parameters ------------------------------------- #
 
 ROOT_REPO_DIR=''
 LOCAL_VERSION=''
@@ -55,6 +55,12 @@ SUGGESTING_VERSION=''
 function _show_function_title {
   printf '\n'
   echo "$1"
+}
+
+function load_project_variables_from_config {
+  config_file=$1
+  . "$config_file"
+# TODO source file
 }
 
 function _check_version_syntax {
@@ -146,6 +152,7 @@ function _get_version_from_file {
 function _read_local_version {
   _show_function_title 'getting local version'
   _get_root_repo_dir
+  load_project_variables_from_config "$ROOT_REPO_DIR/vuh.conf"
   version_file=$(<$ROOT_REPO_DIR/$VERSION_FILE) || {
     echo "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
     return 1
@@ -160,7 +167,10 @@ function _read_local_version {
 function _read_main_version {
   _show_function_title 'getting main version'
   handling_file="origin/$MAIN_BRANCH_NAME:$VERSION_FILE"
-  version_context=$(git show "$handling_file" | grep "$TEXT_BEFORE_VERSION_CODE") || {
+  main_branch_file=<(git show "$handling_file")
+  load_project_variables_from_config "$main_branch_file" || exit 1
+# TODO load_project_variables_from_config
+  version_context=$(echo "$main_branch_file" | grep "$TEXT_BEFORE_VERSION_CODE") || {
     echo "Failed to load file $handling_file!"
     return 1
   }
@@ -201,30 +211,30 @@ function show_help {
 }
 
 while [ "$#" != 0 ]; do
-    case "$1" in
-    -h|--help)
-        show_help
-        exit 0
-        ;;
-    -v|--version)
-        show_vuh_version
-        exit 0
-        ;;
-    lv|local-version)
-        _read_local_version
-        exit 0
-        ;;
-    mv|main-version)
-        _read_main_version
-        exit 0
-        ;;
-    sv|suggesting-version)
-        get_suggesting_version
-        exit 0
-        ;;
-    -*|--*)
-        echo >&2 "error: invalid option '$1'"
-        echo 'use "vuh --help" to see available commands and options information'
-        exit 1 ;;
-    esac
+  case "$1" in
+  -h|--help)
+    show_help
+    exit 0
+    ;;
+  -v|--version)
+    show_vuh_version
+    exit 0
+    ;;
+  lv|local-version)
+    _read_local_version
+    exit 0
+    ;;
+  mv|main-version)
+    _read_main_version
+    exit 0
+    ;;
+  sv|suggesting-version)
+    get_suggesting_version
+    exit 0
+    ;;
+  -*|--*)
+    echo >&2 "error: invalid option '$1'"
+    echo 'use "vuh --help" to see available commands and options information'
+    exit 1 ;;
+  esac
 done
