@@ -20,33 +20,6 @@
 # Current version of version_manager.sh.
 VUH_VERSION='0.1.0'
 
-## ------------------------------------- custom project parameters ------------------------------------- #
-## MAIN_BRANCH_NAME:
-##   the name of the main project's branch
-## example: 'main' or 'master'
-#MAIN_BRANCH_NAME='master'
-## VERSION_FILE:
-##   file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
-## example: 'package.json' (for node.js application)
-#VERSION_FILE='package.json'
-## TEXT_BEFORE_VERSION_CODE:
-##   unique text which will be just before version number (including spaces)
-## example: '\"version\": \"' (for variable "version" in json files so it can find line "version": "1.6.2")
-#TEXT_BEFORE_VERSION_CODE='\"version\": \"'
-## TEXT_AFTER_VERSION_CODE:
-##   unique text which will be just after version number (including spaces)
-## example: '\",' (for variable "version" in json files so it can find line "version": "1.6.2")
-#TEXT_AFTER_VERSION_CODE='\",'
-## VERSION_REG_EXP:
-##   regular expression which will work only on version number
-## example: '^[0-9]\+\.[0-9]\+\.[0-9]\+$' (for versions like 1.63.20)
-#VERSION_REG_EXP='^[0-9]\+\.[0-9]\+\.[0-9]\+$'
-## VERSION_UPDATE_COMMIT_TEXT:
-##   regular expression which will work only on version number
-## example: 'automatic version update (version_manager.sh)' (for versions like 1.63.20)
-#VERSION_UPDATE_COMMIT_TEXT='автоматическая накрутка версии (version_manager.sh)'
-## ------------------------------------- custom project parameters ------------------------------------- #
-
 ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
