@@ -59,8 +59,13 @@ function _show_function_title {
 
 function load_project_variables_from_config {
   config_file=$1
-  . "$config_file"
-# TODO source file
+  tmp_conf_file="/tmp/vuh_projects_conf_file.conf"
+  echo "$config_file" > $tmp_conf_file
+  . $tmp_conf_file || {
+    rm -f /tmp/vuh_projects_conf_file.conf
+    return 1
+  }
+  rm -f /tmp/vuh_projects_conf_file.conf
 }
 
 function _check_version_syntax {
@@ -149,11 +154,26 @@ function _get_version_from_file {
   echo "$version"
 }
 
+function _load_local_conf_file {
+  conf_file=$(<"$ROOT_REPO_DIR/vuh.conf") || {
+    echo "Failed to read local configuration file $ROOT_REPO_DIR/vuh.conf!"
+    return 1
+  }
+  load_project_variables_from_config "$conf_file" || {
+    echo "Failed to load variables from local configuration file $ROOT_REPO_DIR/vuh.conf!"
+    return 1
+  }
+# TODO check is conf file actually loaded
+# TODO check is conf file is correct
+# TODO check is conf file has unsupported version
+#  echo "env_vars:" "$MAIN_BRANCH_NAME" "$VERSION_FILE" "$TEXT_BEFORE_VERSION_CODE" "$TEXT_AFTER_VERSION_CODE" "$VERSION_REG_EXP"
+}
+
 function _read_local_version {
   _show_function_title 'getting local version'
-  _get_root_repo_dir
-  load_project_variables_from_config "$ROOT_REPO_DIR/vuh.conf"
-  version_file=$(<$ROOT_REPO_DIR/$VERSION_FILE) || {
+  _get_root_repo_dir || return 1
+  _load_local_conf_file || return 1
+  version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
     echo "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
     return 1
   }
@@ -166,12 +186,16 @@ function _read_local_version {
 
 function _read_main_version {
   _show_function_title 'getting main version'
+  _load_local_conf_file || return 1
   handling_file="origin/$MAIN_BRANCH_NAME:$VERSION_FILE"
-  main_branch_file=<(git show "$handling_file")
-  load_project_variables_from_config "$main_branch_file" || exit 1
-# TODO load_project_variables_from_config
+  main_branch_config_file=$(git show "origin/$MAIN_BRANCH_NAME:vuh.conf") || return 1
+  load_project_variables_from_config "$main_branch_config_file" || return 1
+  main_branch_file=$(git show "$handling_file") || {
+    echo "Failed to load file $handling_file"
+    return 1
+  }
   version_context=$(echo "$main_branch_file" | grep "$TEXT_BEFORE_VERSION_CODE") || {
-    echo "Failed to load file $handling_file!"
+    echo "Failed to get line, containing version from file $handling_file!"
     return 1
   }
   MAIN_VERSION=$(_get_version_from_file "$version_context") || {
