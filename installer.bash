@@ -1,15 +1,29 @@
 #!/usr/bin/env bash
 
+NEUTRAL_COLOR='\e[0m'
+RED='\e[1;31m'
+YELLOW='\e[1;33m'
+
 function _show_error_message {
   message=$1
+  echo -en "$RED(vuh_installer : ERROR) $message$NEUTRAL_COLOR\n"
   echo "(vuh_installer : ERROR) $message"
 }
 
+function _show_warning_message {
+  message=$1
+  echo -en "$YELLOW(vuh : WARNING) $message$NEUTRAL_COLOR\n"
+}
+
+function _warning_should_restart {
+  _show_warning_message 'Autocompletion will be available only after restarting your terminal!'
+}
+
 function _try_to_restart_terminal {
-  echo 'restarting current bash terminal session ...'
+  _show_warning_message 'restarting current bash terminal session ...'
   exec bash -l || exec zsh -l || {
     _show_error_message "failed to restart current bash terminal session!"
-    echo 'Autocompletion will be available only after restarting your terminal!'
+    _warning_should_restart
     return 1
   }
 }
@@ -54,9 +68,9 @@ function install_for_gitbash {
     question_text="To activate vuh-completion your should restart bash terminal session. Do you want to restart it now?"
     _yes_no_question "$question_text" \
       "_try_to_restart_terminal" \
-      "echo Autocompletion will be available only after restarting your terminal!"
+      "_warning_should_restart"
   else
-    echo "HOME variable not found! aborting"
+    _show_error_message "HOME variable not found! aborting"
     exit 1
   fi
 }

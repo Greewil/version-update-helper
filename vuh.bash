@@ -26,6 +26,10 @@ MAIN_VERSION=''
 SPECIFIED_VERSION=''
 SUGGESTING_VERSION=''
 
+NEUTRAL_COLOR='\e[0m'
+RED='\e[1;31m'
+YELLOW='\e[1;33m'
+
 function _show_function_title {
   printf '\n'
   echo "$1"
@@ -33,7 +37,12 @@ function _show_function_title {
 
 function _show_error_message {
   message=$1
-  echo "(vuh : ERROR) $message"
+  echo -en "$RED(vuh : ERROR) $message$NEUTRAL_COLOR\n"
+}
+
+function _show_warning_message {
+  message=$1
+  echo -en "$YELLOW(vuh : WARNING) $message$NEUTRAL_COLOR\n"
 }
 
 function _yes_no_question {
@@ -224,8 +233,7 @@ function read_main_version {
   _fetch_remote_branches || exit 1
   handling_file="origin/$MAIN_BRANCH_NAME:$VERSION_FILE"
   _load_remote_conf_file "$MAIN_BRANCH_NAME" || {
-    _show_error_message "can't parse remote conf file"
-#    TODO ask: Do you want to use local conf file for origin/main branch?
+    _show_warning_message "vuh will use local configuration to get remote version"
   }
   main_branch_file=$(git show "$handling_file") || {
     _show_error_message "Failed to load file $handling_file"
