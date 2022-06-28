@@ -129,6 +129,7 @@ function _get_version_from_file {
 }
 
 function _load_local_conf_file {
+  _get_root_repo_dir || return 1
   conf_file=$(<"$ROOT_REPO_DIR/vuh.conf") || {
     echo "Failed to read local configuration file $ROOT_REPO_DIR/vuh.conf!"
     return 1
@@ -161,32 +162,36 @@ function _load_remote_conf_file {
 
 function _show_suggested_versions_comparison {
   if [ "$SUGGESTING_VERSION" = "$LOCAL_VERSION" ]; then
-    echo "(suggested to use your local version)"
+    echo "(your local version seems to be ok)"
   elif [ "$SUGGESTING_VERSION" = "$SPECIFIED_VERSION" ]; then
-    echo "(suggested to use version specified in start arguments)"
+    echo "(version specified in arguments seems to be ok)"
   else
     echo "(suggested to use new version)"
   fi
 }
 
-function _read_local_version {
+function read_local_version {
   _show_function_title 'getting local version'
-  _get_root_repo_dir || return 1
-  _load_local_conf_file || return 1
+  _load_local_conf_file || exit 1
   version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
     echo "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
-    return 1
+    exit 1
   }
   LOCAL_VERSION=$(_get_version_from_file "$version_file") || {
     echo "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
-    return 1
+    exit 1
   }
   echo "local: $LOCAL_VERSION"
 }
 
-function _read_main_version {
+function read_main_version {
   _show_function_title 'getting main version'
-  _load_local_conf_file || return 1
+  _load_local_conf_file || exit 1
+  git fetch || {
+    echo 'Failed to use "git fetch" to update information about origin branches!'
+    echo 'If access denied you should configure public keys in your git account.'
+    exit 1
+  }
   handling_file="origin/$MAIN_BRANCH_NAME:$VERSION_FILE"
   _load_remote_conf_file "$MAIN_BRANCH_NAME" || {
     echo "can't parse remote conf file"
@@ -194,22 +199,22 @@ function _read_main_version {
   }
   main_branch_file=$(git show "$handling_file") || {
     echo "Failed to load file $handling_file"
-    return 1
+    exit 1
   }
   version_context=$(echo "$main_branch_file" | grep "$TEXT_BEFORE_VERSION_CODE") || {
     echo "Failed to get line, containing version from file $handling_file!"
-    return 1
+    exit 1
   }
   MAIN_VERSION=$(_get_version_from_file "$version_context") || {
     echo "Failed to get main version from $handling_file!"
-    return 1
+    exit 1
   }
   echo "main: $MAIN_VERSION"
 }
 
 function get_suggesting_version {
-  _read_local_version || exit 1
-  _read_main_version || exit 1
+  read_local_version || exit 1
+  read_main_version || exit 1
   _show_function_title 'suggesting relevant version'
   largest_version=$(_get_largest_version "$MAIN_VERSION" "$LOCAL_VERSION") || {
     echo "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
@@ -247,11 +252,11 @@ while [ "$#" != 0 ]; do
     exit 0
     ;;
   lv|local-version)
-    _read_local_version
+    read_local_version
     exit 0
     ;;
   mv|main-version)
-    _read_main_version
+    read_main_version
     exit 0
     ;;
   sv|suggesting-version)
