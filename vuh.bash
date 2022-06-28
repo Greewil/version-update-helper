@@ -116,7 +116,7 @@ function _get_incremented_version {
 function _get_root_repo_dir {
   ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
     echo "Can't find root repo directory!"
-    exit 1
+    return 1
   }
 }
 
@@ -126,6 +126,14 @@ function _get_version_from_file {
   version=${version%%$TEXT_AFTER_VERSION_CODE*} || return 1
   _check_version_syntax "$version" || return 1
   echo "$version"
+}
+
+function _fetch_remote_branches {
+  git fetch || {
+    echo 'Failed to use "git fetch" to update information about remote branches!'
+    echo 'If access was denied then maybe you should configure public keys in your git account.'
+    return 1
+  }
 }
 
 function _load_local_conf_file {
@@ -187,11 +195,7 @@ function read_local_version {
 function read_main_version {
   _show_function_title 'getting main version'
   _load_local_conf_file || exit 1
-  git fetch || {
-    echo 'Failed to use "git fetch" to update information about origin branches!'
-    echo 'If access denied you should configure public keys in your git account.'
-    exit 1
-  }
+  _fetch_remote_branches || exit 1
   handling_file="origin/$MAIN_BRANCH_NAME:$VERSION_FILE"
   _load_remote_conf_file "$MAIN_BRANCH_NAME" || {
     echo "can't parse remote conf file"
