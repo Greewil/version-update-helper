@@ -36,6 +36,26 @@ function _show_error_message {
   echo "(vuh : ERROR) $message"
 }
 
+function _yes_no_question {
+  question_text=$1
+  command_on_yes=$2
+  command_on_no=$3
+  asking_question='true'
+  while [ $asking_question = 'true' ]; do
+    read -p "$question_text (Y/N): " -r answer
+    case "$answer" in
+    y|Y|Yes|yes)
+      $command_on_yes
+      asking_question='false'
+      ;;
+    n|N|No|no)
+      $command_on_no
+      exit 0
+      ;;
+    esac
+  done
+}
+
 function _load_project_variables_from_config {
   config_file=$1
   tmp_conf_file="/tmp/vuh_projects_conf_file.conf"
