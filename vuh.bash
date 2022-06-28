@@ -31,6 +31,11 @@ function _show_function_title {
   echo "$1"
 }
 
+function _show_error_message {
+  message=$1
+  echo "(vuh : ERROR) $message"
+}
+
 function _load_project_variables_from_config {
   config_file=$1
   tmp_conf_file="/tmp/vuh_projects_conf_file.conf"
@@ -115,7 +120,8 @@ function _get_incremented_version {
 
 function _get_root_repo_dir {
   ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
-    echo "Can't find root repo directory!"
+    _show_error_message "Can't find root repo directory!"
+    echo
     return 1
   }
 }
@@ -130,8 +136,8 @@ function _get_version_from_file {
 
 function _fetch_remote_branches {
   git fetch || {
-    echo 'Failed to use "git fetch" to update information about remote branches!'
-    echo 'If access was denied then maybe you should configure public keys in your git account.'
+    _show_error_message 'Failed to use "git fetch" to update information about remote branches!'
+    _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
     return 1
   }
 }
@@ -139,11 +145,11 @@ function _fetch_remote_branches {
 function _load_local_conf_file {
   _get_root_repo_dir || return 1
   conf_file=$(<"$ROOT_REPO_DIR/vuh.conf") || {
-    echo "Failed to read local configuration file $ROOT_REPO_DIR/vuh.conf!"
+    _show_error_message "Failed to read local configuration file $ROOT_REPO_DIR/vuh.conf!"
     return 1
   }
   _load_project_variables_from_config "$conf_file" || {
-    echo "Failed to load variables from local configuration file $ROOT_REPO_DIR/vuh.conf!"
+    _show_error_message "Failed to load variables from local configuration file $ROOT_REPO_DIR/vuh.conf!"
     return 1
   }
 # TODO check is conf file actually loaded
@@ -155,11 +161,11 @@ function _load_local_conf_file {
 function _load_remote_conf_file {
   branch_name=$1
   main_branch_config_file=$(git show "origin/$branch_name:vuh.conf") || {
-    echo "Failed to read remote configuration file origin/$branch_name:vuh.conf!"
+    _show_error_message "Failed to read remote configuration file origin/$branch_name:vuh.conf!"
     return 1
   }
   _load_project_variables_from_config "$main_branch_config_file" || {
-    echo "Failed to load variables from remote configuration file origin/$branch_name:vuh.conf!"
+    _show_error_message "Failed to load variables from remote configuration file origin/$branch_name:vuh.conf!"
     return 1
   }
 # TODO check is conf file actually loaded
@@ -182,11 +188,11 @@ function read_local_version {
   _show_function_title 'getting local version'
   _load_local_conf_file || exit 1
   version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
-    echo "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
+    _show_error_message "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
     exit 1
   }
   LOCAL_VERSION=$(_get_version_from_file "$version_file") || {
-    echo "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
+    _show_error_message "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
     exit 1
   }
   echo "local: $LOCAL_VERSION"
@@ -198,19 +204,19 @@ function read_main_version {
   _fetch_remote_branches || exit 1
   handling_file="origin/$MAIN_BRANCH_NAME:$VERSION_FILE"
   _load_remote_conf_file "$MAIN_BRANCH_NAME" || {
-    echo "can't parse remote conf file"
+    _show_error_message "can't parse remote conf file"
 #    TODO ask: Do you want to use local conf file for origin/main branch?
   }
   main_branch_file=$(git show "$handling_file") || {
-    echo "Failed to load file $handling_file"
+    _show_error_message "Failed to load file $handling_file"
     exit 1
   }
   version_context=$(echo "$main_branch_file" | grep "$TEXT_BEFORE_VERSION_CODE") || {
-    echo "Failed to get line, containing version from file $handling_file!"
+    _show_error_message "Failed to get line, containing version from file $handling_file!"
     exit 1
   }
   MAIN_VERSION=$(_get_version_from_file "$version_context") || {
-    echo "Failed to get main version from $handling_file!"
+    _show_error_message "Failed to get main version from $handling_file!"
     exit 1
   }
   echo "main: $MAIN_VERSION"
@@ -221,7 +227,7 @@ function get_suggesting_version {
   read_main_version || exit 1
   _show_function_title 'suggesting relevant version'
   largest_version=$(_get_largest_version "$MAIN_VERSION" "$LOCAL_VERSION") || {
-    echo "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
+    _show_error_message "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
     exit 1
   }
   if [[ "$largest_version" = "$MAIN_VERSION" ]]; then
@@ -232,7 +238,7 @@ function get_suggesting_version {
   _show_suggested_versions_comparison
   echo "suggesting: $SUGGESTING_VERSION"
   _check_version_syntax "$SUGGESTING_VERSION" || {
-    echo "Suggesting version format is incorrect! Something went wrong ..."
+    _show_error_message "Suggesting version format is incorrect! Something went wrong ..."
     exit 1
   }
 }
