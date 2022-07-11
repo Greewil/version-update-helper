@@ -7,7 +7,6 @@ YELLOW='\e[1;33m'
 function _show_error_message {
   message=$1
   echo -en "$RED(vuh_installer : ERROR) $message$NEUTRAL_COLOR\n"
-  echo "(vuh_installer : ERROR) $message"
 }
 
 function _show_warning_message {
@@ -64,13 +63,22 @@ function install_for_gitbash {
   if [ -n "$HOME" ]; then
     # GitBash terminal case
 
+    INSTALLATION_DIR="$HOME/bin"
+    COMPLETION_DIR="$HOME/bash_completion.d"
+
+    if [ "$(echo "$PATH" | grep "$INSTALLATION_DIR")" = '' ]; then
+      _show_error_message "Your won't be able to use vuh after installing it in $INSTALLATION_DIR!"
+      _show_error_message "Make sure that $INSTALLATION_DIR is in your PATH variable and launch installer.bash again!"
+      exit 1
+    fi
+
     # install vuh
-    mkdir -p "$HOME/bin" || exit 1
-    cp -f vuh.bash "$HOME/bin/vuh" || exit 1
+    mkdir -p "$INSTALLATION_DIR" || exit 1
+    cp -f vuh.bash "$INSTALLATION_DIR/vuh" || exit 1
 
     # install autocompletion script
-    mkdir -p "$HOME/bash_completion.d" || exit 1
-    cp -f vuh-completion.bash "$HOME/bash_completion.d/vuh-completion.bash" || exit 1
+    mkdir -p "$COMPLETION_DIR" || exit 1
+    cp -f vuh-completion.bash "$COMPLETION_DIR/vuh-completion.bash" || exit 1
 
     # check is vuh installed properly
     printf '\n'
