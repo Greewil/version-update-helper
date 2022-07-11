@@ -25,6 +25,19 @@ Installing vuh.bash is simple:
 
 That will install vuh to `$HOME/bin` by default.
 
+## Configuring projects
+
+To configure your own project you should select one of the template.conf files and copy it to the root directory of your 
+project as vuh.conf. 
+
+To check that your vuh.conf file was configured properly use commands:
+- cat (VERSION_FILE_NAME) | grep "(config:TEXT_BEFORE_VERSION_CODE)" | grep '\
+'"(config:TEXT_AFTER_VERSION_CODE)"
+- echo YOUR_VERSION_EXAMPLE | grep "(config:VERSION_REG_EXP)"
+
+If all was configured properly the first command will return the line with your version and
+the second command should return you the same version as YOUR_VERSION_EXAMPLE.
+
 ## Usage
 
     Usage: vuh [-v | --version] [-h | --help] <command> [<args>]
