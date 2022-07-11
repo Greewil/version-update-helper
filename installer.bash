@@ -1,24 +1,29 @@
 #!/usr/bin/env bash
 
+# Output colors
 NEUTRAL_COLOR='\e[0m'
 RED='\e[1;31m'
 YELLOW='\e[1;33m'
 
-function _show_error_message {
+# Installer's global variables (Please don't modify!)
+INSTALLATION_DIR=''
+COMPLETION_DIR=''
+
+function _show_error_message() {
   message=$1
   echo -en "$RED(vuh_installer : ERROR) $message$NEUTRAL_COLOR\n"
 }
 
-function _show_warning_message {
+function _show_warning_message() {
   message=$1
   echo -en "$YELLOW(vuh : WARNING) $message$NEUTRAL_COLOR\n"
 }
 
-function _warning_should_restart {
+function _warning_should_restart() {
   _show_warning_message 'Autocompletion will be available only after restarting your terminal!'
 }
 
-function _try_to_restart_terminal {
+function _try_to_restart_terminal() {
   _show_warning_message 'restarting current bash terminal session ...'
   exec bash -l || exec zsh -l || {
     _show_error_message "failed to restart current bash terminal session!"
@@ -27,7 +32,7 @@ function _try_to_restart_terminal {
   }
 }
 
-function _yes_no_question {
+function _yes_no_question() {
   question_text=$1
   command_on_yes=$2
   command_on_no=$3
@@ -47,7 +52,7 @@ function _yes_no_question {
   done
 }
 
-function _check_vuh_version {
+function _check_vuh_version() {
   installed_vuh_version=$(vuh -v) || return 1
   available_vuh_version=$(./vuh.bash -v) || return 1
   if [ "$installed_vuh_version" = "$available_vuh_version" ]; then
@@ -59,13 +64,15 @@ function _check_vuh_version {
   fi
 }
 
-function install_for_gitbash {
+function install_for_gitbash() {
   if [ -n "$HOME" ]; then
     # GitBash terminal case
 
+    # define dirs for GitBash terminal case
     INSTALLATION_DIR="$HOME/bin"
     COMPLETION_DIR="$HOME/bash_completion.d"
 
+    # check PATH variable for INSTALLATION_DIR path
     if [ "$(echo "$PATH" | grep "$INSTALLATION_DIR")" = '' ]; then
       _show_error_message "Your won't be able to use vuh after installing it in $INSTALLATION_DIR!"
       _show_error_message "Make sure that $INSTALLATION_DIR is in your PATH variable and launch installer.bash again!"

@@ -35,22 +35,22 @@ SUGGESTING_VERSION=''
 
 # Setting  (Please don't modify!)
 
-function _show_function_title {
+function _show_function_title() {
   printf '\n'
   echo "$1"
 }
 
-function _show_error_message {
+function _show_error_message() {
   message=$1
   echo -en "$RED(vuh : ERROR) $message$NEUTRAL_COLOR\n"
 }
 
-function _show_warning_message {
+function _show_warning_message() {
   message=$1
   echo -en "$YELLOW(vuh : WARNING) $message$NEUTRAL_COLOR\n"
 }
 
-function _yes_no_question {
+function _yes_no_question() {
   question_text=$1
   command_on_yes=$2
   command_on_no=$3
@@ -70,7 +70,7 @@ function _yes_no_question {
   done
 }
 
-function _load_project_variables_from_config {
+function _load_project_variables_from_config() {
   config_file=$1
   tmp_conf_file="/tmp/vuh_projects_conf_file.conf"
   echo "$config_file" > $tmp_conf_file
@@ -81,28 +81,28 @@ function _load_project_variables_from_config {
   rm -f /tmp/vuh_projects_conf_file.conf
 }
 
-function _check_version_syntax {
+function _check_version_syntax() {
   version=$1
   if [ "$version" = "" ] || [ $(echo "$version" | grep "$VERSION_REG_EXP") != "$version" ]; then
     return 1
   fi || return 1
 }
 
-function _get_syncing_versions {
+function _get_syncing_versions() {
   full_version=$1
   syncing_versions=${full_version%.*} || return 1
   [ "$syncing_versions" != '' ] || return 1
   echo "$syncing_versions"
 }
 
-function _get_major_version {
+function _get_major_version() {
   full_version=$1
   major_version=${full_version%%.*}
   [ "$major_version" != '' ] || return 1
   echo "$major_version"
 }
 
-function _get_module_version {
+function _get_module_version() {
   full_version=$1
   syncing_versions=$(_get_syncing_versions "$full_version") || return 1
   module_version=${syncing_versions##*.} || return 1
@@ -110,14 +110,14 @@ function _get_module_version {
   echo "$module_version"
 }
 
-function _get_minor_version {
+function _get_minor_version() {
   full_version=$1
   minor_version=${full_version##*.} || return 1
   [ "$minor_version" != '' ] || return 1
   echo "$minor_version"
 }
 
-function _get_largest_version {
+function _get_largest_version() {
   v1=$1
   v2=$2
   v1_major=$(_get_major_version "$v1") || return 1
@@ -145,14 +145,14 @@ function _get_largest_version {
   fi || return 1
 }
 
-function _get_incremented_version {
+function _get_incremented_version() {
   v=$1
   v_syncing_versions=$(_get_syncing_versions "$v") || return 1
   v_minor_version=$(( $(_get_minor_version "$v") + 1 )) || return 1
   echo "$v_syncing_versions.$v_minor_version"
 }
 
-function _get_root_repo_dir {
+function _get_root_repo_dir() {
   ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
     _show_error_message "Can't find root repo directory!"
     echo
@@ -160,7 +160,7 @@ function _get_root_repo_dir {
   }
 }
 
-function _get_version_from_file {
+function _get_version_from_file() {
   version_file=$1
   version=${version_file##*$TEXT_BEFORE_VERSION_CODE} || return 1
   version=${version%%$TEXT_AFTER_VERSION_CODE*} || return 1
@@ -168,7 +168,7 @@ function _get_version_from_file {
   echo "$version"
 }
 
-function _fetch_remote_branches {
+function _fetch_remote_branches() {
   git fetch || {
     _show_error_message 'Failed to use "git fetch" to update information about remote branches!'
     _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
@@ -176,8 +176,8 @@ function _fetch_remote_branches {
   }
 }
 
-function _unset_conf_variables {
-#  vuh-0.1.0
+function _unset_conf_variables() {
+  # vuh-0.1.0
   MAIN_BRANCH_NAME=''
   VERSION_FILE=''
   TEXT_BEFORE_VERSION_CODE=''
@@ -189,8 +189,8 @@ function _unset_conf_variables {
 # Throws an error if some of default variables wasn't loaded at all.
 #
 # Returns nothing.
-function _check_conf_data_version {
-#  vuh-0.1.0
+function _check_conf_data_version() {
+  # vuh-0.1.0
   if [ "$MAIN_BRANCH_NAME" = '' ] || [ "$VERSION_FILE" = '' ] || [ "$TEXT_BEFORE_VERSION_CODE" = '' ] ||
       [ "$TEXT_AFTER_VERSION_CODE" = '' ] || [ "$VERSION_REG_EXP" = '' ]; then
     _show_error_message "Configuration test failed! Configuration variables were empty or weren't loaded at all!"
@@ -200,7 +200,7 @@ function _check_conf_data_version {
   fi
 }
 
-function _load_local_conf_file {
+function _load_local_conf_file() {
   _unset_conf_variables || return 1
   _get_root_repo_dir || return 1
   conf_file=$(<"$ROOT_REPO_DIR/vuh.conf") || {
@@ -214,7 +214,7 @@ function _load_local_conf_file {
   _check_conf_data_version || return 1
 }
 
-function _load_remote_conf_file {
+function _load_remote_conf_file() {
   _unset_conf_variables || return 1
   branch_name=$1
   main_branch_config_file=$(git show "origin/$branch_name:vuh.conf") || {
@@ -228,7 +228,7 @@ function _load_remote_conf_file {
   _check_conf_data_version || return 1
 }
 
-function _show_suggested_versions_comparison {
+function _show_suggested_versions_comparison() {
   if [ "$SUGGESTING_VERSION" = "$LOCAL_VERSION" ]; then
     echo "(your local version seems to be ok)"
   elif [ "$SUGGESTING_VERSION" = "$SPECIFIED_VERSION" ]; then
@@ -238,7 +238,7 @@ function _show_suggested_versions_comparison {
   fi
 }
 
-function read_local_version {
+function read_local_version() {
   _show_function_title 'getting local version'
   _load_local_conf_file || exit 1
   version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
@@ -252,7 +252,7 @@ function read_local_version {
   echo "local: $LOCAL_VERSION"
 }
 
-function read_main_version {
+function read_main_version() {
   _show_function_title 'getting main version'
   _load_local_conf_file || exit 1
   remote_branch=$MAIN_BRANCH_NAME
@@ -277,7 +277,7 @@ function read_main_version {
   echo "main: $MAIN_VERSION"
 }
 
-function get_suggesting_version {
+function get_suggesting_version() {
   read_local_version || exit 1
   read_main_version || exit 1
   _show_function_title 'suggesting relevant version'
@@ -298,11 +298,11 @@ function get_suggesting_version {
   }
 }
 
-function show_vuh_version {
+function show_vuh_version() {
   echo "vuh version: $VUH_VERSION"
 }
 
-function show_help {
+function show_help() {
   grep '^#/' <"$0" | cut -c4-
 }
 
