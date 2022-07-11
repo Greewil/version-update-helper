@@ -20,15 +20,20 @@
 # Current version of version_manager.sh.
 VUH_VERSION='0.1.0'
 
+# Output colors
+NEUTRAL_COLOR='\e[0m'
+RED='\e[1;31m'
+YELLOW='\e[1;33m'
+
+# Vuh's global variables (Please don't modify!)
+LOADED_CONF_FILE_VERSION=''
 ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SPECIFIED_VERSION=''
 SUGGESTING_VERSION=''
 
-NEUTRAL_COLOR='\e[0m'
-RED='\e[1;31m'
-YELLOW='\e[1;33m'
+# Setting  (Please don't modify!)
 
 function _show_function_title {
   printf '\n'
@@ -54,12 +59,12 @@ function _yes_no_question {
     read -p "$question_text (Y/N): " -r answer
     case "$answer" in
     y|Y|Yes|yes)
-      $command_on_yes
+      ($command_on_yes)
       asking_question='false'
       ;;
     n|N|No|no)
-      $command_on_no
-      exit 0
+      ($command_on_no)
+      asking_question='false'
       ;;
     esac
   done
@@ -78,7 +83,7 @@ function _load_project_variables_from_config {
 
 function _check_version_syntax {
   version=$1
-  if [ "$version" = "" ] || [[ $(echo "$version" | grep "$VERSION_REG_EXP") != "$version" ]]; then
+  if [ "$version" = "" ] || [ $(echo "$version" | grep "$VERSION_REG_EXP") != "$version" ]; then
     return 1
   fi || return 1
 }
@@ -171,7 +176,32 @@ function _fetch_remote_branches {
   }
 }
 
+function _unset_conf_variables {
+#  vuh-0.1.0
+  MAIN_BRANCH_NAME=''
+  VERSION_FILE=''
+  TEXT_BEFORE_VERSION_CODE=''
+  TEXT_AFTER_VERSION_CODE=''
+  VERSION_REG_EXP=''
+}
+
+# Checks compatibility of vuh and loaded configuration file.
+# Throws an error if some of default variables wasn't loaded at all.
+#
+# Returns nothing.
+function _check_conf_data_version {
+#  vuh-0.1.0
+  if [ "$MAIN_BRANCH_NAME" = '' ] || [ "$VERSION_FILE" = '' ] || [ "$TEXT_BEFORE_VERSION_CODE" = '' ] ||
+      [ "$TEXT_AFTER_VERSION_CODE" = '' ] || [ "$VERSION_REG_EXP" = '' ]; then
+    _show_error_message "Configuration test failed! Configuration variables were empty or weren't loaded at all!"
+    return 1
+  else
+    LOADED_CONF_FILE_VERSION='0.1.0'
+  fi
+}
+
 function _load_local_conf_file {
+  _unset_conf_variables || return 1
   _get_root_repo_dir || return 1
   conf_file=$(<"$ROOT_REPO_DIR/vuh.conf") || {
     _show_error_message "Failed to read local configuration file $ROOT_REPO_DIR/vuh.conf!"
@@ -181,13 +211,11 @@ function _load_local_conf_file {
     _show_error_message "Failed to load variables from local configuration file $ROOT_REPO_DIR/vuh.conf!"
     return 1
   }
-# TODO check is conf file actually loaded
-# TODO check is conf file is correct
-# TODO check is conf file has unsupported version
-#  echo "env_vars:" "$MAIN_BRANCH_NAME" "$VERSION_FILE" "$TEXT_BEFORE_VERSION_CODE" "$TEXT_AFTER_VERSION_CODE" "$VERSION_REG_EXP"
+  _check_conf_data_version || return 1
 }
 
 function _load_remote_conf_file {
+  _unset_conf_variables || return 1
   branch_name=$1
   main_branch_config_file=$(git show "origin/$branch_name:vuh.conf") || {
     _show_error_message "Failed to read remote configuration file origin/$branch_name:vuh.conf!"
@@ -197,10 +225,7 @@ function _load_remote_conf_file {
     _show_error_message "Failed to load variables from remote configuration file origin/$branch_name:vuh.conf!"
     return 1
   }
-# TODO check is conf file actually loaded
-# TODO check is conf file is correct
-# TODO check is conf file has unsupported version
-#  echo "env_vars:" "$MAIN_BRANCH_NAME" "$VERSION_FILE" "$TEXT_BEFORE_VERSION_CODE" "$TEXT_AFTER_VERSION_CODE" "$VERSION_REG_EXP"
+  _check_conf_data_version || return 1
 }
 
 function _show_suggested_versions_comparison {
@@ -230,10 +255,12 @@ function read_local_version {
 function read_main_version {
   _show_function_title 'getting main version'
   _load_local_conf_file || exit 1
+  remote_branch=$MAIN_BRANCH_NAME
   _fetch_remote_branches || exit 1
-  handling_file="origin/$MAIN_BRANCH_NAME:$VERSION_FILE"
-  _load_remote_conf_file "$MAIN_BRANCH_NAME" || {
-    _show_warning_message "vuh will use local configuration to get remote version"
+  handling_file="origin/$remote_branch:$VERSION_FILE"
+  _load_remote_conf_file "$remote_branch" || {
+    _show_warning_message "vuh will use local configuration to get remote version from origin/$remote_branch"
+    _load_local_conf_file || exit 1
   }
   main_branch_file=$(git show "$handling_file") || {
     _show_error_message "Failed to load file $handling_file"
@@ -258,7 +285,7 @@ function get_suggesting_version {
     _show_error_message "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
     exit 1
   }
-  if [[ "$largest_version" = "$MAIN_VERSION" ]]; then
+  if [ "$largest_version" = "$MAIN_VERSION" ]; then
     SUGGESTING_VERSION=$(_get_incremented_version "$largest_version")
   else
     SUGGESTING_VERSION=$largest_version
