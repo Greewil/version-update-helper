@@ -83,7 +83,7 @@ function _load_project_variables_from_config() {
 
 function _check_version_syntax() {
   version=$1
-  if [ "$version" = "" ] || [ $(echo "$version" | grep "$VERSION_REG_EXP") != "$version" ]; then
+  if [ "$version" = "" ] || [[ $(echo "$version" | grep "$VERSION_REG_EXP") != "$version" ]]; then
     return 1
   fi || return 1
 }
@@ -164,7 +164,7 @@ function _get_version_from_file() {
   version_file=$1
   version=$(echo "$version_file" | grep "$TEXT_BEFORE_VERSION_CODE" | grep "$TEXT_AFTER_VERSION_CODE")
   version=${version##*$TEXT_BEFORE_VERSION_CODE} || return 1
-  if [ "$TEXT_AFTER_VERSION_CODE" != '' ]; then
+  if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
     version=${version%%$TEXT_AFTER_VERSION_CODE*} || return 1
   fi
   _check_version_syntax "$version" || return 1
@@ -253,6 +253,11 @@ function read_local_version() {
   }
   LOCAL_VERSION=$(_get_version_from_file "$version_file") || {
     _show_error_message "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
+    check_line_command='cat (VERSION_FILE_NAME) | grep "(config:TEXT_BEFORE_VERSION_CODE)" | grep '\
+'"(config:TEXT_AFTER_VERSION_CODE)"'
+    _show_error_message "Make sure that command ($check_line_command) will throw the line with your version"
+    check_version_command='echo YOUR_VERSION_EXAMPLE | grep "(config:VERSION_REG_EXP)"'
+    _show_error_message "Also make sure that command ($check_version_command) will throw same YOUR_VERSION_EXAMPLE"
     exit 1
   }
   echo "local: $LOCAL_VERSION"
@@ -278,6 +283,11 @@ function read_main_version() {
   }
   MAIN_VERSION=$(_get_version_from_file "$version_context") || {
     _show_error_message "Failed to get main version from $handling_file!"
+    check_line_command='cat (VERSION_FILE_NAME) | grep "(config:TEXT_BEFORE_VERSION_CODE)" | grep '\
+'"(config:TEXT_AFTER_VERSION_CODE)"'
+    _show_error_message "Make sure that command ($check_line_command) will throw the line with your version"
+    check_version_command='echo YOUR_VERSION_EXAMPLE | grep "(config:VERSION_REG_EXP)"'
+    _show_error_message "Also make sure that command ($check_version_command) will throw same YOUR_VERSION_EXAMPLE"
     exit 1
   }
   echo "main: $MAIN_VERSION"
