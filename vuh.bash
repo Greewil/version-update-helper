@@ -162,8 +162,11 @@ function _get_root_repo_dir() {
 
 function _get_version_from_file() {
   version_file=$1
-  version=${version_file##*$TEXT_BEFORE_VERSION_CODE} || return 1
-  version=${version%%$TEXT_AFTER_VERSION_CODE*} || return 1
+  version=$(echo "$version_file" | grep "$TEXT_BEFORE_VERSION_CODE" | grep "$TEXT_AFTER_VERSION_CODE")
+  version=${version##*$TEXT_BEFORE_VERSION_CODE} || return 1
+  if [ "$TEXT_AFTER_VERSION_CODE" != '' ]; then
+    version=${version%%$TEXT_AFTER_VERSION_CODE*} || return 1
+  fi
   _check_version_syntax "$version" || return 1
   echo "$version"
 }
@@ -178,11 +181,11 @@ function _fetch_remote_branches() {
 
 function _unset_conf_variables() {
   # vuh-0.1.0
-  MAIN_BRANCH_NAME=''
-  VERSION_FILE=''
-  TEXT_BEFORE_VERSION_CODE=''
-  TEXT_AFTER_VERSION_CODE=''
-  VERSION_REG_EXP=''
+  MAIN_BRANCH_NAME='NO_MAIN_BRANCH_NAME'
+  VERSION_FILE='NO_VERSION_FILE'
+  TEXT_BEFORE_VERSION_CODE='NO_TEXT_BEFORE_VERSION_CODE'
+  TEXT_AFTER_VERSION_CODE='NO_TEXT_AFTER_VERSION_CODE'
+  VERSION_REG_EXP='NO_VERSION_REG_EXP'
 }
 
 # Checks compatibility of vuh and loaded configuration file.
@@ -191,8 +194,11 @@ function _unset_conf_variables() {
 # Returns nothing.
 function _check_conf_data_version() {
   # vuh-0.1.0
-  if [ "$MAIN_BRANCH_NAME" = '' ] || [ "$VERSION_FILE" = '' ] || [ "$TEXT_BEFORE_VERSION_CODE" = '' ] ||
-      [ "$TEXT_AFTER_VERSION_CODE" = '' ] || [ "$VERSION_REG_EXP" = '' ]; then
+  if [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ] ||
+      [ "$VERSION_FILE" = 'NO_VERSION_FILE' ] ||
+      [ "$TEXT_BEFORE_VERSION_CODE" = 'NO_TEXT_BEFORE_VERSION_CODE' ] ||
+      [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ] ||
+      [ "$VERSION_REG_EXP" = 'NO_VERSION_REG_EXP' ]; then
     _show_error_message "Configuration test failed! Configuration variables were empty or weren't loaded at all!"
     return 1
   else
