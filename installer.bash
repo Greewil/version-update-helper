@@ -37,15 +37,27 @@ function _yes_no_question {
     read -p "$question_text (Y/N): " -r answer
     case "$answer" in
     y|Y|Yes|yes)
-      $command_on_yes
+      ($command_on_yes)
       asking_question='false'
       ;;
     n|N|No|no)
-      $command_on_no
-      exit 0
+      ($command_on_no)
+      asking_question='false'
       ;;
     esac
   done
+}
+
+function _check_vuh_version {
+  installed_vuh_version=$(vuh -v) || return 1
+  available_vuh_version=$(./vuh.bash -v) || return 1
+  if [ "$installed_vuh_version" = "$available_vuh_version" ]; then
+    echo 'vuh was successfully installed'
+  else
+    _show_error_message "Something went wrong!"
+    _show_warning_message "You still have an old version ($installed_vuh_version) instead of new ($available_vuh_version)!"
+    return 1
+  fi
 }
 
 function install_for_gitbash {
@@ -60,9 +72,9 @@ function install_for_gitbash {
     mkdir -p "$HOME/bash_completion.d" || exit 1
     cp -f vuh-completion.bash "$HOME/bash_completion.d/vuh-completion.bash" || exit 1
 
-    # show success message
+    # check is vuh installed properly
     printf '\n'
-    echo 'vuh was successfully installed'
+    _check_vuh_version || exit 1
 
     # advice to restart current bash terminal session
     question_text="To activate vuh-completion your should restart bash terminal session. Do you want to restart it now?"
