@@ -1,4 +1,7 @@
 # version-update-helper
+[fork](https://github.com/Greewil/version-update-helper/fork){: .btn}
+[watch](https://github.com/Greewil/version-update-helper/subscription){: .btn}
+[issue](https://github.com/Greewil/version-update-helper/issues/new){: .btn}
 
 ## Overview
 
@@ -10,6 +13,8 @@ vuh script allows you to
   suggesting-version -v=1.6.5***'
 - easily get local project's version with '***vuh lv***' or '***vuh local-version***'
 - easily get version of origin/MAIN_BRANCH_NAME branch with '***vuh lv***' or '***vuh main-version***'
+
+Works only with git projects!
 
 ## Requirements
 
@@ -31,14 +36,19 @@ To configure your own project you should select one of the template.conf files a
 project as vuh.conf. 
 
 To check that your vuh.conf file was configured properly use commands:
-- cat (VERSION_FILE_NAME) | grep "(config:TEXT_BEFORE_VERSION_CODE)" | grep '\
-'"(config:TEXT_AFTER_VERSION_CODE)"
-- echo YOUR_VERSION_EXAMPLE | grep "(config:VERSION_REG_EXP)"
+1)
+    cat (VERSION_FILE_NAME) | grep "(config:TEXT_BEFORE_VERSION_CODE)" | grep '\
+    '"(config:TEXT_AFTER_VERSION_CODE)"
+2)
+    echo YOUR_VERSION_EXAMPLE | grep "(config:VERSION_REG_EXP)"
 
 If all was configured properly the first command will return the line with your version and
 the second command should return you the same version as YOUR_VERSION_EXAMPLE.
 
 ## Usage
+
+To use vuh with your project you should first create vuh.conf file in root folder of your project 
+(read more about configuring in [configuring projects](#Configuring-projects)).
 
     Usage: vuh [-v | --version] [-h | --help] <command> [<args>]
 
