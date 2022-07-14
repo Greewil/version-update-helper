@@ -11,6 +11,8 @@
 #/     mv, main-version         show version of origin/MAIN_BRANCH_NAME
 #/     sv, suggesting-version   show suggesting version which this branch should use
 #/        [-v=<version>]           to specify your own version which also will be taken into account
+#/     uv, update-version       replace your local version with suggesting version which this branch should use
+#/        [-v=<version>]           to specify your own version which also will be taken into account
 #/
 #/ Suggest relevant version for your current project or even update your local project's version.
 #/ Script can work with your project's versions from any directory of your local repository.
@@ -24,6 +26,7 @@ VUH_VERSION='0.1.0'
 NEUTRAL_COLOR='\e[0m'
 RED='\e[1;31m'
 YELLOW='\e[1;33m'
+BLUE='\e[1;36m'
 
 # Vuh's global variables (Please don't modify!)
 LOADED_CONF_FILE_VERSION=''
@@ -33,7 +36,6 @@ MAIN_VERSION=''
 SPECIFIED_VERSION=''
 SUGGESTING_VERSION=''
 
-# Setting  (Please don't modify!)
 
 function _show_function_title() {
   printf '\n'
@@ -48,6 +50,11 @@ function _show_error_message() {
 function _show_warning_message() {
   message=$1
   echo -en "$YELLOW(vuh : WARNING) $message$NEUTRAL_COLOR\n"
+}
+
+function _show_updated_message() {
+  message=$1
+  echo -en "$BLUE(vuh : UPDATED) $message$NEUTRAL_COLOR\n"
 }
 
 function _yes_no_question() {
@@ -314,6 +321,24 @@ function get_suggesting_version() {
   }
 }
 
+function update_version() {
+  new_version=$1
+  _show_function_title 'updating local version'
+  _load_local_conf_file || exit 1
+  version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
+    _show_error_message "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
+    exit 1
+  }
+  if [ "$LOCAL_VERSION" != "$new_version" ]; then
+    old_version_string="$TEXT_BEFORE_VERSION_CODE$LOCAL_VERSION$TEXT_AFTER_VERSION_CODE"
+    new_version_string="$TEXT_BEFORE_VERSION_CODE$new_version$TEXT_AFTER_VERSION_CODE"
+    echo "${version_file/$old_version_string/$new_version_string}" > "$ROOT_REPO_DIR/$VERSION_FILE"
+    _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
+  else
+    echo "your local version already up to date: $LOCAL_VERSION"
+  fi
+}
+
 function show_vuh_version() {
   echo "vuh version: $VUH_VERSION"
 }
@@ -321,6 +346,9 @@ function show_vuh_version() {
 function show_help() {
   grep '^#/' <"$0" | cut -c4-
 }
+
+
+_unset_conf_variables
 
 while [ "$#" != 0 ]; do
   case "$1" in
@@ -340,8 +368,13 @@ while [ "$#" != 0 ]; do
     read_main_version
     exit 0
     ;;
-  sv|suggesting-version)
+  sv|suggest-version)
     get_suggesting_version
+    exit 0
+    ;;
+  uv|update-version)
+    get_suggesting_version
+    update_version "$SUGGESTING_VERSION"
     exit 0
     ;;
   -*|--*)
