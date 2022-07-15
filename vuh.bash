@@ -36,6 +36,10 @@ MAIN_VERSION=''
 SPECIFIED_VERSION=''
 SUGGESTING_VERSION=''
 
+# Console input variables (Please don't modify!)
+POSITIONAL_ARGS=()
+COMMAND=''
+
 
 function _show_function_title() {
   printf '\n'
@@ -55,6 +59,29 @@ function _show_warning_message() {
 function _show_updated_message() {
   message=$1
   echo -en "$BLUE(vuh : UPDATED) $message$NEUTRAL_COLOR\n"
+}
+
+function _show_invalid_usage_error_message() {
+  message=$1
+  _show_error_message "$message"
+  echo 'Use "vuh --help" to see available commands and options information'
+}
+
+function _exit_if_using_multiple_commands() {
+  last_command=$1
+  if [ "$COMMAND" != '' ]; then
+    _show_invalid_usage_error_message "You can't use both commands: '$COMMAND' and '$1'!"
+    exit 1
+  fi
+}
+
+function _read_positional_arg() {
+  arg="$1"
+  if [ "$COMMAND" = '' ]; then
+    _show_invalid_usage_error_message "Parameter '$1' used without specifying any command!"
+    exit 1
+  fi
+  POSITIONAL_ARGS+=("$arg")
 }
 
 function _yes_no_question() {
@@ -297,10 +324,12 @@ function read_main_version() {
     _show_error_message "Also make sure that command ($check_version_command) will throw same YOUR_VERSION_EXAMPLE"
     exit 1
   }
-  echo "main: $MAIN_VERSION"
+  echo "origin/$remote_branch: $MAIN_VERSION"
 }
 
 function get_suggesting_version() {
+  args=( "$@" )
+  echo "${args[@]}"
   read_local_version || exit 1
   read_main_version || exit 1
   _show_function_title 'suggesting relevant version'
@@ -350,36 +379,68 @@ function show_help() {
 
 _unset_conf_variables
 
-while [ "$#" != 0 ]; do
+while [[ $# -gt 0 ]]; do
   case "$1" in
   -h|--help)
-    show_help
-    exit 0
-    ;;
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='--help'
+    shift ;;
   -v|--version)
-    show_vuh_version
-    exit 0
-    ;;
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='--version'
+    shift ;;
   lv|local-version)
-    read_local_version
-    exit 0
-    ;;
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='local-version'
+    shift ;;
   mv|main-version)
-    read_main_version
-    exit 0
-    ;;
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='main-version'
+    shift ;;
   sv|suggest-version)
-    get_suggesting_version
-    exit 0
-    ;;
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='suggest-version'
+    shift ;;
   uv|update-version)
-    get_suggesting_version
-    update_version "$SUGGESTING_VERSION"
-    exit 0
-    ;;
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='update-version'
+    shift ;;
+  -v=*|-b=*|-y)
+    _read_positional_arg "$1"
+    shift ;;
   -*|--*)
-    echo >&2 "error: invalid option '$1'"
-    echo 'use "vuh --help" to see available commands and options information'
+    _show_invalid_usage_error_message "Unknown option '$1'!"
+    exit 1 ;;
+  *)
+    _show_invalid_usage_error_message "Unknown command '$1'!"
     exit 1 ;;
   esac
 done
+
+case "$COMMAND" in
+--help)
+  show_help
+  exit 0
+  ;;
+--version)
+  show_vuh_version
+  exit 0
+  ;;
+local-version)
+  read_local_version
+  exit 0
+  ;;
+main-version)
+  read_main_version
+  exit 0
+  ;;
+suggest-version)
+  get_suggesting_version "${POSITIONAL_ARGS[@]}"
+  exit 0
+  ;;
+update-version)
+  get_suggesting_version "${POSITIONAL_ARGS[@]}"
+  update_version "$SUGGESTING_VERSION"
+  exit 0
+  ;;
+esac
