@@ -33,12 +33,13 @@ LOADED_CONF_FILE_VERSION=''
 ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
-SPECIFIED_VERSION=''
 SUGGESTING_VERSION=''
 
 # Console input variables (Please don't modify!)
-POSITIONAL_ARGS=()
 COMMAND=''
+SPECIFIED_VERSION=''
+SPECIFIED_BRANCH=''
+SPECIFIED_AGREEMENT='false'
 
 
 function _show_function_title() {
@@ -75,13 +76,12 @@ function _exit_if_using_multiple_commands() {
   fi
 }
 
-function _read_positional_arg() {
+function _check_arg() {
   arg="$1"
   if [ "$COMMAND" = '' ]; then
     _show_invalid_usage_error_message "Parameter '$1' used without specifying any command!"
     exit 1
   fi
-  POSITIONAL_ARGS+=("$arg")
 }
 
 function _yes_no_question() {
@@ -272,7 +272,7 @@ function _show_suggested_versions_comparison() {
   if [ "$SUGGESTING_VERSION" = "$LOCAL_VERSION" ]; then
     echo "(your local version seems to be ok)"
   elif [ "$SUGGESTING_VERSION" = "$SPECIFIED_VERSION" ]; then
-    echo "(version specified in arguments seems to be ok)"
+    echo "(specified version seems to be ok)"
   else
     echo "(suggested to use new version)"
   fi
@@ -328,8 +328,6 @@ function read_main_version() {
 }
 
 function get_suggesting_version() {
-  args=( "$@" )
-  echo "${args[@]}"
   read_local_version || exit 1
   read_main_version || exit 1
   _show_function_title 'suggesting relevant version'
@@ -337,6 +335,12 @@ function get_suggesting_version() {
     _show_error_message "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
     exit 1
   }
+  if [[ "$SPECIFIED_VERSION" != '' ]]; then
+    largest_version=$(_get_largest_version "$largest_version" "$SPECIFIED_VERSION") || {
+      _show_error_message "Failed to select larger version between '$largest_version' and '$SPECIFIED_VERSION'!"
+      exit 1
+    }
+  fi
   if [ "$largest_version" = "$MAIN_VERSION" ]; then
     SUGGESTING_VERSION=$(_get_incremented_version "$largest_version")
   else
@@ -405,8 +409,18 @@ while [[ $# -gt 0 ]]; do
     _exit_if_using_multiple_commands "$1"
     COMMAND='update-version'
     shift ;;
-  -v=*|-b=*|-y)
-    _read_positional_arg "$1"
+  -v=*)
+    _check_arg "$1"
+    SPECIFIED_VERSION=${1#*=}
+    echo "SPECIFIED_VERSION=$SPECIFIED_VERSION"
+    shift ;;
+  -b=*)
+    _check_arg "$1"
+    SPECIFIED_BRANCH=${1%=*}
+    shift ;;
+  -y)
+    _check_arg "$1"
+    SPECIFIED_AGREEMENT='true'
     shift ;;
   -*|--*)
     _show_invalid_usage_error_message "Unknown option '$1'!"
@@ -435,11 +449,11 @@ main-version)
   exit 0
   ;;
 suggest-version)
-  get_suggesting_version "${POSITIONAL_ARGS[@]}"
+  get_suggesting_version
   exit 0
   ;;
 update-version)
-  get_suggesting_version "${POSITIONAL_ARGS[@]}"
+  get_suggesting_version
   update_version "$SUGGESTING_VERSION"
   exit 0
   ;;
