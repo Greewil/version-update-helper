@@ -67,10 +67,13 @@ To use vuh with your project you should first create vuh.conf file in root folde
     Commands:
         lv, local-version        show local current version (default format)
         mv, main-version         show version of origin/MAIN_BRANCH_NAME
+           [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
         sv, suggesting-version   show suggesting version which this branch should use
            [-v=<version>]           to specify your own version which also will be taken into account
+           [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
         uv, update-version       replace your local version with suggesting version which this branch should use
            [-v=<version>]           to specify your own version which also will be taken into account
+           [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
     
     Suggests relevant version for your local project or even updates your local project's version.
     Script can work with your project's versions from any directory of your local repository.

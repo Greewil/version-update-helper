@@ -9,13 +9,16 @@
 #/ Commands:
 #/     lv, local-version        show local current version (default format)
 #/     mv, main-version         show version of origin/MAIN_BRANCH_NAME
+#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
 #/     sv, suggesting-version   show suggesting version which this branch should use
 #/        [-v=<version>]           to specify your own version which also will be taken into account
+#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
 #/        [-v=<version>]           to specify your own version which also will be taken into account
+#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
 #/
 #/ Suggest relevant version for your current project or even update your local project's version.
-#/ Script can work with your project's versions from any directory of your local repository.
+#/ Script can work with your project's versions from any directory inside of your local repository.
 #
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
@@ -38,7 +41,7 @@ SUGGESTING_VERSION=''
 # Console input variables (Please don't modify!)
 COMMAND=''
 SPECIFIED_VERSION=''
-SPECIFIED_BRANCH=''
+SPECIFIED_MAIN_BRANCH=''
 SPECIFIED_AGREEMENT='false'
 
 
@@ -301,6 +304,12 @@ function read_main_version() {
   _show_function_title 'getting main version'
   _load_local_conf_file || exit 1
   remote_branch=$MAIN_BRANCH_NAME
+  if [[ "$SPECIFIED_MAIN_BRANCH" != '' ]]; then
+    remote_branch="$SPECIFIED_MAIN_BRANCH" || {
+      _show_error_message "Failed to set specified main branch '$SPECIFIED_MAIN_BRANCH'!"
+      exit 1
+    }
+  fi
   _fetch_remote_branches || exit 1
   handling_file="origin/$remote_branch:$VERSION_FILE"
   _load_remote_conf_file "$remote_branch" || {
@@ -414,9 +423,9 @@ while [[ $# -gt 0 ]]; do
     SPECIFIED_VERSION=${1#*=}
     echo "SPECIFIED_VERSION=$SPECIFIED_VERSION"
     shift ;;
-  -b=*)
+  -mb=*)
     _check_arg "$1"
-    SPECIFIED_BRANCH=${1%=*}
+    SPECIFIED_MAIN_BRANCH=${1#*=}
     shift ;;
   -y)
     _check_arg "$1"
