@@ -84,7 +84,12 @@ function _install() {
 
   # install autocompletion script
   mkdir -p "$COMPLETION_DIR" || exit 1
-  cp -f vuh-completion.bash "$COMPLETION_DIR/vuh-completion.bash" || exit 1
+  if [ "$COMPLETION_DIR" = "$HOME/bash_completion.d" ]; then
+    completion_file_name='vuh-completion.bash'
+  else
+    completion_file_name='vuh'
+  fi
+  cp -f vuh-completion.bash "$COMPLETION_DIR/$completion_file_name" || exit 1
 
   # check is vuh installed properly
   _check_vuh_version || exit 1
