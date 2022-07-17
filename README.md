@@ -18,9 +18,9 @@ vuh script allows you to
   suggesting-version***'
 - check is your input version allowed to be new main branch version with '***vuh sv -v=1.6.5***' or '***vuh
   suggesting-version -v=1.6.5***'
-- update your local version to suggesting version with '***vuh uv***' or '***vuh update-version***'
+- update your local version to suggested version with '***vuh uv***' or '***vuh update-version***'
 - easily get local project's version with '***vuh lv***' or '***vuh local-version***'
-- easily get version of origin/MAIN_BRANCH_NAME branch with '***vuh lv***' or '***vuh main-version***'
+- easily get version of origin/MAIN_BRANCH_NAME branch with '***vuh mv***' or '***vuh main-version***'
 
 Works only with git projects!
 
