@@ -92,16 +92,7 @@ function _get_input_with_check() {
 }
 
 function _warning_should_restart() {
-  _show_warning_message 'Autocompletion will be available only after restarting your terminal!'
-}
-
-function _try_to_restart_terminal() {
-  _show_warning_message 'restarting current bash terminal session ...'
-  exec bash -l || exec zsh -l || {
-    _show_error_message "failed to restart current bash terminal session!"
-    _warning_should_restart
-    return 1
-  }
+  _show_warning_message 'Autocompletion will be available only after restarting your shell session!'
 }
 
 function _check_vuh_version() {
@@ -140,11 +131,8 @@ function _install() {
   # check is vuh installed properly
   _check_vuh_version || return 1
 
-  # advice to restart current bash terminal session
-  question_text="To activate vuh-completion your should restart bash terminal session. Do you want to restart it now?"
-  _yes_no_question "$question_text" \
-    "_try_to_restart_terminal" \
-    "_warning_should_restart" || return 1
+  # warning to restart completion script
+  _warning_should_restart || return 1
 }
 
 function _is_dir_exists() {
@@ -258,4 +246,4 @@ function try_select_os_and_install() {
   esac
 }
 
-try_select_os_and_install
+try_select_os_and_install $$ exit 0
