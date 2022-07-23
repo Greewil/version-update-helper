@@ -26,10 +26,12 @@
 VUH_VERSION='0.1.0'
 
 # Output colors
+APP_NAME='vuh'
 NEUTRAL_COLOR='\e[0m'
-RED='\e[1;31m'
-YELLOW='\e[1;33m'
-BLUE='\e[1;36m'
+RED='\e[1;31m'        # for errors
+YELLOW='\e[1;33m'     # for warnings
+BROWN='\e[0;33m'      # for inputs
+LIGHT_CYAN='\e[1;36m' # for changes
 
 # Vuh's global variables (Please don't modify!)
 LOADED_CONF_FILE_VERSION=''
@@ -52,17 +54,17 @@ function _show_function_title() {
 
 function _show_error_message() {
   message=$1
-  echo -en "$RED(vuh : ERROR) $message$NEUTRAL_COLOR\n"
+  echo -en "$RED($APP_NAME : ERROR) $message$NEUTRAL_COLOR\n"
 }
 
 function _show_warning_message() {
   message=$1
-  echo -en "$YELLOW(vuh : WARNING) $message$NEUTRAL_COLOR\n"
+  echo -en "$YELLOW($APP_NAME : WARNING) $message$NEUTRAL_COLOR\n"
 }
 
 function _show_updated_message() {
   message=$1
-  echo -en "$BLUE(vuh : UPDATED) $message$NEUTRAL_COLOR\n"
+  echo -en "$LIGHT_CYAN($APP_NAME : CHANGED) $message$NEUTRAL_COLOR\n"
 }
 
 function _show_invalid_usage_error_message() {
@@ -91,15 +93,19 @@ function _yes_no_question() {
   question_text=$1
   command_on_yes=$2
   command_on_no=$3
+
   asking_question='true'
-  while [ $asking_question = 'true' ]; do
-    read -p "$question_text (Y/N): " -r answer
+  echo -en "$BROWN"
+  while [ "$asking_question" = 'true' ]; do
+    read -p "($APP_NAME : INPUT) $question_text (Y/N): " -r answer
     case "$answer" in
     y|Y|Yes|yes)
+      echo -en "$NEUTRAL_COLOR"
       ($command_on_yes)
       asking_question='false'
       ;;
     n|N|No|no)
+      echo -en "$NEUTRAL_COLOR"
       ($command_on_no)
       asking_question='false'
       ;;
