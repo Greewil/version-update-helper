@@ -1,14 +1,16 @@
 # version-update-helper
-![release](https://badgen.net/github/release/Greewil/version-update-helper)
-![latest tag](https://badgen.net/github/tag/Greewil/version-update-helper)
+[![release](https://badgen.net/github/release/Greewil/version-update-helper)](https://github.com/Greewil/version-update-helper/releases)
+[![Last updated](https://img.shields.io/github/release-date/Greewil/version-update-helper?label=updated)](https://github.com/Greewil/version-update-helper/releases)
+![issues](https://badgen.net/github/issues/Greewil/version-update-helper)
 ![stars](https://badgen.net/github/stars/Greewil/version-update-helper)
 ![forks](https://badgen.net/github/forks/Greewil/version-update-helper)
 ![watchers](https://badgen.net/github/watchers/Greewil/version-update-helper)
-![issues](https://badgen.net/github/issues/Greewil/version-update-helper)
 
-[fork](https://github.com/Greewil/version-update-helper/fork)
-[watch](https://github.com/Greewil/version-update-helper/subscription)
-[issue](https://github.com/Greewil/version-update-helper/issues/new)
+[create fork](https://github.com/Greewil/version-update-helper/fork)
+
+[watch repo](https://github.com/Greewil/version-update-helper/subscription)
+
+[create issue](https://github.com/Greewil/version-update-helper/issues/new)
 
 ## Overview
 
