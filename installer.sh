@@ -97,7 +97,7 @@ function _warning_should_restart() {
 
 function _check_vuh_version() {
   installed_vuh_version=$(vuh -v) || return 1
-  available_vuh_version=$(./vuh.bash -v) || return 1
+  available_vuh_version=$(./vuh.sh -v) || return 1
   if [ "$installed_vuh_version" = "$available_vuh_version" ]; then
     _show_updated_message 'Vuh was successfully installed'
   else
@@ -111,13 +111,13 @@ function _install() {
   # check PATH variable for INSTALLATION_DIR path
   if [ "$(echo "$PATH" | grep "$INSTALLATION_DIR")" = '' ]; then
     _show_error_message "Your won't be able to use vuh after installing it in $INSTALLATION_DIR!"
-    _show_error_message "Make sure that $INSTALLATION_DIR is in your PATH variable and launch installer.bash again!"
+    _show_error_message "Make sure that $INSTALLATION_DIR is in your PATH variable and launch installer.sh again!"
     return 1
   fi
 
   # install vuh
   mkdir -p "$INSTALLATION_DIR" || return 1
-  cp -f vuh.bash "$INSTALLATION_DIR/vuh" || return 1
+  cp -f vuh.sh "$INSTALLATION_DIR/vuh" || return 1
 
   # install autocompletion script
   mkdir -p "$COMPLETION_DIR" || return 1
@@ -126,7 +126,7 @@ function _install() {
   else
     completion_file_name='vuh'
   fi
-  cp -f vuh-completion.bash "$COMPLETION_DIR/$completion_file_name" || return 1
+  cp -f vuh-completion.sh "$COMPLETION_DIR/$completion_file_name" || return 1
 
   # check is vuh installed properly
   _check_vuh_version || return 1
