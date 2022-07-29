@@ -38,7 +38,12 @@ Installing vuh.bash is simple:
     $ cd version-update-helper
     $ ./installer.sh
 
-That will install vuh to `$HOME/bin` by default.
+To use default installation start installer with:
+
+    $ ./installer.sh -d
+
+Default installation selects installation directories automatically. 
+It can be useful if you don't want to select installation directories manually.
 
 ## Configuring projects
 
