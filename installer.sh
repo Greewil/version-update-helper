@@ -8,6 +8,9 @@ YELLOW='\e[1;33m'     # for warnings
 BROWN='\e[0;33m'      # for inputs
 LIGHT_CYAN='\e[1;36m' # for changes
 
+# Variables from input parameters
+DEFAULT_INSTALLATION='false'
+
 # Installer's global variables (Please don't modify!)
 INSTALLATION_DIR=''
 COMPLETION_DIR=''
@@ -178,6 +181,10 @@ function _manual_select_completion_dir() {
 }
 
 function _manual_installation() {
+  [ $DEFAULT_INSTALLATION = 'true' ] && {
+    _show_error_message "Default installation failed!"
+    exit 1
+  }
   _show_function_title "manual installation"
   _manual_select_installation_dir || return 1
   _manual_select_completion_dir || return 1
@@ -186,7 +193,7 @@ function _manual_installation() {
 
 function _install_msys() {
   if [ -n "$HOME" ]; then
-    # define dirs for msys terminal case (f.e. GitBash)
+    _show_function_title "Installing for msys ..."
     INSTALLATION_DIR="$HOME/bin"
     COMPLETION_DIR="$HOME/bash_completion.d"
     _install || return 1
@@ -197,7 +204,7 @@ function _install_msys() {
 }
 
 function _install_unix_like() {
-  # define dirs for UNIX-like case
+  _show_function_title "Installing for unix-like OS ($OSTYPE) ..."
   INSTALLATION_DIR="/usr/bin"
   if [ -d /usr/share/bash-completion/completions ]; then
     COMPLETION_DIR="/usr/share/bash-completion/completions"
@@ -219,25 +226,40 @@ function _ask_default_unix_like_installation() {
   }
 }
 
+function _ask_default_msys_installation() {
+  echo "Seems like you using msys"
+  question_text="Do you want to start default installation for msys (f.e. if you using GitBash terminal)?"
+  _yes_no_question "$question_text" "_install_msys" "_manual_installation" || {
+    _show_error_message "Something went wrong due installation!"
+    exit 1
+  }
+}
+
 function try_select_os_and_install() {
   case "$OSTYPE" in
     solaris*)
-      _ask_default_unix_like_installation "SOLARIS" ;;
+      [ $DEFAULT_INSTALLATION = 'true' ] && _install_unix_like
+      [ $DEFAULT_INSTALLATION = 'false' ] && _ask_default_unix_like_installation "SOLARIS"
+      ;;
     linux*)
-      _ask_default_unix_like_installation "linux" ;;
+      [ $DEFAULT_INSTALLATION = 'true' ] && _install_unix_like
+      [ $DEFAULT_INSTALLATION = 'false' ] && _ask_default_unix_like_installation "linux"
+      ;;
     bsd*)
-      _ask_default_unix_like_installation "BSD" ;;
+      [ $DEFAULT_INSTALLATION = 'true' ] && _install_unix_like
+      [ $DEFAULT_INSTALLATION = 'false' ] && _ask_default_unix_like_installation "BSD"
+      ;;
     cygwin*)
-      _ask_default_unix_like_installation "cygwin" ;;
+      [ $DEFAULT_INSTALLATION = 'true' ] && _install_unix_like
+      [ $DEFAULT_INSTALLATION = 'false' ] && _ask_default_unix_like_installation "cygwin"
+      ;;
     darwin*)
-      _ask_default_unix_like_installation "OSX" ;;
+      [ $DEFAULT_INSTALLATION = 'true' ] && _install_unix_like
+      [ $DEFAULT_INSTALLATION = 'false' ] && _ask_default_unix_like_installation "OSX"
+      ;;
     msys*)
-      echo "Seems like you using msys"
-      question_text="Do you want to start default installation for msys (f.e. if you using GitBash terminal)?"
-      _yes_no_question "$question_text" "_install_msys" "_manual_installation" || {
-        _show_error_message "Something went wrong due installation!"
-        exit 1
-      }
+      [ $DEFAULT_INSTALLATION = 'true' ] && _install_msys
+      [ $DEFAULT_INSTALLATION = 'false' ] && _ask_default_msys_installation
       ;;
     *)
       _show_error_message "Unknown OS type: $OSTYPE"
@@ -245,5 +267,9 @@ function try_select_os_and_install() {
       ;;
   esac
 }
+
+if [ "$1" = '-d' ]; then
+  DEFAULT_INSTALLATION='true'
+fi
 
 try_select_os_and_install $$ exit 0
