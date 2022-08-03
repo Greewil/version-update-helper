@@ -146,7 +146,12 @@ function _install() {
   echo "$completion_script_name_info" >> "$DATA_DIR/installation_info.conf" || return 1
 
   # update DATA_DIR variable in vuh
-  # TODO replace <should_be_replace_after_installation:DATA_DIR>
+  installed_vuh_script=$(<"$INSTALLATION_DIR/vuh") || {
+    _show_error_message "Failed to get file $INSTALLATION_DIR/vuh!"
+    return 1
+  }
+  string_to_replace='<should_be_replace_after_installation:DATA_DIR>'
+  echo "${installed_vuh_script/$string_to_replace/$DATA_DIR}" > "$INSTALLATION_DIR/vuh" || return 1
 
   # check is vuh installed properly
   _check_vuh_version || return 1
@@ -195,7 +200,8 @@ function _manual_select_completion_dir() {
   check_failed_message="Directory doesn't exist! Please select another directory or create this one!"
   _get_input_with_check "$ask_input_message" "$output_variable_name" "$check_function" "$check_failed_message"
   echo "directory for autocompletion script selected: $COMPLETION_DIR"
-  _get # TODO check if user want COMPLETION_SCRIPT_NAME to be vuh or vuh-completion.bash
+  COMPLETION_SCRIPT_NAME='vuh'
+#  _get # TODO check if user want COMPLETION_SCRIPT_NAME to be vuh or vuh-completion.bash
 }
 
 function _manual_select_data_dir() {
