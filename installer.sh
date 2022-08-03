@@ -14,6 +14,7 @@ DEFAULT_INSTALLATION='false'
 # Installer's global variables (Please don't modify!)
 INSTALLATION_DIR=''
 COMPLETION_DIR=''
+DATA_DIR=''
 
 
 function _show_function_title() {
@@ -123,13 +124,29 @@ function _install() {
   cp -f vuh.sh "$INSTALLATION_DIR/vuh" || return 1
 
   # install autocompletion script
-  mkdir -p "$COMPLETION_DIR" || return 1
-  if [ "$COMPLETION_DIR" = "$HOME/bash_completion.d" ]; then
-    completion_file_name='vuh-completion.bash'
-  else
-    completion_file_name='vuh'
-  fi
-  cp -f vuh-completion.sh "$COMPLETION_DIR/$completion_file_name" || return 1
+#  mkdir -p "$COMPLETION_DIR" || return 1
+#  if [ "$COMPLETION_DIR" = "$HOME/bash_completion.d" ]; then
+#    completion_file_name='vuh-completion.bash'
+#  else
+#    completion_file_name='vuh'
+#  fi
+  cp -f vuh-completion.sh "$COMPLETION_DIR/$COMPLETION_SCRIPT_NAME" || return 1
+
+  # create data dir and configuration files
+  mkdir -p "$DATA_DIR" || return 1
+  echo "# configuration file path: $DATA_DIR/installation_info.conf" > "$DATA_DIR/installation_info.conf"
+  echo "" >> "$DATA_DIR/installation_info.conf"
+
+  # write information about all installed files
+  installation_dir_info="INSTALLATION_DIR='$INSTALLATION_DIR'"
+  echo "$installation_dir_info" >> "$DATA_DIR/installation_info.conf" || return 1
+  completion_dir_info="COMPLETION_DIR='$COMPLETION_DIR'"
+  echo "$completion_dir_info" >> "$DATA_DIR/installation_info.conf" || return 1
+  completion_script_name_info="COMPLETION_SCRIPT_NAME='$COMPLETION_SCRIPT_NAME'"
+  echo "$completion_script_name_info" >> "$DATA_DIR/installation_info.conf" || return 1
+
+  # update DATA_DIR variable in vuh
+  # TODO replace <should_be_replace_after_installation:DATA_DIR>
 
   # check is vuh installed properly
   _check_vuh_version || return 1
@@ -178,6 +195,20 @@ function _manual_select_completion_dir() {
   check_failed_message="Directory doesn't exist! Please select another directory or create this one!"
   _get_input_with_check "$ask_input_message" "$output_variable_name" "$check_function" "$check_failed_message"
   echo "directory for autocompletion script selected: $COMPLETION_DIR"
+  _get # TODO check if user want COMPLETION_SCRIPT_NAME to be vuh or vuh-completion.bash
+}
+
+function _manual_select_data_dir() {
+  _show_function_title "select directory where script should store its configuration and other temporary data"
+  recommended_dir="$DATA_DIR"
+#  ask_input_message="Enter directory path where you want to store information about vuh script (recommended: $recommended_dir)" TODO add recommended dir
+  ask_input_message="Enter directory path where you want to store information about vuh script"
+  output_variable_name="DATA_DIR"
+  check_function="_is_dir_exists"
+  check_failed_message="Directory doesn't exist! Please select another directory or create this one!"
+  _get_input_with_check "$ask_input_message" "$output_variable_name" "$check_function" "$check_failed_message"
+  DATA_DIR="$DATA_DIR/vuh"
+  echo "configuration directory for autocompletion script selected: $DATA_DIR"
 }
 
 function _manual_installation() {
@@ -188,6 +219,7 @@ function _manual_installation() {
   _show_function_title "manual installation"
   _manual_select_installation_dir || return 1
   _manual_select_completion_dir || return 1
+  _manual_select_data_dir || return 1
   _install || return 1
 }
 
@@ -196,6 +228,8 @@ function _install_msys() {
     _show_function_title "Installing for msys ..."
     INSTALLATION_DIR="$HOME/bin"
     COMPLETION_DIR="$HOME/bash_completion.d"
+    COMPLETION_SCRIPT_NAME="vuh-completion.bash"
+    DATA_DIR="$HOME/bin/vuh-data"
     _install || return 1
   else
     _show_error_message "HOME variable not found! aborting"
@@ -208,11 +242,13 @@ function _install_unix_like() {
   INSTALLATION_DIR="/usr/bin"
   if [ -d /usr/share/bash-completion/completions ]; then
     COMPLETION_DIR="/usr/share/bash-completion/completions"
+    COMPLETION_SCRIPT_NAME="vuh"
   else
     _show_error_message "Couldn't find bash-completion directory!"
     echo "Please select bash-completion directory manually"
     _manual_select_completion_dir || return 1
   fi
+  DATA_DIR="/usr/share/vuh"
   _install || return 1
 }
 
