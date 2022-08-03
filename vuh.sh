@@ -5,6 +5,7 @@
 #/ Options:
 #/     -h, --help               show help text
 #/     -v, --version            show version
+#/     --configuration          show configuration
 #/     --update                 check for available vuh updates and ask to install latest version
 #/
 #/ Commands:
@@ -25,6 +26,9 @@
 
 # Current version of version_manager.sh.
 VUH_VERSION='0.1.0'
+
+# Installation variables (Please don't modify!)
+DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
 
 # variables for auto updates checking
 LAST_VUH_UPDATE_CHECK='0-0' # dates like: 'date +%Y-%j' (f.e. 2022-213)
@@ -435,10 +439,20 @@ function show_vuh_version() {
   echo "vuh version: $VUH_VERSION"
 }
 
+function show_vuh_configuration() {
+  configuration_file="$DATA_DIR/installation_info.conf"
+  if [ -f "$configuration_file" ]; then
+    cat $configuration_file
+  else
+    _show_error_message "vuh wasn't installed properly!"
+    exit 1
+  fi
+}
+
 function check_available_updates() {
   _get_latest_available_vuh_version || {
     _show_error_message "Failed to get latest available version from $OFFICIAL_REPO_FULL repository!"
-    return 1
+    exit 1
   }
   largest_version=$(_get_largest_version "$VUH_VERSION" "$AVAILABLE_VERSION") || exit 1
   if [ "$largest_version" = "$VUH_VERSION" ]; then
@@ -466,6 +480,10 @@ while [[ $# -gt 0 ]]; do
   -v|--version)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--version'
+    shift ;;
+  --configuration)
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='--configuration'
     shift ;;
   --update)
     _exit_if_using_multiple_commands "$1"
@@ -520,6 +538,10 @@ case "$COMMAND" in
   ;;
 --version)
   show_vuh_version
+  exit 0
+  ;;
+--configuration)
+  show_vuh_configuration
   exit 0
   ;;
 --update)
