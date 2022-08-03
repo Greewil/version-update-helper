@@ -124,12 +124,7 @@ function _install() {
   cp -f vuh.sh "$INSTALLATION_DIR/vuh" || return 1
 
   # install autocompletion script
-#  mkdir -p "$COMPLETION_DIR" || return 1
-#  if [ "$COMPLETION_DIR" = "$HOME/bash_completion.d" ]; then
-#    completion_file_name='vuh-completion.bash'
-#  else
-#    completion_file_name='vuh'
-#  fi
+  mkdir -p "$COMPLETION_DIR" || return 1
   cp -f vuh-completion.sh "$COMPLETION_DIR/$COMPLETION_SCRIPT_NAME" || return 1
 
   # create data dir and configuration files
@@ -144,6 +139,10 @@ function _install() {
   echo "$completion_dir_info" >> "$DATA_DIR/installation_info.conf" || return 1
   completion_script_name_info="COMPLETION_SCRIPT_NAME='$COMPLETION_SCRIPT_NAME'"
   echo "$completion_script_name_info" >> "$DATA_DIR/installation_info.conf" || return 1
+
+  # create latest_update_check file
+  touch "$DATA_DIR/latest_update_check"
+  chmod 666 "$DATA_DIR/latest_update_check"
 
   # update DATA_DIR variable in vuh
   installed_vuh_script=$(<"$INSTALLATION_DIR/vuh") || {

@@ -25,7 +25,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current version of version_manager.sh.
-VUH_VERSION='0.1.0'
+VUH_VERSION='0.0.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -33,7 +33,7 @@ DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
 # variables for auto updates checking
 LAST_VUH_UPDATE_CHECK='0-0' # dates like: 'date +%Y-%j' (f.e. 2022-213)
 OFFICIAL_REPO='Greewil/version-update-helper'
-OFFICIAL_REPO_FULL='https://github.com/$OFFICIAL_REPO'
+OFFICIAL_REPO_FULL="https://github.com/$OFFICIAL_REPO"
 AVAILABLE_VERSION=''
 
 # Output colors
@@ -314,9 +314,22 @@ function _get_latest_available_vuh_version() {
 #}
 
 function _regular_check_available_updates() {
+  configuration_file="$DATA_DIR/installation_info.conf"
+  if [[ ! -f "$configuration_file" ]]; then
+    _show_warning_message "vuh wasn't installed properly!"
+    _show_warning_message "If you want to install vuh properly read more in $OFFICIAL_REPO_FULL."
+    return 1
+  fi
   cur_date=$(date +%Y-%j)
-  if [[ "$cur_date" != "$LAST_VUH_UPDATE_CHECK" ]]; then
-    LAST_VUH_UPDATE_CHECK=cur_date
+  last_update_check='0-0'
+  update_info_file="$DATA_DIR/latest_update_check"
+  if [[ -d "$update_info_file" ]] || [[ -s "$update_info_file" ]]; then
+    last_update_check=$(<"$DATA_DIR/latest_update_check")
+  else
+    echo "$cur_date" > "$update_info_file"
+  fi
+  if [[ "$cur_date" != "$last_update_check" ]]; then
+    echo "$cur_date" > "$update_info_file"
     _get_latest_available_vuh_version || {
       _show_warning_message "Failed to get latest available version from $OFFICIAL_REPO_FULL repository!"
     }
@@ -527,7 +540,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--update' ]]; then
+if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
+    [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]]; then
   _regular_check_available_updates
 fi
 
