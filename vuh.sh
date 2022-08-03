@@ -5,6 +5,7 @@
 #/ Options:
 #/     -h, --help               show help text
 #/     -v, --version            show version
+#/     --update                 check for available vuh updates and ask to install latest version
 #/
 #/ Commands:
 #/     lv, local-version        show local current version (default format)
@@ -24,6 +25,12 @@
 
 # Current version of version_manager.sh.
 VUH_VERSION='0.1.0'
+
+# variables for auto updates checking
+LAST_VUH_UPDATE_CHECK='0-0' # dates like: 'date +%Y-%j' (f.e. 2022-213)
+OFFICIAL_REPO='Greewil/version-update-helper'
+OFFICIAL_REPO_FULL='https://github.com/$OFFICIAL_REPO'
+AVAILABLE_VERSION=''
 
 # Output colors
 APP_NAME='vuh'
@@ -206,6 +213,10 @@ function _get_root_repo_dir() {
 function _get_version_from_file() {
   version_file=$1
   version=$(echo "$version_file" | grep "$TEXT_BEFORE_VERSION_CODE" | grep "$TEXT_AFTER_VERSION_CODE")
+  if [ "$version" = '' ]; then
+    _show_error_message "Failed to get line, containing version from file $handling_file!"
+    return 1
+  fi
   version=${version##*$TEXT_BEFORE_VERSION_CODE} || return 1
   if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
     version=${version%%$TEXT_AFTER_VERSION_CODE*} || return 1
@@ -277,6 +288,43 @@ function _load_remote_conf_file() {
   _check_conf_data_version || return 1
 }
 
+function _get_latest_available_vuh_version() {
+  _unset_conf_variables || return 1
+  main_vuh_branch='suggesting_version_tools'
+  vuh_conf_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/vuh.conf") || return 1
+  _load_project_variables_from_config "$vuh_conf_file" || return 1
+  _check_conf_data_version || return 1
+  vuh_version_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/$VERSION_FILE") || return 1
+  AVAILABLE_VERSION=$(_get_version_from_file "$vuh_version_file") || return 1
+}
+
+#function _get_current_vuh_location() {
+#  SOURCE=${BASH_SOURCE[0]}
+#  while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+#    DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+#    SOURCE=$(readlink "$SOURCE")
+#    [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+#  done
+#  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+#  echo "$DIR d"
+#}
+
+function _regular_check_available_updates() {
+  cur_date=$(date +%Y-%j)
+  if [[ "$cur_date" != "$LAST_VUH_UPDATE_CHECK" ]]; then
+    LAST_VUH_UPDATE_CHECK=cur_date
+    _get_latest_available_vuh_version || {
+      _show_warning_message "Failed to get latest available version from $OFFICIAL_REPO_FULL repository!"
+    }
+    largest_version=$(_get_largest_version "$VUH_VERSION" "$AVAILABLE_VERSION") || exit 1
+    if [[ "$largest_version" != "$VUH_VERSION" ]]; then
+      echo "your current vuh version: $VUH_VERSION"
+      echo "latest vuh available version: $AVAILABLE_VERSION"
+      _yes_no_question "Do you want to get update?" "echo yeay" "echo noooo" # TODO invoke installation
+    fi
+  fi
+}
+
 function _show_suggested_versions_comparison() {
   if [ "$SUGGESTING_VERSION" = "$LOCAL_VERSION" ]; then
     echo "(your local version seems to be ok)"
@@ -326,11 +374,7 @@ function read_main_version() {
     _show_error_message "Failed to load file $handling_file"
     exit 1
   }
-  version_context=$(echo "$main_branch_file" | grep "$TEXT_BEFORE_VERSION_CODE") || {
-    _show_error_message "Failed to get line, containing version from file $handling_file!"
-    exit 1
-  }
-  MAIN_VERSION=$(_get_version_from_file "$version_context") || {
+  MAIN_VERSION=$(_get_version_from_file "$main_branch_file") || {
     _show_error_message "Failed to get main version from $handling_file!"
     check_line_command='cat (VERSION_FILE_NAME) | grep "(config:TEXT_BEFORE_VERSION_CODE)" | grep '\
 '"(config:TEXT_AFTER_VERSION_CODE)"'
@@ -391,6 +435,21 @@ function show_vuh_version() {
   echo "vuh version: $VUH_VERSION"
 }
 
+function check_available_updates() {
+  _get_latest_available_vuh_version || {
+    _show_error_message "Failed to get latest available version from $OFFICIAL_REPO_FULL repository!"
+    return 1
+  }
+  largest_version=$(_get_largest_version "$VUH_VERSION" "$AVAILABLE_VERSION") || exit 1
+  if [ "$largest_version" = "$VUH_VERSION" ]; then
+    echo "you already have the latest vuh version: $VUH_VERSION"
+  else
+    echo "your current vuh version: $VUH_VERSION"
+    echo "latest vuh available version: $AVAILABLE_VERSION"
+    _yes_no_question "Do you want to get update?" "echo yeay" "echo noooo" # TODO invoke installation
+  fi
+}
+
 function show_help() {
   grep '^#/' <"$0" | cut -c4-
 }
@@ -407,6 +466,10 @@ while [[ $# -gt 0 ]]; do
   -v|--version)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--version'
+    shift ;;
+  --update)
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='--update'
     shift ;;
   lv|local-version)
     _exit_if_using_multiple_commands "$1"
@@ -446,6 +509,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--update' ]]; then
+  _regular_check_available_updates
+fi
+
 case "$COMMAND" in
 --help)
   show_help
@@ -453,6 +520,10 @@ case "$COMMAND" in
   ;;
 --version)
   show_vuh_version
+  exit 0
+  ;;
+--update)
+  check_available_updates
   exit 0
   ;;
 local-version)

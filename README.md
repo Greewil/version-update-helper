@@ -70,6 +70,7 @@ To use vuh with your project you should first create vuh.conf file in root folde
     Options:
         -h, --help               show help text
         -v, --version            show version
+        --update                 check for available vuh updates and ask to install latest version
     
     Commands:
         lv, local-version        show local current version (default format)
