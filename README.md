@@ -1,16 +1,9 @@
 # version-update-helper
 [![release](https://badgen.net/github/release/Greewil/version-update-helper)](https://github.com/Greewil/version-update-helper/releases)
 [![Last updated](https://img.shields.io/github/release-date/Greewil/version-update-helper?label=updated)](https://github.com/Greewil/version-update-helper/releases)
-![issues](https://badgen.net/github/issues/Greewil/version-update-helper)
-![stars](https://badgen.net/github/stars/Greewil/version-update-helper)
-![forks](https://badgen.net/github/forks/Greewil/version-update-helper)
-![watchers](https://badgen.net/github/watchers/Greewil/version-update-helper)
+[![issues](https://badgen.net/github/issues/Greewil/version-update-helper)](https://github.com/Greewil/version-update-helper/issues)
 
-[create fork](https://github.com/Greewil/version-update-helper/fork)
-
-[watch repo](https://github.com/Greewil/version-update-helper/subscription)
-
-[create issue](https://github.com/Greewil/version-update-helper/issues/new)
+Actions: [create fork](https://github.com/Greewil/version-update-helper/fork), [watch repo](https://github.com/Greewil/version-update-helper/subscription), [create issue](https://github.com/Greewil/version-update-helper/issues/new)
 
 ## Overview
 
@@ -32,15 +25,15 @@ Works only with git projects!
 
 ## Installation
 
-Installing vuh.bash is simple:
+Installing vuh.sh is simple:
 
-    $ git clone git clone https://github.com/Greewil/version-update-helper.git
-    $ cd version-update-helper
-    $ ./installer.sh
+    git clone git clone https://github.com/Greewil/version-update-helper.git
+    cd version-update-helper
+    ./installer.sh
 
 To use default installation start installer with:
 
-    $ ./installer.sh -d
+    ./installer.sh -d
 
 Default installation selects installation directories automatically. 
 It can be useful if you don't want to select installation directories manually.
