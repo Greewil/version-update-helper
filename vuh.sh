@@ -110,11 +110,11 @@ function _yes_no_question() {
     read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text (Y/N): $NEUTRAL_COLOR")" -r answer
     case "$answer" in
     y|Y|Yes|yes)
-      ($command_on_yes)
+      eval "$command_on_yes"
       asking_question='false'
       ;;
     n|N|No|no)
-      ($command_on_no)
+      eval "$command_on_no"
       asking_question='false'
       ;;
     esac

@@ -47,11 +47,11 @@ function _yes_no_question() {
     read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text (Y/N): $NEUTRAL_COLOR")" -r answer
     case "$answer" in
     y|Y|Yes|yes)
-      ($command_on_yes)
+      eval "$command_on_yes"
       asking_question='false'
       ;;
     n|N|No|no)
-      ($command_on_no)
+      eval "$command_on_no"
       asking_question='false'
       ;;
     esac
@@ -83,7 +83,7 @@ function _get_input_with_check() {
   while [ "$waiting_for_input" = 'true' ]; do
     _get_input "$ask_input_message" "$output_variable"
     waiting_for_input='false'
-    $check_function "${!output_variable}" || {
+    eval "$check_function ${!output_variable}" || {
       waiting_for_input='true'
       _show_warning_message "'${!output_variable}': $check_failed_message"
     }
