@@ -41,7 +41,6 @@ function _yes_no_question() {
   question_text=$1
   command_on_yes=$2
   command_on_no=$3
-
   asking_question='true'
   while [ "$asking_question" = 'true' ]; do
     read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text (Y/N): $NEUTRAL_COLOR")" -r answer
@@ -69,8 +68,8 @@ function _get_input() {
 #
 # $1 - Message that asks an input from user
 # $2 - Output variable name in which function should leave the result
-# $3 - Function that returns 'true' if input was correct and 'false' if user should write it again.
-# $4 - Message that will be shown if check_function ($3) will return 'false'
+# $3 - Function that returns 1 if input was incorrect and user should write it again.
+# $4 - Message that will be shown if check_function ($3) will return 1
 #
 # Returns nothing.
 function _get_input_with_check() {
@@ -78,7 +77,6 @@ function _get_input_with_check() {
   output_variable=$2
   check_function=$3
   check_failed_message=$4
-
   waiting_for_input='true'
   while [ "$waiting_for_input" = 'true' ]; do
     _get_input "$ask_input_message" "$output_variable"

@@ -104,7 +104,6 @@ function _yes_no_question() {
   question_text=$1
   command_on_yes=$2
   command_on_no=$3
-
   asking_question='true'
   while [ "$asking_question" = 'true' ]; do
     read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text (Y/N): $NEUTRAL_COLOR")" -r answer
