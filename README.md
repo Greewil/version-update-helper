@@ -1,5 +1,5 @@
 # version-update-helper
-[![release](https://badgen.net/github/release/Greewil/version-update-helper)](https://github.com/Greewil/version-update-helper/releases)
+[![release](https://badgen.net/github/release/Greewil/version-update-helper/stable)](https://github.com/Greewil/version-update-helper/releases)
 [![Last updated](https://img.shields.io/github/release-date/Greewil/version-update-helper?label=updated)](https://github.com/Greewil/version-update-helper/releases)
 [![issues](https://badgen.net/github/issues/Greewil/version-update-helper)](https://github.com/Greewil/version-update-helper/issues)
 
