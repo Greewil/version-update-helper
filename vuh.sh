@@ -25,7 +25,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current version of version_manager.sh.
-VUH_VERSION='0.0.0'
+VUH_VERSION='0.1.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -122,13 +122,13 @@ function _yes_no_question() {
 
 function _load_project_variables_from_config() {
   config_file=$1
-  tmp_conf_file="/tmp/vuh_projects_conf_file.conf"
+  tmp_conf_file="/tmp/${APP_NAME}_projects_conf_file.conf"
   echo "$config_file" > $tmp_conf_file
   . $tmp_conf_file || {
-    rm -f /tmp/vuh_projects_conf_file.conf
+    rm -f "/tmp/${APP_NAME}_projects_conf_file.conf"
     return 1
   }
-  rm -f /tmp/vuh_projects_conf_file.conf
+  rm -f "/tmp/${APP_NAME}_projects_conf_file.conf"
 }
 
 function _check_version_syntax() {
