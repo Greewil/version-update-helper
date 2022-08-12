@@ -212,8 +212,11 @@ function _manual_select_completion_dir() {
   check_failed_message="Directory doesn't exist! Please select another directory or create this one!"
   _get_input_with_check "$ask_input_message" "$output_variable_name" "$check_function" "$check_failed_message"
   echo "directory for autocompletion script selected: $COMPLETION_DIR"
-  COMPLETION_SCRIPT_NAME="$INSTALLING_APP_NAME"
-#  _get # TODO check if user want COMPLETION_SCRIPT_NAME to be $INSTALLING_APP_NAME or $INSTALLING_APP_NAME-completion.bash
+#  COMPLETION_SCRIPT_NAME="$INSTALLING_APP_NAME"
+# TODO add recommended COMPLETION_SCRIPT_NAME should be $INSTALLING_APP_NAME or $INSTALLING_APP_NAME-completion.bash
+  ask_input_message="Enter name of the completion script (recommended: $INSTALLING_APP_NAME)"
+  output_variable_name="COMPLETION_SCRIPT_NAME"
+  _get_input "$ask_input_message" "$output_variable_name"
 }
 
 function _manual_select_data_dir() {
