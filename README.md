@@ -25,7 +25,13 @@ Works only with git projects!
 
 ## Installation
 
-Installing vuh.sh is simple:
+To install vuh you can use one-liner (at any directory):
+
+    bash -c "tmp_dir=/tmp/installation-\$(date +%s%N); start_dir=\$(pwd); trap 'printf \"%b\" \"\n\e[0;31mInstallation failed\e[0m\n\n\"; cd \$start_dir; rm -r \$tmp_dir' ERR; set -e; printf '%b' '\ndownloading vuh packages ...\n\n'; mkdir -p \$tmp_dir; cd \$tmp_dir; curl https://github.com/Greewil/version-update-helper/archive/refs/heads/main.zip -O -J -L; printf '%b' '\nunpacking ...\n\n'; unzip version-update-helper-main.zip; printf '%b' '\ninstalling vuh ...\n\n'; ./version-update-helper-main/installer.sh; cd \$start_dir; rm -r \$tmp_dir; printf '%b' '\nThis installation command was generated with \e[1;34mhttps://github.com/Greewil/one-line-installer\e[0m\n\n'"
+
+(one-liner was generated with https://github.com/Greewil/one-line-installer)
+
+or you can install vuh manually:
 
     git clone git clone https://github.com/Greewil/version-update-helper.git
     cd version-update-helper
