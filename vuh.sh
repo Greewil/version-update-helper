@@ -309,6 +309,13 @@ function _get_latest_available_vuh_version() {
 #  echo "$DIR d"
 #}
 
+function _install_latest_vuh_version() {
+  _show_function_title 'Installing latest vuh version ...'
+  autoinstaller_path="$OFFICIAL_REPO/$main_vuh_branch/auto_update.sh"
+  vuh_autoinstaller_file=$(curl -s "https://raw.githubusercontent.com/$autoinstaller_path") || exit 1
+  eval "$vuh_autoinstaller_file"
+}
+
 function _regular_check_available_updates() {
   configuration_file="$DATA_DIR/installation_info.conf"
   if [[ ! -f "$configuration_file" ]]; then
@@ -333,7 +340,7 @@ function _regular_check_available_updates() {
     if [[ "$largest_version" != "$VUH_VERSION" ]]; then
       echo "your current vuh version: $VUH_VERSION"
       echo "latest vuh available version: $AVAILABLE_VERSION"
-      _yes_no_question "Do you want to get update?" "echo yeay" "echo noooo" # TODO invoke installation
+      _yes_no_question "Do you want to get update?" "_install_latest_vuh_version" "echo 'Update canceled'"
     fi
   fi
 }
@@ -469,7 +476,7 @@ function check_available_updates() {
   else
     echo "your current vuh version: $VUH_VERSION"
     echo "latest vuh available version: $AVAILABLE_VERSION"
-    _yes_no_question "Do you want to get update?" "echo yeay" "echo noooo" # TODO invoke installation
+    _yes_no_question "Do you want to get update?" "_install_latest_vuh_version" "echo 'Update canceled'"
   fi
 }
 
@@ -539,6 +546,7 @@ done
 if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
     [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]]; then
   _regular_check_available_updates
+  exit 0
 fi
 
 case "$COMMAND" in
