@@ -35,6 +35,8 @@ LAST_VUH_UPDATE_CHECK='0-0' # dates like: 'date +%Y-%j' (f.e. 2022-213)
 OFFICIAL_REPO='Greewil/version-update-helper'
 OFFICIAL_REPO_FULL="https://github.com/$OFFICIAL_REPO"
 AVAILABLE_VERSION=''
+UPDATE_FAILED='false'
+PERMISSION_DENIED_WHEN_UPDATING='false'
 
 # Output colors
 APP_NAME='vuh'
@@ -309,11 +311,28 @@ function _get_latest_available_vuh_version() {
 #  echo "$DIR d"
 #}
 
+function _check_auto_update_logs() {
+  update_log_file=$1
+  logs=$(<"$update_log_file")
+  [[ "$logs" == *'Installation failed'* ]] && _show_error_message 'Failed to install update!'
+  [[ "$logs" == *'ermission denied'* ]] && _show_error_message "Permission denied so try 'sudo vuh --update' to start update!"
+}
+
 function _install_latest_vuh_version() {
   _show_function_title 'Installing latest vuh version ...'
-  autoinstaller_path="$OFFICIAL_REPO/$main_vuh_branch/auto_update.sh"
-  vuh_autoinstaller_file=$(curl -s "https://raw.githubusercontent.com/$autoinstaller_path") || exit 1
-  eval "$vuh_autoinstaller_file"
+  auto_updater_path="$OFFICIAL_REPO/$main_vuh_branch/auto_update.sh"
+  vuh_auto_updater_file=$(curl -s "https://raw.githubusercontent.com/$auto_updater_path") || {
+    _show_error_message "Failed to download vuh updater!"
+    exit 1
+  }
+  update_log_file='/tmp/vuh_update_log.txt'
+  echo '' > "$update_log_file"
+  eval "$vuh_auto_updater_file" |& tee /dev/fd/3 3>&1 1>>${update_log_file} 2>&1
+  _check_auto_update_logs "$update_log_file" || {
+    rm "$update_log_file"
+    exit 1
+  }
+  rm "$update_log_file"
 }
 
 function _regular_check_available_updates() {
