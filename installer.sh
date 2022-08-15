@@ -238,10 +238,13 @@ function _manual_installation() {
     exit 1
   }
   _show_function_title "manual installation"
-  _manual_select_installation_dir || return 1
-  _manual_select_completion_dir || return 1
-  _manual_select_data_dir || return 1
-  _install || return 1
+  _manual_select_installation_dir || exit 1
+  _manual_select_completion_dir || exit 1
+  _manual_select_data_dir || exit 1
+  _install || {
+    _show_error_message "Something went wrong due installation!"
+    exit 1
+  }
 }
 
 function _install_msys() {
@@ -251,7 +254,10 @@ function _install_msys() {
     COMPLETION_DIR="$HOME/bash_completion.d"
     COMPLETION_SCRIPT_NAME="$INSTALLING_APP_NAME-completion.bash"
     DATA_DIR="$HOME/bin/$INSTALLING_APP_NAME-data"
-    _install || return 1
+    _install || {
+      _show_error_message "Something went wrong due installation!"
+      exit 1
+    }
   else
     _show_error_message "HOME variable not found! aborting"
     exit 1
@@ -267,29 +273,26 @@ function _install_unix_like() {
   else
     _show_error_message "Couldn't find bash-completion directory!"
     echo "Please select bash-completion directory manually"
-    _manual_select_completion_dir || return 1
+    _manual_select_completion_dir || exit 1
   fi
   DATA_DIR="/usr/share/$INSTALLING_APP_NAME"
-  _install || return 1
+  _install || {
+    _show_error_message "Something went wrong due installation!"
+    exit 1
+  }
 }
 
 function _ask_default_unix_like_installation() {
   os_type_name=$1
   echo "Your OS type was identified as $os_type_name"
   question_text="Do you want to start default installation for UNIX-like systems?"
-  _yes_no_question "$question_text" "_install_unix_like" "_manual_installation" || {
-    _show_error_message "Something went wrong due installation!"
-    exit 1
-  }
+  _yes_no_question "$question_text" "_install_unix_like" "_manual_installation"
 }
 
 function _ask_default_msys_installation() {
   echo "Seems like you using msys"
   question_text="Do you want to start default installation for msys (f.e. if you using GitBash terminal)?"
-  _yes_no_question "$question_text" "_install_msys" "_manual_installation" || {
-    _show_error_message "Something went wrong due installation!"
-    exit 1
-  }
+  _yes_no_question "$question_text" "_install_msys" "_manual_installation"
 }
 
 function try_select_os_and_install() {
