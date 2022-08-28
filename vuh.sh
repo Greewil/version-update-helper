@@ -11,32 +11,30 @@
 #/ Commands:
 #/     lv, local-version        show local current version (default format)
 #/     mv, main-version         show version of origin/MAIN_BRANCH_NAME
-#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
+#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/     sv, suggesting-version   show suggesting version which this branch should use
 #/        [-v=<version>]           to specify your own version which also will be taken into account
-#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
+#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
 #/        [-v=<version>]           to specify your own version which also will be taken into account
-#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
+#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/
 #/ Suggest relevant version for your current project or even update your local project's version.
 #/ Script can work with your project's versions from any directory inside of your local repository.
+#/ Project repository: https://github.com/Greewil/version-update-helper
 #
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
-# Current version of version_manager.sh.
+# Current vuh version
 VUH_VERSION='0.1.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
 
-# variables for auto updates checking
-LAST_VUH_UPDATE_CHECK='0-0' # dates like: 'date +%Y-%j' (f.e. 2022-213)
+# Variables for auto updates checking
 OFFICIAL_REPO='Greewil/version-update-helper'
 OFFICIAL_REPO_FULL="https://github.com/$OFFICIAL_REPO"
 AVAILABLE_VERSION=''
-UPDATE_FAILED='false'
-PERMISSION_DENIED_WHEN_UPDATING='false'
 
 # Output colors
 APP_NAME='vuh'
@@ -46,7 +44,7 @@ YELLOW='\e[1;33m'     # for warnings
 BROWN='\e[0;33m'      # for inputs
 LIGHT_CYAN='\e[1;36m' # for changes
 
-# Vuh's global variables (Please don't modify!)
+# vuh global variables (Please don't modify!)
 LOADED_CONF_FILE_VERSION=''
 ROOT_REPO_DIR=''
 LOCAL_VERSION=''
@@ -57,7 +55,7 @@ SUGGESTING_VERSION=''
 COMMAND=''
 SPECIFIED_VERSION=''
 SPECIFIED_MAIN_BRANCH=''
-SPECIFIED_AGREEMENT='false'
+SPECIFIED_ALWAYS_AGREE='false'
 
 
 function _show_function_title() {
@@ -89,7 +87,7 @@ function _show_invalid_usage_error_message() {
 function _exit_if_using_multiple_commands() {
   last_command=$1
   if [ "$COMMAND" != '' ]; then
-    _show_invalid_usage_error_message "You can't use both commands: '$COMMAND' and '$1'!"
+    _show_invalid_usage_error_message "You can't use both commands: '$COMMAND' and '$last_command'!"
     exit 1
   fi
 }
@@ -97,7 +95,7 @@ function _exit_if_using_multiple_commands() {
 function _check_arg() {
   arg="$1"
   if [ "$COMMAND" = '' ]; then
-    _show_invalid_usage_error_message "Parameter '$1' used without specifying any command!"
+    _show_invalid_usage_error_message "Parameter '$arg' used without specifying any command!"
     exit 1
   fi
 }
@@ -124,13 +122,14 @@ function _yes_no_question() {
 
 function _load_project_variables_from_config() {
   config_file=$1
-  tmp_conf_file="/tmp/${APP_NAME}_projects_conf_file.conf"
+  tmp_conf_file="/tmp/${APP_NAME}_projects_conf_file"
   echo "$config_file" > $tmp_conf_file
+  # shellcheck source=/dev/null
   . $tmp_conf_file || {
-    rm -f "/tmp/${APP_NAME}_projects_conf_file.conf"
+    rm -f "/tmp/${APP_NAME}_projects_conf_file"
     return 1
   }
-  rm -f "/tmp/${APP_NAME}_projects_conf_file.conf"
+  rm -f "/tmp/${APP_NAME}_projects_conf_file"
 }
 
 function _check_version_syntax() {
@@ -265,12 +264,12 @@ function _check_conf_data_version() {
 function _load_local_conf_file() {
   _unset_conf_variables || return 1
   _get_root_repo_dir || return 1
-  conf_file=$(<"$ROOT_REPO_DIR/vuh.conf") || {
-    _show_error_message "Failed to read local configuration file $ROOT_REPO_DIR/vuh.conf!"
+  conf_file=$(<"$ROOT_REPO_DIR/.vuh") || {
+    _show_error_message "Failed to read local configuration file $ROOT_REPO_DIR/.vuh!"
     return 1
   }
   _load_project_variables_from_config "$conf_file" || {
-    _show_error_message "Failed to load variables from local configuration file $ROOT_REPO_DIR/vuh.conf!"
+    _show_error_message "Failed to load variables from local configuration file $ROOT_REPO_DIR/.vuh!"
     return 1
   }
   _check_conf_data_version || return 1
@@ -279,12 +278,12 @@ function _load_local_conf_file() {
 function _load_remote_conf_file() {
   _unset_conf_variables || return 1
   branch_name=$1
-  main_branch_config_file=$(git show "origin/$branch_name:vuh.conf") || {
-    _show_error_message "Failed to read remote configuration file origin/$branch_name:vuh.conf!"
+  main_branch_config_file=$(git show "origin/$branch_name:.vuh") || {
+    _show_error_message "Failed to read remote configuration file origin/$branch_name:.vuh!"
     return 1
   }
   _load_project_variables_from_config "$main_branch_config_file" || {
-    _show_error_message "Failed to load variables from remote configuration file origin/$branch_name:vuh.conf!"
+    _show_error_message "Failed to load variables from remote configuration file origin/$branch_name:.vuh!"
     return 1
   }
   _check_conf_data_version || return 1
@@ -293,7 +292,7 @@ function _load_remote_conf_file() {
 function _get_latest_available_vuh_version() {
   _unset_conf_variables || return 1
   main_vuh_branch='suggesting_version_tools'
-  vuh_conf_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/vuh.conf") || return 1
+  vuh_conf_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/.vuh") || return 1
   _load_project_variables_from_config "$vuh_conf_file" || return 1
   _check_conf_data_version || return 1
   vuh_version_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/$VERSION_FILE") || return 1
@@ -336,14 +335,14 @@ function _install_latest_vuh_version() {
 }
 
 function _regular_check_available_updates() {
-  configuration_file="$DATA_DIR/installation_info.conf"
+  configuration_file="$DATA_DIR/.installation_info"
   if [[ ! -f "$configuration_file" ]]; then
     _show_warning_message "vuh wasn't installed properly!"
     _show_warning_message "If you want to install vuh properly read more in $OFFICIAL_REPO_FULL."
     return 1
   fi
   cur_date=$(date +%Y-%j)
-  last_update_check='0-0'
+  last_update_check='0-0' # dates like: 'date +%Y-%j' (f.e. 2022-213)
   update_info_file="$DATA_DIR/latest_update_check"
   if [[ -d "$update_info_file" ]] || [[ -s "$update_info_file" ]]; then
     last_update_check=$(<"$DATA_DIR/latest_update_check")
@@ -475,7 +474,7 @@ function show_vuh_version() {
 }
 
 function show_vuh_configuration() {
-  configuration_file="$DATA_DIR/installation_info.conf"
+  configuration_file="$DATA_DIR/.installation_info"
   if [ -f "$configuration_file" ]; then
     cat $configuration_file
   else
@@ -551,9 +550,9 @@ while [[ $# -gt 0 ]]; do
     shift ;;
   -y)
     _check_arg "$1"
-    SPECIFIED_AGREEMENT='true'
+    SPECIFIED_ALWAYS_AGREE='true'
     shift ;;
-  -*|--*)
+  -*)
     _show_invalid_usage_error_message "Unknown option '$1'!"
     exit 1 ;;
   *)
@@ -565,7 +564,6 @@ done
 if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
     [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]]; then
   _regular_check_available_updates
-  exit 0
 fi
 
 case "$COMMAND" in

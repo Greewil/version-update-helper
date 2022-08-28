@@ -2,6 +2,8 @@
 
 # Installer configuration
 INSTALLING_APP_NAME='vuh'
+APP_TO_INSTALL='vuh.sh'
+COMPLETION_TO_INSTALL='vuh-completion.sh'
 
 # Output colors
 APP_NAME='vuh_installer'
@@ -63,6 +65,7 @@ function _yes_no_question() {
 function _get_input() {
   ask_input_message=$1
   output_variable_name=$2
+  # shellcheck disable=SC2229
   read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $ask_input_message: $NEUTRAL_COLOR")" -r "$output_variable_name"
 }
 
@@ -110,7 +113,7 @@ function _check_installed_version() {
   # get installer path in case if installer started not from the same directory
   installer_path=$(_get_script_source_path) || return 1
   installed_version=$($INSTALLING_APP_NAME -v) || return 1
-  available_version=$("$installer_path/vuh.sh" -v) || return 1
+  available_version=$("$installer_path/$APP_TO_INSTALL" -v) || return 1
   if [ "$installed_version" = "$available_version" ]; then
     _show_updated_message "$INSTALLING_APP_NAME was successfully installed"
   else
@@ -134,24 +137,24 @@ function _install() {
 
   # install application
   mkdir -p "$INSTALLATION_DIR" || return 1
-  cp -f "$installer_path/vuh.sh" "$INSTALLATION_DIR/$INSTALLING_APP_NAME" || return 1
+  cp -f "$installer_path/$APP_TO_INSTALL" "$INSTALLATION_DIR/$INSTALLING_APP_NAME" || return 1
 
   # install autocompletion script
   mkdir -p "$COMPLETION_DIR" || return 1
-  cp -f "$installer_path/vuh-completion.sh" "$COMPLETION_DIR/$COMPLETION_SCRIPT_NAME" || return 1
+  cp -f "$installer_path/$COMPLETION_TO_INSTALL" "$COMPLETION_DIR/$COMPLETION_SCRIPT_NAME" || return 1
 
   # create data dir and configuration files
   mkdir -p "$DATA_DIR" || return 1
-  echo "# configuration file path: $DATA_DIR/installation_info.conf" > "$DATA_DIR/installation_info.conf"
-  echo "" >> "$DATA_DIR/installation_info.conf"
+  echo "# configuration file path: $DATA_DIR/.installation_info" > "$DATA_DIR/.installation_info"
+  echo "" >> "$DATA_DIR/.installation_info"
 
   # write information about all installed files
   installation_dir_info="INSTALLATION_DIR='$INSTALLATION_DIR'"
-  echo "$installation_dir_info" >> "$DATA_DIR/installation_info.conf" || return 1
+  echo "$installation_dir_info" >> "$DATA_DIR/.installation_info" || return 1
   completion_dir_info="COMPLETION_DIR='$COMPLETION_DIR'"
-  echo "$completion_dir_info" >> "$DATA_DIR/installation_info.conf" || return 1
+  echo "$completion_dir_info" >> "$DATA_DIR/.installation_info" || return 1
   completion_script_name_info="COMPLETION_SCRIPT_NAME='$COMPLETION_SCRIPT_NAME'"
-  echo "$completion_script_name_info" >> "$DATA_DIR/installation_info.conf" || return 1
+  echo "$completion_script_name_info" >> "$DATA_DIR/.installation_info" || return 1
 
   # create latest_update_check file
   touch "$DATA_DIR/latest_update_check"
@@ -190,7 +193,7 @@ function _is_installation_dir_ok() {
 
 function _manual_select_installation_dir() {
   _show_function_title "select installation directory"
-  recommended_dir="$INSTALLATION_DIR"
+#  recommended_dir="$INSTALLATION_DIR"
 #  ask_input_message="Enter directory path where you want to install $INSTALLING_APP_NAME (recommended: $recommended_dir)" TODO add recommended dir
   ask_input_message="Enter directory path where you want to install $INSTALLING_APP_NAME"
   output_variable_name="INSTALLATION_DIR"
