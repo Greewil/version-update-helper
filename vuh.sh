@@ -10,14 +10,17 @@
 #/
 #/ Commands:
 #/     lv, local-version        show local current version (default format)
+#/         [-q | --quiet]           to show only version number (or errors messages if there are so)
 #/     mv, main-version         show version of origin/MAIN_BRANCH_NAME
-#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+#/         [-q | --quiet]           to show only version number (or errors messages if there are so)
+#/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/     sv, suggesting-version   show suggesting version which this branch should use
-#/        [-v=<version>]           to specify your own version which also will be taken into account
-#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+#/         [-q | --quiet]           to show only version number (or errors messages if there are so)
+#/         [-v=<version>]           to specify your own version which also will be taken into account
+#/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
-#/        [-v=<version>]           to specify your own version which also will be taken into account
-#/        [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+#/         [-v=<version>]           to specify your own version which also will be taken into account
+#/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/
 #/ Suggest relevant version for your current project or even update your local project's version.
 #/ Script can work with your project's versions from any directory inside of your local repository.
@@ -55,7 +58,7 @@ SUGGESTING_VERSION=''
 COMMAND=''
 SPECIFIED_VERSION=''
 SPECIFIED_MAIN_BRANCH=''
-SPECIFIED_ALWAYS_AGREE='false'
+ARGUMENT_QUIET='false'
 
 
 function _show_function_title() {
@@ -227,7 +230,7 @@ function _get_version_from_file() {
 }
 
 function _fetch_remote_branches() {
-  git fetch || {
+  git fetch -q || {
     _show_error_message 'Failed to use "git fetch" to update information about remote branches!'
     _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
     return 1
@@ -374,7 +377,7 @@ function _show_suggested_versions_comparison() {
 }
 
 function read_local_version() {
-  _show_function_title 'getting local version'
+  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'getting local version'
   _load_local_conf_file || exit 1
   version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
     _show_error_message "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
@@ -389,11 +392,15 @@ function read_local_version() {
     _show_error_message "Also make sure that command ($check_version_command) will throw same YOUR_VERSION_EXAMPLE"
     exit 1
   }
-  echo "local: $LOCAL_VERSION"
+  if [ "$ARGUMENT_QUIET" = 'false' ]; then
+    echo "local: $LOCAL_VERSION"
+  elif [ "$ARGUMENT_QUIET" = 'true' ] && [ "$COMMAND" = 'local-version' ]; then
+    echo "$LOCAL_VERSION"
+  fi
 }
 
 function read_main_version() {
-  _show_function_title 'getting main version'
+  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'getting main version'
   _load_local_conf_file || exit 1
   remote_branch=$MAIN_BRANCH_NAME
   if [[ "$SPECIFIED_MAIN_BRANCH" != '' ]]; then
@@ -404,10 +411,19 @@ function read_main_version() {
   fi
   _fetch_remote_branches || exit 1
   handling_file="origin/$remote_branch:$VERSION_FILE"
-  _load_remote_conf_file "$remote_branch" || {
-    _show_warning_message "vuh will use local configuration to get remote version from origin/$remote_branch"
-    _load_local_conf_file || exit 1
-  }
+  if [ "$ARGUMENT_QUIET" = 'false' ]; then
+    _load_remote_conf_file "$remote_branch" || {
+      _show_warning_message "vuh will use local configuration to get remote version from origin/$remote_branch"
+      _load_local_conf_file || exit 1
+    }
+  elif [ "$ARGUMENT_QUIET" = 'true' ]; then
+    {
+      _load_remote_conf_file "$remote_branch" || {
+        _show_warning_message "vuh will use local configuration to get remote version from origin/$remote_branch"
+        _load_local_conf_file || exit 1
+      }
+    } > /dev/null
+  fi
   main_branch_file=$(git show "$handling_file") || {
     _show_error_message "Failed to load file $handling_file"
     exit 1
@@ -421,13 +437,17 @@ function read_main_version() {
     _show_error_message "Also make sure that command ($check_version_command) will throw same YOUR_VERSION_EXAMPLE"
     exit 1
   }
-  echo "origin/$remote_branch: $MAIN_VERSION"
+  if [ "$ARGUMENT_QUIET" = 'false' ]; then
+    echo "origin/$remote_branch: $MAIN_VERSION"
+  elif [ "$ARGUMENT_QUIET" = 'true' ] && [ "$COMMAND" = 'main-version' ]; then
+    echo "$MAIN_VERSION"
+  fi
 }
 
 function get_suggesting_version() {
   read_local_version || exit 1
   read_main_version || exit 1
-  _show_function_title 'suggesting relevant version'
+  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'suggesting relevant version'
   largest_version=$(_get_largest_version "$MAIN_VERSION" "$LOCAL_VERSION") || {
     _show_error_message "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
     exit 1
@@ -443,8 +463,12 @@ function get_suggesting_version() {
   else
     SUGGESTING_VERSION=$largest_version
   fi
-  _show_suggested_versions_comparison
-  echo "suggesting: $SUGGESTING_VERSION"
+  if [ "$ARGUMENT_QUIET" = 'false' ]; then
+    _show_suggested_versions_comparison
+    echo "suggesting: $SUGGESTING_VERSION"
+  elif [ "$ARGUMENT_QUIET" = 'true' ] && [ "$COMMAND" = 'suggest-version' ]; then
+    echo "$SUGGESTING_VERSION"
+  fi
   _check_version_syntax "$SUGGESTING_VERSION" || {
     _show_error_message "Suggesting version format is incorrect! Something went wrong ..."
     exit 1
@@ -542,15 +566,14 @@ while [[ $# -gt 0 ]]; do
   -v=*)
     _check_arg "$1"
     SPECIFIED_VERSION=${1#*=}
-    echo "SPECIFIED_VERSION=$SPECIFIED_VERSION"
+    shift ;;
+  -q|--quiet)
+    _check_arg "$1"
+    ARGUMENT_QUIET='true'
     shift ;;
   -mb=*)
     _check_arg "$1"
     SPECIFIED_MAIN_BRANCH=${1#*=}
-    shift ;;
-  -y)
-    _check_arg "$1"
-    SPECIFIED_ALWAYS_AGREE='true'
     shift ;;
   -*)
     _show_invalid_usage_error_message "Unknown option '$1'!"
@@ -562,7 +585,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
-    [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]]; then
+    [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]] &&
+    [ "$ARGUMENT_QUIET" = 'false' ]; then
   _regular_check_available_updates
 fi
 
