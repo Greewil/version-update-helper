@@ -9,13 +9,29 @@ Actions: [create fork](https://github.com/Greewil/version-update-helper/fork), [
 
 vuh script allows you to
 
-- suggest relevant version according to your local and main versions with '***vuh sv***' or '***vuh
-  suggesting-version***'
-- check is your input version allowed to be new main branch version with '***vuh sv -v=1.6.5***' or '***vuh
-  suggesting-version -v=1.6.5***'
-- update your local version to suggested version with '***vuh uv***' or '***vuh update-version***'
-- easily get local project's version with '***vuh lv***' or '***vuh local-version***'
-- easily get version of origin/MAIN_BRANCH_NAME branch with '***vuh mv***' or '***vuh main-version***'
+- suggest relevant version according to your local and main versions
+
+  ('***vuh sv***' or '***vuh suggesting-version***')
+
+- check is your input version allowed to be new main branch version
+
+  ('***vuh sv -v=1.6.5***' or '***vuh suggesting-version -v=1.6.5***')
+
+- update your local version to suggested version
+
+  ('***vuh uv***' or '***vuh update-version***')
+
+- easily get local project's version
+
+  ('***vuh lv***' or '***vuh local-version***')
+
+- easily get version from origin/MAIN_BRANCH_NAME branch
+
+  ('***vuh mv***' or '***vuh main-version***')
+
+- easily get version from specified branch
+
+  ('***vuh mv -mb=<YOUR_BRANCH>***' or '***vuh main-version -mb=<YOUR_BRANCH>***')
 
 Works only with git projects!
 
@@ -85,6 +101,7 @@ To use vuh with your project you should first create vuh.conf file in root folde
     
     Suggests relevant version for your local project or even updates your local project's version.
     Script can work with your project's versions from any directory of your local repository.
+    Project repository: https://github.com/Greewil/version-update-helper
 
 ## License
 
@@ -95,4 +112,4 @@ version-update-helper is licensed under the terms of the MIT License. See [LICEN
 * Web: <https://github.com/Greewil/version-update-helper>
 * Mail: <shishkin.sergey.d@gmail.com>
 
-[LICENSE]: https://github.com/Greewil/version-update-helper/blob/master/LICENSE
+[LICENSE]: https://github.com/Greewil/version-update-helper/blob/main/LICENSE
