@@ -10,24 +10,30 @@
 
 # ------------------------------------- begin-variables-vuh-0.1.0 ------------------------------------- #
 
-MAIN_BRANCH_NAME='master'
 # MAIN_BRANCH_NAME: the name of the main project's branch
 # example: 'main' or 'master'
+MAIN_BRANCH_NAME='main'
 
-VERSION_FILE='package.json'
 # VERSION_FILE: file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
 # example: 'package.json' (for node.js application)
+VERSION_FILE='vuh.bash'
 
-TEXT_BEFORE_VERSION_CODE='"version": "'
 # TEXT_BEFORE_VERSION_CODE: unique text which will be just before version number (including spaces)
 # example: '"version": "' (for variable "version" in json files so it can find line "version": "version_number")
+TEXT_BEFORE_VERSION_CODE="VUH_VERSION='"
 
-TEXT_AFTER_VERSION_CODE='",'
 # TEXT_AFTER_VERSION_CODE: unique text which will be just after version number (including spaces)
 # example: '",' (for variable "version" in json files so it can find line "version": "version_number")
+TEXT_AFTER_VERSION_CODE="'"
 
-VERSION_REG_EXP='^[0-9]\+\.[0-9]\+\.[0-9]\+$'
 # VERSION_REG_EXP: regular expression which will work only on version number
-# example: '^[0-9]\+\.[0-9]\+\.[0-9]\+$' (for versions like x.y.z)
+# examples:
+#VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' # (for versions like x.y.z)
+#VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
+#'(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?'\
+#'(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$' # (for semantic versions https://semver.org)
+VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
+'(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?'\
+'(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
 
 # ------------------------------------- end-variables-vuh-0.1.0 ------------------------------------- #
