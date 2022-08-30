@@ -62,26 +62,23 @@ It can be useful if you don't want to select installation directories manually.
 
 ## Configuring projects
 
-To configure your own project you should select one of the template.conf files and copy it to the root directory of your 
-project as vuh.conf. 
+To configure your own project you should select one of the configuration template from [project-config-templates] 
+and copy it to the root directory of your project as '.vuh'. 
 
-To check that your vuh.conf file was configured properly use commands:
-1)
-    cat (VERSION_FILE_NAME) | grep "(config:TEXT_BEFORE_VERSION_CODE)" | grep '\
-    '"(config:TEXT_AFTER_VERSION_CODE)"
-2)
-    echo YOUR_VERSION_EXAMPLE | grep "(config:VERSION_REG_EXP)"
+To check that your '.vuh' file was configured properly use commands (from the root your repo):
+1) cat "<config:VERSION_FILE_NAME>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E "<config:TEXT_AFTER_VERSION_CODE>"
+2) vuh sv
 
-If all was configured properly the first command will return the line with your version and
-the second command should return you the same version as YOUR_VERSION_EXAMPLE.
+If all was configured properly the first command will return the line with your version.
+The second command should return you local version of the project, main version and next suggesting version.
 
 ## Usage
 
-To use vuh with your project you should first create vuh.conf file in root folder of your project 
+To use vuh with your project you should first create .vuh file in root folder of your project 
 (read more about configuring in [configuring projects](#Configuring-projects)).
 
     Usage: vuh [-v | --version] [-h | --help] <command> [<args>]
-
+    
     Options:
         -h, --help               show help text
         -v, --version            show version
@@ -90,17 +87,20 @@ To use vuh with your project you should first create vuh.conf file in root folde
     
     Commands:
         lv, local-version        show local current version (default format)
+            [-q | --quiet]           to show only version number (or errors messages if there are so)
         mv, main-version         show version of origin/MAIN_BRANCH_NAME
-           [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
+            [-q | --quiet]           to show only version number (or errors messages if there are so)
+            [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
         sv, suggesting-version   show suggesting version which this branch should use
-           [-v=<version>]           to specify your own version which also will be taken into account
-           [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
+            [-q | --quiet]           to show only version number (or errors messages if there are so)
+            [-v=<version>]           to specify your own version which also will be taken into account
+            [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
         uv, update-version       replace your local version with suggesting version which this branch should use
-           [-v=<version>]           to specify your own version which also will be taken into account
-           [-mb=<version>]          to use another main branch (instead of main branch specified in .conf file)
+            [-v=<version>]           to specify your own version which also will be taken into account
+            [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
     
-    Suggests relevant version for your local project or even updates your local project's version.
-    Script can work with your project's versions from any directory of your local repository.
+    Suggest relevant version for your current project or even update your local project's version.
+    Script can work with your project's versions from any directory inside of your local repository.
     Project repository: https://github.com/Greewil/version-update-helper
 
 ## License
@@ -113,3 +113,4 @@ version-update-helper is licensed under the terms of the MIT License. See [LICEN
 * Mail: <shishkin.sergey.d@gmail.com>
 
 [LICENSE]: https://github.com/Greewil/version-update-helper/blob/main/LICENSE
+[project-config-templates]: https://github.com/Greewil/version-update-helper/blob/main/project-config-templates
