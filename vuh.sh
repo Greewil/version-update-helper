@@ -192,6 +192,7 @@ function _get_largest_version() {
   v2=$2
   if [ "$v1" = "$v2" ]; then
     echo '='
+    return 0
   fi
   v1_major=$(_get_major_version "$v1") || return 1
   v2_major=$(_get_major_version "$v2") || return 1
@@ -332,17 +333,6 @@ function _get_latest_available_vuh_version() {
   AVAILABLE_VERSION=$(_get_version_from_file "$vuh_version_file") || return 1
 }
 
-#function _get_current_vuh_location() {
-#  SOURCE=${BASH_SOURCE[0]}
-#  while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-#    DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
-#    SOURCE=$(readlink "$SOURCE")
-#    [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-#  done
-#  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
-#  echo "$DIR d"
-#}
-
 function _check_auto_update_logs() {
   update_log_file=$1
   logs=$(<"$update_log_file")
@@ -415,11 +405,11 @@ function read_local_version() {
   }
   LOCAL_VERSION=$(_get_version_from_file "$version_file") || {
     _show_error_message "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
-    check_line_command='cat (VERSION_FILE_NAME) | grep -E "(config:TEXT_BEFORE_VERSION_CODE)" | grep -E '\
-'"(config:TEXT_AFTER_VERSION_CODE)"'
-    _show_error_message "Make sure that command ($check_line_command) will throw the line with your version"
-    check_version_command='echo YOUR_VERSION_EXAMPLE | grep -E "(config:VERSION_REG_EXP)"'
-    _show_error_message "Also make sure that command ($check_version_command) will throw same YOUR_VERSION_EXAMPLE"
+    cat_version_file_cmd='cat "<config:VERSION_FILE_NAME>"'
+    grep_text_before_cmd='grep -E "<config:TEXT_BEFORE_VERSION_CODE>"'
+    grep_text_after_cmd='grep -E "<config:TEXT_AFTER_VERSION_CODE>"'
+    check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
+    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
@@ -460,11 +450,13 @@ function read_main_version() {
   }
   MAIN_VERSION=$(_get_version_from_file "$main_branch_file") || {
     _show_error_message "Failed to get main version from $handling_file!"
-    check_line_command='cat (VERSION_FILE_NAME) | grep -E "(config:TEXT_BEFORE_VERSION_CODE)" | grep -E '\
-'"(config:TEXT_AFTER_VERSION_CODE)"'
-    _show_error_message "Make sure that command ($check_line_command) will throw the line with your version"
-    check_version_command='echo YOUR_VERSION_EXAMPLE | grep -E "(config:VERSION_REG_EXP)"'
-    _show_error_message "Also make sure that command ($check_version_command) will throw same YOUR_VERSION_EXAMPLE"
+    check_line_command='cat "<config:VERSION_FILE_NAME>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E '\
+'"<config:TEXT_AFTER_VERSION_CODE>"'
+    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."
+    _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
+    make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
+'has different .vuh configuration.'
+    _show_error_message "$make_sure_message"
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
@@ -482,17 +474,38 @@ function get_suggesting_version() {
     _show_error_message "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
     exit 1
   }
+  if [ "$largest_version" = '=' ]; then
+    fair_largest_version="$MAIN_VERSION"
+  else
+    fair_largest_version="$largest_version"
+  fi
   if [[ "$SPECIFIED_VERSION" != '' ]]; then
-    largest_version=$(_get_largest_version "$largest_version" "$SPECIFIED_VERSION") || {
+    largest_version=$(_get_largest_version "$fair_largest_version" "$SPECIFIED_VERSION") || {
       _show_error_message "Failed to select larger version between '$largest_version' and '$SPECIFIED_VERSION'!"
       exit 1
     }
   fi
-  if [ "$largest_version" = "$MAIN_VERSION" ] || [ "$largest_version" = '=' ]; then
+  if [ "$largest_version" = '=' ]; then
+    if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
+      SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
+        _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
+        exit 1
+      }
+    elif [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
+      SUGGESTING_VERSION=$LOCAL_VERSION
+    else
+      SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
+        _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
+        exit 1
+      }
+    fi
+  elif [ "$largest_version" = "$MAIN_VERSION" ]; then
     SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-      _show_error_message "Failed to increment patch version!"
+      _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
       exit 1
     }
+  elif [ "$largest_version" = "$SPECIFIED_VERSION" ]; then
+    SUGGESTING_VERSION=$SPECIFIED_VERSION
   else
     SUGGESTING_VERSION=$LOCAL_VERSION
   fi
