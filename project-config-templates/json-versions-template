@@ -26,14 +26,4 @@ TEXT_BEFORE_VERSION_CODE='"version": "'
 # example: '",' (for variable "version" in json files so it can find line "version": "version_number")
 TEXT_AFTER_VERSION_CODE='",'
 
-# VERSION_REG_EXP: regular expression which will work only on version number
-# examples:
-#VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' # (for versions like x.y.z)
-#VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
-#'(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?'\
-#'(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$' # (for semantic versions https://semver.org)
-VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
-'(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?'\
-'(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
-
 # ------------------------------------- end-variables-vuh-0.1.0 ------------------------------------- #

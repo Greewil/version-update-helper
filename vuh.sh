@@ -29,7 +29,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='0.1.0'
+VUH_VERSION='0.1.0-alpha.0+qwe-123'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -53,6 +53,11 @@ ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SUGGESTING_VERSION=''
+
+# variables for handling semantic versions
+VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
+'(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?'\
+'(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
 
 # Console input variables (Please don't modify!)
 COMMAND=''
@@ -142,54 +147,70 @@ function _check_version_syntax() {
   fi || return 1
 }
 
-function _get_syncing_versions() {
-  full_version=$1
-  syncing_versions=${full_version%.*} || return 1
-  [ "$syncing_versions" != '' ] || return 1
-  echo "$syncing_versions"
-}
-
 function _get_major_version() {
   full_version=$1
-  major_version=${full_version%%.*}
-  [ "$major_version" != '' ] || return 1
-  echo "$major_version"
-}
-
-function _get_module_version() {
-  full_version=$1
-  syncing_versions=$(_get_syncing_versions "$full_version") || return 1
-  module_version=${syncing_versions##*.} || return 1
-  [ "$module_version" != '' ] || return 1
-  echo "$module_version"
+  if [[ $full_version =~ $VERSION_REG_EXP ]]; then
+    major_version=${BASH_REMATCH[1]}
+    [ "$major_version" != '' ] || return 1
+    echo "$major_version"
+  else
+    return 1
+  fi
 }
 
 function _get_minor_version() {
   full_version=$1
-  minor_version=${full_version##*.} || return 1
-  [ "$minor_version" != '' ] || return 1
-  echo "$minor_version"
+  if [[ $full_version =~ $VERSION_REG_EXP ]]; then
+    minor_version=${BASH_REMATCH[2]}
+    [ "$minor_version" != '' ] || return 1
+    echo "$minor_version"
+  else
+    return 1
+  fi
 }
 
+function _get_patch_version() {
+  full_version=$1
+  if [[ $full_version =~ $VERSION_REG_EXP ]]; then
+    patch_version=${BASH_REMATCH[3]}
+    [ "$patch_version" != '' ] || return 1
+    echo "$patch_version"
+  else
+    return 1
+  fi
+}
+
+# TODO compare additional parts
+# Compares two versions and returns the largest one. If input versions are equal returns '='.
+#
+# $1 - First version to compare
+# $2 - Second version to compare
+#
+# Returns larger version of '=' if input versions are equal.
 function _get_largest_version() {
   v1=$1
   v2=$2
+  if [ "$v1" = "$v2" ]; then
+    echo '='
+  fi
   v1_major=$(_get_major_version "$v1") || return 1
   v2_major=$(_get_major_version "$v2") || return 1
-  v1_module=$(_get_module_version "$v1") || return 1
-  v2_module=$(_get_module_version "$v2") || return 1
   v1_minor=$(_get_minor_version "$v1") || return 1
   v2_minor=$(_get_minor_version "$v2") || return 1
+  v1_patch=$(_get_patch_version "$v1") || return 1
+  v2_patch=$(_get_patch_version "$v2") || return 1
   if (( "$v1_major" == "$v2_major" )); then
-    if (( "$v1_module" == "$v2_module" )); then
-      if (( "$v1_minor" > "$v2_minor" )); then
+    if (( "$v1_minor" == "$v2_minor" )); then
+      if (( "$v1_patch" == "$v2_patch" )); then
+        echo "="
+      elif (( "$v1_patch" > "$v2_patch" )); then
         echo "$v1"
-      else
+      elif (( "$v1_patch" < "$v2_patch" )); then
         echo "$v2"
       fi
-    elif (( "$v1_module" > "$v2_module" )); then
+    elif (( "$v1_minor" > "$v2_minor" )); then
       echo "$v1"
-    elif (( "$v1_module" < "$v2_module" )); then
+    elif (( "$v1_minor" < "$v2_minor" )); then
       echo "$v2"
     fi
   elif (( "$v1_major" > "$v2_major" )); then
@@ -201,9 +222,20 @@ function _get_largest_version() {
 
 function _get_incremented_version() {
   v=$1
-  v_syncing_versions=$(_get_syncing_versions "$v") || return 1
-  v_minor_version=$(( $(_get_minor_version "$v") + 1 )) || return 1
-  echo "$v_syncing_versions.$v_minor_version"
+  if [[ $v =~ $VERSION_REG_EXP ]]; then
+    prerelease_info=${BASH_REMATCH[4]}
+    if [[ $v =~ \+ ]]; then
+      metadata="+${v#*+}"
+    else
+      metadata=''
+    fi
+    major_version=$(_get_major_version "$v") || return 1
+    minor_version=$(_get_minor_version "$v") || return 1
+    patch_version=$(( $(_get_patch_version "$v") + 1 )) || return 1
+    echo "$major_version.$minor_version.$patch_version$prerelease_info$metadata"
+  else
+    return 1
+  fi
 }
 
 function _get_root_repo_dir() {
@@ -243,7 +275,6 @@ function _unset_conf_variables() {
   VERSION_FILE='NO_VERSION_FILE'
   TEXT_BEFORE_VERSION_CODE='NO_TEXT_BEFORE_VERSION_CODE'
   TEXT_AFTER_VERSION_CODE='NO_TEXT_AFTER_VERSION_CODE'
-  VERSION_REG_EXP='NO_VERSION_REG_EXP'
 }
 
 # Checks compatibility of vuh and loaded configuration file.
@@ -255,8 +286,7 @@ function _check_conf_data_version() {
   if [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ] ||
       [ "$VERSION_FILE" = 'NO_VERSION_FILE' ] ||
       [ "$TEXT_BEFORE_VERSION_CODE" = 'NO_TEXT_BEFORE_VERSION_CODE' ] ||
-      [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ] ||
-      [ "$VERSION_REG_EXP" = 'NO_VERSION_REG_EXP' ]; then
+      [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ]; then
     _show_error_message "Configuration test failed! Configuration variables were empty or weren't loaded at all!"
     return 1
   else
@@ -458,10 +488,13 @@ function get_suggesting_version() {
       exit 1
     }
   fi
-  if [ "$largest_version" = "$MAIN_VERSION" ]; then
-    SUGGESTING_VERSION=$(_get_incremented_version "$largest_version")
+  if [ "$largest_version" = "$MAIN_VERSION" ] || [ "$largest_version" = '=' ]; then
+    SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
+      _show_error_message "Failed to increment patch version!"
+      exit 1
+    }
   else
-    SUGGESTING_VERSION=$largest_version
+    SUGGESTING_VERSION=$LOCAL_VERSION
   fi
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     _show_suggested_versions_comparison
