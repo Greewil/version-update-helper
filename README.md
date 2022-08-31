@@ -72,6 +72,12 @@ To check that your '.vuh' file was configured properly use commands (from the ro
 If all was configured properly the first command will return the line with your version.
 The second command should return you local version of the project, main version and next suggesting version.
 
+When comparing versions by default vuh will use this logic: 
+if versions are the same except prerelease info the largest version will be the one without any prerelease info 
+and other will be treated as equals. 
+But you can override get_larger_prerelease_info function in .vuh file
+if you want to use your own function for comparing prerelease information for your project. 
+
 ## Usage
 
 To use vuh with your project you should first create .vuh file in root folder of your project 

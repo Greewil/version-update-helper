@@ -29,7 +29,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='0.1.0-alpha.0+qwe-123'
+VUH_VERSION='0.1.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -180,13 +180,47 @@ function _get_patch_version() {
   fi
 }
 
-# TODO compare additional parts
+function _get_prerelease() {
+  full_version=$1
+  if [[ $full_version =~ $VERSION_REG_EXP ]]; then
+    patch_version=${BASH_REMATCH[5]}
+    echo "$patch_version"
+  else
+    return 1
+  fi
+}
+
+function _get_metadata() {
+  full_version=$1
+  if [[ $full_version =~ \+ ]]; then
+    metadata="+${full_version#*+}"
+  else
+    metadata=''
+  fi
+  echo "$metadata"
+}
+
+# This is default function but it can be overridden from .vuh confing!
+#
+# $1 - Prerelease information of the first version to compare
+# $2 - Prerelease information of the second version to compare
+#
+# Returns larger prerelease version or '=' if inputs are treated as equal.
+function get_larger_prerelease_info() {
+  prerelease_1=$1
+  prerelease_2=$2
+  [ "$prerelease_1" = "$prerelease_2" ] && { echo '='; return 0; }
+  [ "$prerelease_1" = '' ] && { echo "$prerelease_1"; return 0; }
+  [ "$prerelease_2" = '' ] && { echo "$prerelease_2"; return 0; }
+  echo '='
+}
+
 # Compares two versions and returns the largest one. If input versions are equal returns '='.
 #
 # $1 - First version to compare
 # $2 - Second version to compare
 #
-# Returns larger version of '=' if input versions are equal.
+# Returns larger version or '=' if input versions are treated as equal.
 function _get_largest_version() {
   v1=$1
   v2=$2
@@ -200,10 +234,15 @@ function _get_largest_version() {
   v2_minor=$(_get_minor_version "$v2") || return 1
   v1_patch=$(_get_patch_version "$v1") || return 1
   v2_patch=$(_get_patch_version "$v2") || return 1
+  v1_prerelease=$(_get_prerelease "$v1") || return 1
+  v2_prerelease=$(_get_prerelease "$v2") || return 1
   if (( "$v1_major" == "$v2_major" )); then
     if (( "$v1_minor" == "$v2_minor" )); then
       if (( "$v1_patch" == "$v2_patch" )); then
-        echo "="
+        prerelease_comparison=$(get_larger_prerelease_info "$v1_prerelease" "$v2_prerelease")
+        [ "$prerelease_comparison" = '=' ] && { echo '='; return 0; }
+        [ "$prerelease_comparison" = "$v1_prerelease" ] && { echo "$v1"; return 0; }
+        [ "$prerelease_comparison" = "$v2_prerelease" ] && { echo "$v2"; return 0; }
       elif (( "$v1_patch" > "$v2_patch" )); then
         echo "$v1"
       elif (( "$v1_patch" < "$v2_patch" )); then
@@ -225,11 +264,7 @@ function _get_incremented_version() {
   v=$1
   if [[ $v =~ $VERSION_REG_EXP ]]; then
     prerelease_info=${BASH_REMATCH[4]}
-    if [[ $v =~ \+ ]]; then
-      metadata="+${v#*+}"
-    else
-      metadata=''
-    fi
+    metadata=$(_get_metadata "$v") || return 1
     major_version=$(_get_major_version "$v") || return 1
     minor_version=$(_get_minor_version "$v") || return 1
     patch_version=$(( $(_get_patch_version "$v") + 1 )) || return 1
@@ -481,7 +516,7 @@ function get_suggesting_version() {
   fi
   if [[ "$SPECIFIED_VERSION" != '' ]]; then
     largest_version=$(_get_largest_version "$fair_largest_version" "$SPECIFIED_VERSION") || {
-      _show_error_message "Failed to select larger version between '$largest_version' and '$SPECIFIED_VERSION'!"
+      _show_error_message "Failed to select larger version between '$fair_largest_version' and '$SPECIFIED_VERSION'!"
       exit 1
     }
   fi
