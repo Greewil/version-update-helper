@@ -1,0 +1,6 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Declare files that will always have LF line endings on checkout.
+*.sh text eol=lf
+*.vuh text eol=lf
