@@ -360,7 +360,7 @@ function _load_remote_conf_file() {
 
 function _get_latest_available_vuh_version() {
   _unset_conf_variables || return 1
-  main_vuh_branch='suggesting_version_tools'
+  main_vuh_branch='main'
   vuh_conf_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/.vuh") || return 1
   _load_project_variables_from_config "$vuh_conf_file" || return 1
   _check_conf_data_version || return 1
@@ -413,7 +413,7 @@ function _regular_check_available_updates() {
       _show_warning_message "Failed to get latest available version from $OFFICIAL_REPO_FULL repository!"
     }
     largest_version=$(_get_largest_version "$VUH_VERSION" "$AVAILABLE_VERSION") || exit 1
-    if [[ "$largest_version" != "$VUH_VERSION" ]]; then
+    if [[ "$largest_version" != "$VUH_VERSION" ]] && [[ "$largest_version" != "=" ]]; then
       echo "your current vuh version: $VUH_VERSION"
       echo "latest vuh available version: $AVAILABLE_VERSION"
       _yes_no_question "Do you want to get update?" "_install_latest_vuh_version" "echo 'Update canceled'"
