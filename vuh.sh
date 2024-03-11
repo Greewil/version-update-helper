@@ -29,7 +29,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='0.1.1'
+VUH_VERSION='0.2.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -284,14 +284,16 @@ function _get_root_repo_dir() {
 
 function _get_version_from_file() {
   version_file=$1
-  version=$(echo "$version_file" | grep -E "$TEXT_BEFORE_VERSION_CODE" | grep -E "$TEXT_AFTER_VERSION_CODE")
-  if [ "$version" = '' ]; then
+  version_line=$(echo "$version_file" | grep -E "$TEXT_BEFORE_VERSION_CODE" | grep -E "$TEXT_AFTER_VERSION_CODE")
+  if [ "$version_line" = '' ]; then
     _show_error_message "Failed to get line, containing version from file $handling_file!"
     return 1
   fi
-  version=${version##*$TEXT_BEFORE_VERSION_CODE} || return 1
+  version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$version_line") || return 1
+  version=${version_line##*$version_prefix} || return 1
   if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
-    version=${version%%$TEXT_AFTER_VERSION_CODE*} || return 1
+    version_postfix=$(sed -r "s/.*($TEXT_AFTER_VERSION_CODE)/\1/" <<< "$version") || return 1
+    version=${version%%$version_postfix*} || return 1
   fi
   _check_version_syntax "$version" || return 1
   echo "$version"
@@ -440,7 +442,7 @@ function read_local_version() {
   }
   LOCAL_VERSION=$(_get_version_from_file "$version_file") || {
     _show_error_message "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
-    cat_version_file_cmd='cat "<config:VERSION_FILE_NAME>"'
+    cat_version_file_cmd='cat "<config:VERSION_FILE>"'
     grep_text_before_cmd='grep -E "<config:TEXT_BEFORE_VERSION_CODE>"'
     grep_text_after_cmd='grep -E "<config:TEXT_AFTER_VERSION_CODE>"'
     check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
@@ -485,7 +487,7 @@ function read_main_version() {
   }
   MAIN_VERSION=$(_get_version_from_file "$main_branch_file") || {
     _show_error_message "Failed to get main version from $handling_file!"
-    check_line_command='cat "<config:VERSION_FILE_NAME>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E '\
+    check_line_command='cat "<config:VERSION_FILE>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E '\
 '"<config:TEXT_AFTER_VERSION_CODE>"'
     _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
