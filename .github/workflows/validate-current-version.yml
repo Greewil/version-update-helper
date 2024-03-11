@@ -7,7 +7,7 @@ jobs:
   validate-version:
     name: Check new version is greater than main version
     runs-on: ubuntu-latest
-    env:
+#    env:
 #      VUH_VERSION: 'v1.0.0'
     steps:
       - name: Checkout
