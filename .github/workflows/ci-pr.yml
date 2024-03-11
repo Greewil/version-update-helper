@@ -1,0 +1,11 @@
+name: ci-pr
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  validate-version:
+    name: Validate version
+    uses: ./.github/workflows/validate-current-version.yml
