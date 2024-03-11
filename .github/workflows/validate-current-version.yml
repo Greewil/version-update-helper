@@ -1,0 +1,21 @@
+name: Check new version is greater than main version
+
+on: [workflow_call]
+
+jobs:
+
+  validate-version:
+    name: Check new version is greater than main version
+    runs-on: ubuntu-latest
+    env:
+      VUH_VERSION: 'v0.2.0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download vuh
+        run: |
+          curl https://raw.githubusercontent.com/Greewil/version-update-helper/${{ env.VUH_VERSION }}/vuh.sh -O -J -L
+          chmod +x vuh.sh
+      - name: Compare versions
+        run: |
+          ./vuh.sh sv -q && [ "$(./vuh.sh lv -q)" = "$(./vuh.sh sv -q)" ] || exit 1
