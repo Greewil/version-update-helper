@@ -11,16 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CHANGELOG_GENERATOR_VERSION: 'v0.3.3'
-      VUH_VERSION: 'v0.2.0'
+#      VUH_VERSION: 'v1.0.0'
     steps:
 
       - name: Git clone this repo
         uses: actions/checkout@v1
 
-      - name: download vuh notes generator
-        run: |
-          curl https://raw.githubusercontent.com/Greewil/version-update-helper/${{ env.VUH_VERSION }}/vuh.sh -O -J -L
-          chmod +x vuh.sh
+#     Don't need this step here, but if you want to use same workflow in side apps your can download vuh.sh in repository folder like in commented step below:
+#      - name: download vuh notes generator
+#        run: |
+#          curl https://raw.githubusercontent.com/Greewil/version-update-helper/${{ env.VUH_VERSION }}/vuh.sh -O -J -L
+#          chmod +x vuh.sh
 
       - name: download release notes generator
         run: |
