@@ -8,14 +8,15 @@ jobs:
     name: Check new version is greater than main version
     runs-on: ubuntu-latest
     env:
-      VUH_VERSION: 'v0.2.0'
+#      VUH_VERSION: 'v1.0.0'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Download vuh
-        run: |
-          curl https://raw.githubusercontent.com/Greewil/version-update-helper/${{ env.VUH_VERSION }}/vuh.sh -O -J -L
-          chmod +x vuh.sh
+#     Don't need this step here, but if you want to use same workflow in side apps your can download vuh.sh in repository folder like in commented step below:
+#      - name: Download vuh
+#        run: |
+#          curl https://raw.githubusercontent.com/Greewil/version-update-helper/${{ env.VUH_VERSION }}/vuh.sh -O -J -L
+#          chmod +x vuh.sh
       - name: Compare versions
         run: |
           ./vuh.sh sv -q && [ "$(./vuh.sh lv -q)" = "$(./vuh.sh sv -q)" ] || exit 1
