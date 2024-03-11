@@ -1,0 +1,58 @@
+name: Release generation
+
+on:
+  push:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  get_version:
+    runs-on: ubuntu-latest
+    env:
+      CHANGELOG_GENERATOR_VERSION: 'v0.3.3'
+      VUH_VERSION: 'v0.2.0'
+    steps:
+
+      - name: Git clone this repo
+        uses: actions/checkout@v1
+
+      - name: download vuh notes generator
+        run: |
+          curl https://raw.githubusercontent.com/Greewil/version-update-helper/${{ env.VUH_VERSION }}/vuh.sh -O -J -L
+          chmod +x vuh.sh
+
+      - name: download release notes generator
+        run: |
+          curl https://raw.githubusercontent.com/Greewil/release-notes-generator/${{ env.CHANGELOG_GENERATOR_VERSION }}/gen_release_notes.sh -O -J -L
+          chmod +x gen_release_notes.sh
+
+      - name: get release tag_name
+        id: release_version
+        run: |
+          ./vuh.sh lv -q > release_version.txt
+          echo "::set-output name=release_version::$(cat release_version.txt)"
+
+      - name: generate release notes
+        id: changelog
+        run: |
+          ./gen_release_notes.sh .. -lt -f changelog.md
+
+          [ -f "changelog.md" ] && CHANGELOG=$(cat changelog.md) || CHANGELOG=''
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          echo "::set-output name=final_changelog::$(echo "$CHANGELOG")"
+
+          [ -f 'changelog.md' ] && echo "::set-output name=empty::false"
+          [ -f 'changelog.md' ] || echo "::set-output name=empty::true"
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        if: ${{ steps.changelog.outputs.empty == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v${{ steps.release_version.outputs.release_version }}"
+          release_name: "v${{ steps.release_version.outputs.release_version }}"
+          body: ${{ steps.changelog.outputs.final_changelog }}
