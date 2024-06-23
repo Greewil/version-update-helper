@@ -25,6 +25,7 @@
 #/         [-v=<version>]           to specify your own version which also will be taken into account
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
+#/     pm, project-modules      show all project modules of current mono repository that were specified in .vuh
 #/
 #/ This tool suggest relevant version for your current project or even update your local project's version.
 #/ Vuh can work with your project's versions from any directory inside of your local repository.
@@ -608,6 +609,17 @@ function get_suggesting_version() {
   }
 }
 
+function get_project_modules() {
+  _show_function_title 'getting project modules'
+  _load_local_conf_file || exit 1
+  if [ "$PROJECT_MODULES" = "" ]; then
+    echo "PROJECT_MODULES are not specified in configuration file (.vuh)."
+    echo "It means that this project has only default module and it's not pretending to be a mono repository."
+  else
+    echo "current project has next modules: $PROJECT_MODULES"
+  fi
+}
+
 function update_version() {
   new_version=$1
   _show_function_title 'updating local version'
@@ -692,6 +704,10 @@ while [[ $# -gt 0 ]]; do
     _exit_if_using_multiple_commands "$1"
     COMMAND='suggest-version'
     shift ;;
+  pm|project-modules)
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='project-modules'
+    shift ;;
   uv|update-version)
     _exit_if_using_multiple_commands "$1"
     COMMAND='update-version'
@@ -754,6 +770,10 @@ main-version)
   ;;
 suggest-version)
   get_suggesting_version
+  exit 0
+  ;;
+project-modules)
+  get_project_modules
   exit 0
   ;;
 update-version)
