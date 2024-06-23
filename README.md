@@ -7,13 +7,17 @@ Actions: [create fork](https://github.com/Greewil/version-update-helper/fork), [
 
 ## Overview
 
+This project allows you to simplify operations with project's version on dev machines or in CI/CD pipelines.
+
+After 2.0.0 vuh also can work with monorepos, so you can handle few different modules stored in one mono repository.
+
 vuh script allows you to
 
 - suggest relevant version according to your local and main versions
 
   ('***vuh sv***' or '***vuh suggesting-version***')
 
-- check is your input version allowed to be new main branch version
+- check that your input version allowed to be new main branch version
 
   ('***vuh sv -v=1.6.5***' or '***vuh suggesting-version -v=1.6.5***')
 
@@ -32,6 +36,10 @@ vuh script allows you to
 - easily get version from specified branch
 
   ('***vuh mv -mb=<YOUR_BRANCH>***' or '***vuh main-version -mb=<YOUR_BRANCH>***')
+
+- easily get list of all modules which are stored in current mono repository
+
+  ('***vuh pm***' or '***vuh project-modules***')
 
 Works only with git projects!
 
@@ -94,19 +102,25 @@ To use vuh with your project you should first create .vuh file in root folder of
     Commands:
         lv, local-version        show local current version (default format)
             [-q | --quiet]           to show only version number (or errors messages if there are so)
+            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
         mv, main-version         show version of origin/MAIN_BRANCH_NAME
             [-q | --quiet]           to show only version number (or errors messages if there are so)
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
         sv, suggesting-version   show suggesting version which this branch should use
             [-q | --quiet]           to show only version number (or errors messages if there are so)
             [-v=<version>]           to specify your own version which also will be taken into account
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
         uv, update-version       replace your local version with suggesting version which this branch should use
             [-v=<version>]           to specify your own version which also will be taken into account
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+        pm, project-modules      show all project modules of current mono repository that were specified in .vuh
     
-    Suggest relevant version for your current project or even update your local project's version.
-    Script can work with your project's versions from any directory inside of your local repository.
+    This tool suggest relevant version for your current project or even update your local project's version.
+    Vuh can work with your project's versions from any directory inside of your local repository.
+    Vuh also can work with monorepos, so you can handle few different modules stored in one mono repository.
     Project repository: https://github.com/Greewil/version-update-helper
 
 ## License
