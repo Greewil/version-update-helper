@@ -25,6 +25,8 @@
 #/         [-v=<version>]           to specify your own version which also will be taken into account
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
+#/     mrp, module-root-path     show root path of specified module (for monorepos projects)
+#/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
 #/     pm, project-modules      show all project modules of current mono repository that were specified in .vuh
 #/
 #/ This tool suggest relevant version for your current project or even update your local project's version.
@@ -59,6 +61,7 @@ ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SUGGESTING_VERSION=''
+MODULE_ROOT_PATH=''
 
 # variables for handling semantic versions
 VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
@@ -142,11 +145,12 @@ function _yes_no_question() {
 function _use_module_configuration() {
   next_handling_module=$1
   eval MAIN_BRANCH_NAME='$'"$next_handling_module"'_MAIN_BRANCH_NAME'
-  [ "$MAIN_BRANCH_NAME" == '' ] && _show_error_message "$next_handling_module"'_MAIN_BRANCH_NAME variable is empty!'
   eval VERSION_FILE='$'"$next_handling_module"'_VERSION_FILE'
-  [ "$VERSION_FILE" == '' ] && _show_error_message "$next_handling_module"'_VERSION_FILE variable is empty!'
   eval TEXT_BEFORE_VERSION_CODE='$'"$next_handling_module"'_TEXT_BEFORE_VERSION_CODE'
   eval TEXT_AFTER_VERSION_CODE='$'"$next_handling_module"'_TEXT_AFTER_VERSION_CODE'
+  eval MODULE_ROOT_PATH='$'"$next_handling_module"'_MODULE_ROOT_PATH'
+  [ "$MAIN_BRANCH_NAME" == '' ] && _show_error_message "$next_handling_module"'_MAIN_BRANCH_NAME variable is empty!'
+  [ "$VERSION_FILE" == '' ] && _show_error_message "$next_handling_module"'_VERSION_FILE variable is empty!'
   if [ "$MAIN_BRANCH_NAME" == '' ] || [ "$VERSION_FILE" == '' ]; then
     _show_error_message "Seems like module '$next_handling_module' don't have correct configuration in .vuh file!"
     return 1
@@ -613,11 +617,21 @@ function get_project_modules() {
   _show_function_title 'getting project modules'
   _load_local_conf_file || exit 1
   if [ "$PROJECT_MODULES" = "" ]; then
-    echo "PROJECT_MODULES are not specified in configuration file (.vuh)."
+    echo "PROJECT_MODULES wasn't specified in configuration file (.vuh)."
     echo "It means that this project has only default module and it's not pretending to be a mono repository."
   else
     echo "current project has next modules: $PROJECT_MODULES"
   fi
+}
+
+function show_module_root_path() {
+  _show_function_title 'showing module root path'
+  _load_local_conf_file || exit 1
+  if [ "$SPECIFIED_PROJECT_MODULE" = "" ]; then
+    _show_error_message "Project module should be specified in this command (see 'vuh -h' for more info)!"
+    exit 1
+  fi
+  echo "$SPECIFIED_PROJECT_MODULE module located in: '$MODULE_ROOT_PATH'"
 }
 
 function update_version() {
@@ -704,6 +718,10 @@ while [[ $# -gt 0 ]]; do
     _exit_if_using_multiple_commands "$1"
     COMMAND='suggest-version'
     shift ;;
+  mrp|module-root-path)
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='module-root-path'
+    shift ;;
   pm|project-modules)
     _exit_if_using_multiple_commands "$1"
     COMMAND='project-modules'
@@ -774,6 +792,10 @@ suggest-version)
   ;;
 project-modules)
   get_project_modules
+  exit 0
+  ;;
+module-root-path)
+  show_module_root_path
   exit 0
   ;;
 update-version)
