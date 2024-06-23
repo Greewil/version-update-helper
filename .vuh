@@ -39,3 +39,22 @@ TEXT_AFTER_VERSION_CODE="'"
 #}
 
 # ------------------------------------- end-variables-vuh-0.1.0 ------------------------------------- #
+
+# ------------------------------------- begin-variables-vuh-2.0.0 ------------------------------------- #
+
+# PROJECT_MODULES: list of all modules in your mono repository that will have different versioning mechanisms.
+# You can leave this variable empty if your repository contains only one project.
+# For each specified module you should specify configuration for this module down below.
+# For each module you should specify: MAIN_BRANCH_NAME, VERSION_FILE, TEXT_BEFORE_VERSION_CODE, TEXT_AFTER_VERSION_CODE.
+# Configuration variable for module should looks like: <MODULE_NAME>_<VARIABLE_NAME>.
+# example: 'UI,API' (for mono repository with two modules: UI and API)
+# Also you can see example here: https://github.com/Greewil/version-update-helper/blob/main/.vuh
+PROJECT_MODULES='VUH'
+
+# variables for VUH module (in this case VUH module mirrors default settings)
+VUH_MAIN_BRANCH_NAME="$MAIN_BRANCH_NAME"
+VUH_VERSION_FILE="$VERSION_FILE"
+VUH_TEXT_BEFORE_VERSION_CODE="$TEXT_BEFORE_VERSION_CODE"
+VUH_TEXT_AFTER_VERSION_CODE="$TEXT_AFTER_VERSION_CODE"
+
+# ------------------------------------- end-variables-vuh-2.0.0 ------------------------------------- #

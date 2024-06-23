@@ -11,25 +11,30 @@
 #/ Commands:
 #/     lv, local-version        show local current version (default format)
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so)
+#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
 #/     mv, main-version         show version of origin/MAIN_BRANCH_NAME
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so)
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
 #/     sv, suggesting-version   show suggesting version which this branch should use
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so)
 #/         [-v=<version>]           to specify your own version which also will be taken into account
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
 #/         [-v=<version>]           to specify your own version which also will be taken into account
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
+#/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
 #/
-#/ Suggest relevant version for your current project or even update your local project's version.
-#/ Script can work with your project's versions from any directory inside of your local repository.
+#/ This tool suggest relevant version for your current project or even update your local project's version.
+#/ Vuh can work with your project's versions from any directory inside of your local repository.
+#/ Vuh also can work with monorepos, so you can handle few different modules stored in one mono repository.
 #/ Project repository: https://github.com/Greewil/version-update-helper
 #
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='1.0.1'
+VUH_VERSION='2.0.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -62,6 +67,7 @@ VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
 # Console input variables (Please don't modify!)
 COMMAND=''
 SPECIFIED_VERSION=''
+SPECIFIED_PROJECT_MODULE=''
 SPECIFIED_MAIN_BRANCH=''
 ARGUMENT_QUIET='false'
 
@@ -128,6 +134,49 @@ function _yes_no_question() {
   done
 }
 
+# Changes default configuration values to configuration values of specified module.
+# Throws error if module's MAIN_BRANCH_NAME or VERSION_FILE values are empty.
+#
+# $1 - Module name
+function _use_module_configuration() {
+  next_handling_module=$1
+  eval MAIN_BRANCH_NAME='$'"$next_handling_module"'_MAIN_BRANCH_NAME'
+  [ "$MAIN_BRANCH_NAME" == '' ] && _show_error_message "$next_handling_module"'_MAIN_BRANCH_NAME variable is empty!'
+  eval VERSION_FILE='$'"$next_handling_module"'_VERSION_FILE'
+  [ "$VERSION_FILE" == '' ] && _show_error_message "$next_handling_module"'_VERSION_FILE variable is empty!'
+  eval TEXT_BEFORE_VERSION_CODE='$'"$next_handling_module"'_TEXT_BEFORE_VERSION_CODE'
+  eval TEXT_AFTER_VERSION_CODE='$'"$next_handling_module"'_TEXT_AFTER_VERSION_CODE'
+  if [ "$MAIN_BRANCH_NAME" == '' ] || [ "$VERSION_FILE" == '' ]; then
+    _show_error_message "Seems like module '$next_handling_module' don't have correct configuration in .vuh file!"
+    return 1
+  fi
+}
+
+# Changes default configuration values to configuration values of specified module.
+# Throws error if module name in function's argument wasn't specified in .vuh file in PROJECT_MODULES.
+#
+# $1 - Module name
+function _use_module_configuration_if_it_exists() {
+  next_handling_module=$1
+  if [ "$next_handling_module" != "" ]; then
+    module_specified='false'
+    IFS=',' read -ra ADDR <<< "$PROJECT_MODULES"
+    for module in "${ADDR[@]}"; do
+      if [ "$next_handling_module" = "$module" ]; then
+        _use_module_configuration "$next_handling_module" || return 1
+        module_specified='true'
+      fi
+    done
+    if [ "$module_specified" = 'false' ]; then
+      _show_error_message "Module '$next_handling_module' wasn't specified in PROJECT_MODULES in .vuh file!"
+      return 1
+    fi
+  fi
+}
+
+# Loads all data from configuration file and sets current configuration according to SPECIFIED_PROJECT_MODULE.
+#
+# $1 - Text of handling configuration file
 function _load_project_variables_from_config() {
   config_file=$1
   tmp_conf_file="/tmp/${APP_NAME}_projects_conf_file"
@@ -138,6 +187,7 @@ function _load_project_variables_from_config() {
     return 1
   }
   rm -f "/tmp/${APP_NAME}_projects_conf_file"
+  _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
 }
 
 function _check_version_syntax() {
@@ -649,6 +699,10 @@ while [[ $# -gt 0 ]]; do
   -v=*)
     _check_arg "$1"
     SPECIFIED_VERSION=${1#*=}
+    shift ;;
+  -pm=*)
+    _check_arg "$1"
+    SPECIFIED_PROJECT_MODULE=${1#*=}
     shift ;;
   -q|--quiet)
     _check_arg "$1"
