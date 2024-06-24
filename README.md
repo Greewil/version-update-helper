@@ -116,7 +116,11 @@ To use vuh with your project you should first create .vuh file in root folder of
             [-v=<version>]           to specify your own version which also will be taken into account
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+        mrp, module-root-path     show root path of specified module (for monorepos projects)
+            [-q | --quiet]           to show only root path (or errors messages if there are so)
+            [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
         pm, project-modules      show all project modules of current mono repository that were specified in .vuh
+            [-q | --quiet]           to show only project modules (or errors messages if there are so)
     
     This tool suggest relevant version for your current project or even update your local project's version.
     Vuh can work with your project's versions from any directory inside of your local repository.

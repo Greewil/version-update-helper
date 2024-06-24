@@ -26,8 +26,10 @@
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
 #/     mrp, module-root-path     show root path of specified module (for monorepos projects)
+#/         [-q | --quiet]           to show only root path (or errors messages if there are so)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
 #/     pm, project-modules      show all project modules of current mono repository that were specified in .vuh
+#/         [-q | --quiet]           to show only project modules (or errors messages if there are so)
 #/
 #/ This tool suggest relevant version for your current project or even update your local project's version.
 #/ Vuh can work with your project's versions from any directory inside of your local repository.
@@ -614,24 +616,27 @@ function get_suggesting_version() {
 }
 
 function get_project_modules() {
-  _show_function_title 'getting project modules'
+  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'getting project modules'
   _load_local_conf_file || exit 1
   if [ "$PROJECT_MODULES" = "" ]; then
-    echo "PROJECT_MODULES wasn't specified in configuration file (.vuh)."
-    echo "It means that this project has only default module and it's not pretending to be a mono repository."
+    _show_error_message "PROJECT_MODULES wasn't specified in configuration file (.vuh)."
+    _show_error_message "It may mean that this project has only one module and it's not pretending to be a monorepo."
+    exit 1
   else
-    echo "current project has next modules: $PROJECT_MODULES"
+    [ "$ARGUMENT_QUIET" = 'false' ] && echo "current project has next modules: $PROJECT_MODULES"
+    [ "$ARGUMENT_QUIET" = 'true' ] && echo "$PROJECT_MODULES"
   fi
 }
 
 function show_module_root_path() {
-  _show_function_title 'showing module root path'
+  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'showing module root path'
   _load_local_conf_file || exit 1
   if [ "$SPECIFIED_PROJECT_MODULE" = "" ]; then
     _show_error_message "Project module should be specified in this command (see 'vuh -h' for more info)!"
     exit 1
   fi
-  echo "$SPECIFIED_PROJECT_MODULE module located in: '$MODULE_ROOT_PATH'"
+  [ "$ARGUMENT_QUIET" = 'false' ] && echo "$SPECIFIED_PROJECT_MODULE module located in: '$MODULE_ROOT_PATH'"
+  [ "$ARGUMENT_QUIET" = 'true' ] && echo "$MODULE_ROOT_PATH"
 }
 
 function update_version() {
