@@ -8,7 +8,7 @@
 #
 # (Version update helper's page: https://github.com/Greewil/version-update-helper)
 
-# This configuration file is based on project-config-templates/shell-versions-template.
+# This configuration file is based on project-config-templates/monorepo-template.
 
 # ------------------------------------- begin-variables-vuh-0.1.0 ------------------------------------- #
 
@@ -18,15 +18,15 @@ MAIN_BRANCH_NAME='main'
 
 # VERSION_FILE: file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
 # example: 'package.json' (for node.js application)
-VERSION_FILE='vuh.sh'
+VERSION_FILE='api/build.gradle.kts'
 
 # TEXT_BEFORE_VERSION_CODE: unique text which will be just before version number (including spaces)
 # example: '"version": "' (for variable "version" in json files so it can find line "version": "version_number")
-TEXT_BEFORE_VERSION_CODE="VUH_VERSION='"
+TEXT_BEFORE_VERSION_CODE='version = "'
 
 # TEXT_AFTER_VERSION_CODE: unique text which will be just after version number (including spaces)
 # example: '",' (for variable "version" in json files so it can find line "version": "version_number")
-TEXT_AFTER_VERSION_CODE="'"
+TEXT_AFTER_VERSION_CODE='"'
 
 # You can override get_larger_prerelease_info function here. Here's a template for it:
 #
@@ -50,13 +50,20 @@ TEXT_AFTER_VERSION_CODE="'"
 # Configuration variable for module should looks like: <MODULE_NAME>_<VARIABLE_NAME>.
 # example: 'UI,API' (for mono repository with two modules: UI and API)
 # Also you can see example here: https://github.com/Greewil/version-update-helper/blob/main/.vuh
-PROJECT_MODULES='VUH'
+PROJECT_MODULES='API,WEB'
 
-# variables for VUH module (in this case VUH module mirrors default settings)
-VUH_MAIN_BRANCH_NAME="$MAIN_BRANCH_NAME"
-VUH_VERSION_FILE="$VERSION_FILE"
-VUH_TEXT_BEFORE_VERSION_CODE="$TEXT_BEFORE_VERSION_CODE"
-VUH_TEXT_AFTER_VERSION_CODE="$TEXT_AFTER_VERSION_CODE"
-VUH_MODULE_ROOT_PATH=''
+# variables for API module
+API_MAIN_BRANCH_NAME='main'
+API_VERSION_FILE='api/build.gradle.kts'
+API_TEXT_BEFORE_VERSION_CODE='version = "'
+API_TEXT_AFTER_VERSION_CODE='"'
+API_MODULE_ROOT_PATH="api"
+
+# variables for WEB module
+WEB_MAIN_BRANCH_NAME='main'
+WEB_VERSION_FILE='web/package.json'
+WEB_TEXT_BEFORE_VERSION_CODE='"version": "'
+WEB_TEXT_AFTER_VERSION_CODE='",'
+WEB_MODULE_ROOT_PATH="web"
 
 # ------------------------------------- end-variables-vuh-2.0.0 ------------------------------------- #
