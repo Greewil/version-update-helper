@@ -8,46 +8,31 @@ Actions: [create fork](https://github.com/Greewil/version-update-helper/fork), [
 ## Overview
 
 This project allows you to simplify operations with project's version on dev machines or in CI/CD pipelines.
+It can work with every possible type of configuration files, because it simply greps versions from files to get them. 
 
-After 2.0.0 vuh also can work with monorepos, so you can handle few different modules stored in one mono repository.
+This tool can help you to:
 
-vuh script allows you to
+- update version your local version to specified or autoincrement it
+- suggest minimal valid version or check that specified version is valid 
+(version supposed to be valid if it's greater than origin/YOUR_MAIN_BRANCH_NAME)
+- compare versions from different branches (f.e. current with origin/main)
+- get version from any local or remote branch (or branch which you set as main)
+- show configuration for each module of your monorepo 
+(so you can store them in one place and call them with vuh)
 
-- suggest relevant version according to your local and main versions
+After 2.0.0 vuh also can work with monorepos, so you can handle 
+few different modules with their own versions stored in one mono repository.
 
-  ('***vuh sv***' or '***vuh suggesting-version***')
-
-- check that your input version allowed to be new main branch version
-
-  ('***vuh sv -v=1.6.5***' or '***vuh suggesting-version -v=1.6.5***')
-
-- update your local version to suggested version
-
-  ('***vuh uv***' or '***vuh update-version***')
-
-- easily get local project's version
-
-  ('***vuh lv***' or '***vuh local-version***')
-
-- easily get version from origin/MAIN_BRANCH_NAME branch
-
-  ('***vuh mv***' or '***vuh main-version***')
-
-- easily get version from specified branch
-
-  ('***vuh mv -mb=<YOUR_BRANCH>***' or '***vuh main-version -mb=<YOUR_BRANCH>***')
-
-- easily get list of all modules which are stored in current mono repository
-
-  ('***vuh pm***' or '***vuh project-modules***')
-
+Runs under any platform which supports bash.
 Works only with git projects!
 
 ## Requirements
 
-- git version 2.24 (Version 2.24 was tested. You can use lower versions at your own risk)
+- git version 2.24 (Version 2.24 was tested. You can use lower versions at your own risk.)
 
 ## Installation
+
+Default installation supported for linux, solaris, bsd, msys (yes, it will work under gitbash console), cygwin, darwin.
 
 To install vuh you can use one-liner (at any directory):
 
@@ -80,13 +65,10 @@ To check that your '.vuh' file was configured properly use commands (from the ro
 If all was configured properly the first command will return the line with your version.
 The second command should return you local version of the project, main version and next suggesting version.
 
-When comparing versions by default vuh will use this logic: 
-if versions are the same except prerelease info the largest version will be the one without any prerelease info 
-and other will be treated as equals. 
-But you can override get_larger_prerelease_info function in .vuh file
-if you want to use your own function for comparing prerelease information for your project. 
-
 ## Usage
+
+[//]: # (TODO link to example js repo, python repo, java repo, ...)
+[//]: # (TODO link to example monorepo, f.e. with WEB, BACKEND, OPENAPI_SCHEMA) 
 
 To use vuh with your project you should first create .vuh file in root folder of your project 
 (read more about configuring in [configuring projects](#Configuring-projects)).
@@ -126,6 +108,14 @@ To use vuh with your project you should first create .vuh file in root folder of
     Vuh can work with your project's versions from any directory inside of your local repository.
     Vuh also can work with monorepos, so you can handle few different modules stored in one mono repository.
     Project repository: https://github.com/Greewil/version-update-helper
+
+## Version comparing logic
+
+When comparing versions by default vuh will use this logic:
+if versions are the same except prerelease info the largest version will be the one without any prerelease info
+and other will be treated as equals.
+But you can override get_larger_prerelease_info function in .vuh file if you want to use
+your own function for comparing prerelease information for your project.
 
 ## License
 
