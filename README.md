@@ -92,10 +92,16 @@ To use vuh with your project you should first create .vuh file in root folder of
         sv, suggesting-version   show suggesting version which this branch should use
             [-q | --quiet]           to show only version number (or errors messages if there are so)
             [-v=<version>]           to specify your own version which also will be taken into account
+                                     This parameter can't be use with '-vp' parameter!
+            [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+                                     This parameter can't be use with '-v' parameter!
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
         uv, update-version       replace your local version with suggesting version which this branch should use
             [-v=<version>]           to specify your own version which also will be taken into account
+                                     This parameter can't be use with '-vp' parameter!
+            [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+                                     This parameter can't be use with '-v' parameter!
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
         mrp, module-root-path     show root path of specified module (for monorepos projects)

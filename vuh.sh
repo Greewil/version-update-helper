@@ -19,10 +19,16 @@
 #/     sv, suggesting-version   show suggesting version which this branch should use
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so)
 #/         [-v=<version>]           to specify your own version which also will be taken into account
+#/                                  This parameter can't be use with '-vp' parameter!
+#/         [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+#/                                  This parameter can't be use with '-v' parameter!
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
 #/         [-v=<version>]           to specify your own version which also will be taken into account
+#/                                  This parameter can't be use with '-vp' parameter!
+#/         [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+#/                                  This parameter can't be use with '-v' parameter!
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
 #/     mrp, module-root-path     show root path of specified module (for monorepos projects)
@@ -37,6 +43,9 @@
 #/ Project repository: https://github.com/Greewil/version-update-helper
 #
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
+
+# TODO add compare function to simply compare two versions and show largest
+# TODO run shellcheck in CI
 
 # Current vuh version
 VUH_VERSION='2.0.0'
@@ -73,6 +82,7 @@ VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
 # Console input variables (Please don't modify!)
 COMMAND=''
 SPECIFIED_VERSION=''
+SPECIFIED_INCREASING_VERSION_PART='patch'
 SPECIFIED_PROJECT_MODULE=''
 SPECIFIED_MAIN_BRANCH=''
 ARGUMENT_QUIET='false'
@@ -503,7 +513,7 @@ function read_local_version() {
     grep_text_before_cmd='grep -E "<config:TEXT_BEFORE_VERSION_CODE>"'
     grep_text_after_cmd='grep -E "<config:TEXT_AFTER_VERSION_CODE>"'
     check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
-    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."
+    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."  # TODO it should return the only line.
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
@@ -546,7 +556,7 @@ function read_main_version() {
     _show_error_message "Failed to get main version from $handling_file!"
     check_line_command='cat "<config:VERSION_FILE>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E '\
 '"<config:TEXT_AFTER_VERSION_CODE>"'
-    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."
+    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."  # TODO the only one line with your version
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
     make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
 'has different .vuh configuration.'
@@ -573,11 +583,13 @@ function get_suggesting_version() {
   else
     fair_largest_version="$largest_version"
   fi
-  if [[ "$SPECIFIED_VERSION" != '' ]]; then
+  if [ "$SPECIFIED_VERSION" != '' ]; then
     largest_version=$(_get_largest_version "$fair_largest_version" "$SPECIFIED_VERSION") || {
       _show_error_message "Failed to select larger version between '$fair_largest_version' and '$SPECIFIED_VERSION'!"
       exit 1
     }
+  elif [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ]; then
+    largest_version="$largest_version"  # TODO check somewhere if increased main is larger than local > return main else local
   fi
   if [ "$largest_version" = '=' ]; then
     if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
@@ -737,7 +749,19 @@ while [[ $# -gt 0 ]]; do
     shift ;;
   -v=*)
     _check_arg "$1"
+    if [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ]; then
+      _show_invalid_usage_error_message "You can't use both parameters: '-v' and '-vp'!"
+      exit 1
+    fi
     SPECIFIED_VERSION=${1#*=}
+    shift ;;
+  -vp=*)
+    _check_arg "$1"
+    if [ "$SPECIFIED_VERSION" != '' ]; then
+      _show_invalid_usage_error_message "You can't use both parameters: '-v' and '-vp'!"
+      exit 1
+    fi
+    SPECIFIED_INCREASING_VERSION_PART=${1#*=}
     shift ;;
   -pm=*)
     _check_arg "$1"
