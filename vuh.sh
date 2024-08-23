@@ -67,7 +67,6 @@ BROWN='\e[0;33m'      # for inputs
 LIGHT_CYAN='\e[1;36m' # for changes
 
 # vuh global variables (Please don't modify!)
-LOADED_CONF_FILE_VERSION=''
 ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
@@ -357,10 +356,10 @@ function _get_version_from_file() {
     return 1
   fi
   version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$version_line") || return 1
-  version=${version_line##*$version_prefix} || return 1
+  version=${version_line##*"$version_prefix"} || return 1
   if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
     version_postfix=$(sed -r "s/.*($TEXT_AFTER_VERSION_CODE)/\1/" <<< "$version") || return 1
-    version=${version%%$version_postfix*} || return 1
+    version=${version%%"$version_postfix"*} || return 1
   fi
   _check_version_syntax "$version" || return 1
   echo "$version"
@@ -386,7 +385,7 @@ function _unset_conf_variables() {
 # Throws an error if some of default variables wasn't loaded at all.
 #
 # Returns nothing.
-function _check_conf_data_version() {
+function _check_conf_data_loaded_properly() {
   # vuh-0.1.0
   if [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ] ||
       [ "$VERSION_FILE" = 'NO_VERSION_FILE' ] ||
@@ -394,8 +393,6 @@ function _check_conf_data_version() {
       [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ]; then
     _show_error_message "Configuration test failed! Configuration variables were empty or weren't loaded at all!"
     return 1
-  else
-    LOADED_CONF_FILE_VERSION='0.1.0'
   fi
 }
 
@@ -410,7 +407,7 @@ function _load_local_conf_file() {
     _show_error_message "Failed to load variables from local configuration file $ROOT_REPO_DIR/.vuh!"
     return 1
   }
-  _check_conf_data_version || return 1
+  _check_conf_data_loaded_properly || return 1
 }
 
 function _load_remote_conf_file() {
@@ -424,7 +421,7 @@ function _load_remote_conf_file() {
     _show_error_message "Failed to load variables from remote configuration file origin/$branch_name:.vuh!"
     return 1
   }
-  _check_conf_data_version || return 1
+  _check_conf_data_loaded_properly || return 1
 }
 
 function _get_latest_available_vuh_version() {
@@ -432,7 +429,7 @@ function _get_latest_available_vuh_version() {
   main_vuh_branch='main'
   vuh_conf_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/.vuh") || return 1
   _load_project_variables_from_config "$vuh_conf_file" || return 1
-  _check_conf_data_version || return 1
+  _check_conf_data_loaded_properly || return 1
   vuh_version_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/$VERSION_FILE") || return 1
   AVAILABLE_VERSION=$(_get_version_from_file "$vuh_version_file") || return 1
 }
@@ -589,7 +586,7 @@ function get_suggesting_version() {
       exit 1
     }
   elif [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ]; then
-    largest_version="$largest_version"  # TODO check somewhere if increased main is larger than local > return main else local
+    largest_version="1$largest_version"  # TODO check somewhere if increased main is larger than local > return main else local
   fi
   if [ "$largest_version" = '=' ]; then
     if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
