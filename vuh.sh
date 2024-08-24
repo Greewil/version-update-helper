@@ -45,10 +45,9 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # TODO add compare function to simply compare two versions and show largest
-# TODO run shellcheck in CI
 
 # Current vuh version
-VUH_VERSION='2.0.0'
+VUH_VERSION='2.1.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -326,6 +325,36 @@ function _get_largest_version() {
   fi || return 1
 }
 
+function _get_incremented_patch_version() {
+  v_major=$1
+  v_minor=$2
+  v_patch=$3
+  v_prerelease_info=$4
+  v_metadata=$5
+  v_patch=$(( v_patch + 1 )) || return 1
+  echo "$v_major.$v_minor.$v_patch$v_prerelease_info$v_metadata"
+}
+
+function _get_incremented_minor_version() {
+  v_major=$1
+  v_minor=$2
+  v_patch=$3
+  v_prerelease_info=$4
+  v_metadata=$5
+  v_minor=$(( v_minor + 1 )) || return 1
+  echo "$v_major.$v_minor.0$v_prerelease_info$v_metadata"
+}
+
+function _get_incremented_major_version() {
+  v_major=$1
+  v_minor=$2
+  v_patch=$3
+  v_prerelease_info=$4
+  v_metadata=$5
+  v_major=$(( v_major + 1 )) || return 1
+  echo "$v_major.0.0$v_prerelease_info$v_metadata"
+}
+
 function _get_incremented_version() {
   v=$1
   if [[ $v =~ $VERSION_REG_EXP ]]; then
@@ -333,8 +362,14 @@ function _get_incremented_version() {
     metadata=$(_get_metadata "$v") || return 1
     major_version=$(_get_major_version "$v") || return 1
     minor_version=$(_get_minor_version "$v") || return 1
-    patch_version=$(( $(_get_patch_version "$v") + 1 )) || return 1
-    echo "$major_version.$minor_version.$patch_version$prerelease_info$metadata"
+    patch_version=$(_get_patch_version "$v") || return 1
+    if [ "$SPECIFIED_INCREASING_VERSION_PART" = "patch" ]; then
+      _get_incremented_patch_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
+    elif [ "$SPECIFIED_INCREASING_VERSION_PART" = "minor" ]; then
+      _get_incremented_minor_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
+    elif [ "$SPECIFIED_INCREASING_VERSION_PART" = "major" ]; then
+      _get_incremented_major_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
+    fi
   else
     return 1
   fi
@@ -580,37 +615,57 @@ function get_suggesting_version() {
   else
     fair_largest_version="$largest_version"
   fi
-  if [ "$SPECIFIED_VERSION" != '' ]; then
+  if [ "$SPECIFIED_VERSION" = '' ]; then
+    # if used -vp=.. param
+
+    incremented_main_version=$(_get_incremented_version "$MAIN_VERSION") || {
+      _show_error_message "Failed to increment $SPECIFIED_INCREASING_VERSION_PART version of '$MAIN_VERSION'!"
+      exit 1
+    }
+    if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
+      SUGGESTING_VERSION="$incremented_main_version"
+    else
+      largest_version=$(_get_largest_version "$incremented_main_version" "$LOCAL_VERSION") || {
+        _show_error_message "Failed to select larger version between '$incremented_main_version' and '$LOCAL_VERSION'!"
+        exit 1
+      }
+      if [ "$largest_version" = '=' ]; then
+        SUGGESTING_VERSION="$incremented_main_version"
+      else
+        SUGGESTING_VERSION="$largest_version"
+      fi
+    fi
+  else
+    # if used -v=.. param
+
     largest_version=$(_get_largest_version "$fair_largest_version" "$SPECIFIED_VERSION") || {
       _show_error_message "Failed to select larger version between '$fair_largest_version' and '$SPECIFIED_VERSION'!"
       exit 1
     }
-  elif [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ]; then
-    largest_version="1$largest_version"  # TODO check somewhere if increased main is larger than local > return main else local
-  fi
-  if [ "$largest_version" = '=' ]; then
-    if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
+    if [ "$largest_version" = '=' ]; then
+      if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
+        SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
+          _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
+          exit 1
+        }
+      elif [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
+        SUGGESTING_VERSION=$LOCAL_VERSION
+      else
+        SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
+          _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
+          exit 1
+        }
+      fi
+    elif [ "$largest_version" = "$MAIN_VERSION" ]; then
       SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
         _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
         exit 1
       }
-    elif [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
-      SUGGESTING_VERSION=$LOCAL_VERSION
+    elif [ "$largest_version" = "$SPECIFIED_VERSION" ]; then
+      SUGGESTING_VERSION=$SPECIFIED_VERSION
     else
-      SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-        _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-        exit 1
-      }
+      SUGGESTING_VERSION=$LOCAL_VERSION
     fi
-  elif [ "$largest_version" = "$MAIN_VERSION" ]; then
-    SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-      _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-      exit 1
-    }
-  elif [ "$largest_version" = "$SPECIFIED_VERSION" ]; then
-    SUGGESTING_VERSION=$SPECIFIED_VERSION
-  else
-    SUGGESTING_VERSION=$LOCAL_VERSION
   fi
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     _show_suggested_versions_comparison
