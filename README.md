@@ -53,22 +53,7 @@ To use default installation start installer with:
 Default installation selects installation directories automatically. 
 It can be useful if you don't want to select installation directories manually.
 
-## Configuring projects
-
-To configure your own project you should select one of the configuration template from [project-config-templates] 
-and copy it to the root directory of your project as '.vuh'. 
-
-To check that your '.vuh' file was configured properly use commands (from the root your repo):
-1) cat "<config:VERSION_FILE_NAME>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E "<config:TEXT_AFTER_VERSION_CODE>"
-2) vuh sv
-
-If all was configured properly the first command will return the line with your version.
-The second command should return you local version of the project, main version and next suggesting version.
-
 ## Usage
-
-[//]: # (TODO link to example js repo, python repo, java repo, ...)
-[//]: # (TODO link to example monorepo, f.e. with WEB, BACKEND, OPENAPI_SCHEMA) 
 
 To use vuh with your project you should first create .vuh file in root folder of your project 
 (read more about configuring in [configuring projects](#Configuring-projects)).
@@ -114,6 +99,50 @@ To use vuh with your project you should first create .vuh file in root folder of
     Vuh can work with your project's versions from any directory inside of your local repository.
     Vuh also can work with monorepos, so you can handle few different modules stored in one mono repository.
     Project repository: https://github.com/Greewil/version-update-helper
+
+## Configuring projects
+
+List of basic .vuh config variables for your project:
+
+| Variable                            | Vuh version supporting  | Required always | Description                                                            | Example                                                                                                     |
+|-------------------------------------|:-----------------------:|:---------------:|------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| MAIN_BRANCH_NAME                    |          0.1.0          |       Yes       | The name of the main project's branch.                                 | 'main' or 'master'                                                                                          |
+| VERSION_FILE                        |          0.1.0          |       Yes       | File which contains version information.                               | 'package.json' <br/> (for node.js application)                                                              |
+| TEXT_BEFORE_VERSION_CODE            |          0.1.0          |       Yes       | Unique text which will be just before version number including spaces. | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number") |
+| TEXT_AFTER_VERSION_CODE             |          0.1.0          |       Yes       | Unique text which will be just after version number including spaces.  | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")           |
+
+If you want to work with versions for multiple modules in one monorepo you should specify in config few more variables.
+Variables which corresponds to modules should be started with module name
+(So they should be named like: <MODULE_NAME>_<VARIABLE_NAME>).
+
+List of all config variables for monorepos:
+
+| Variable                            | Vuh version supporting  | Required always | Description                                                                                                                                                                                                                                                                  | Example                                                                                                     |
+|-------------------------------------|:-----------------------:|:---------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| PROJECT_MODULES                     |          2.0.0          |       No        | List of all modules in your mono repository that will have different versioning mechanisms. <br/>You can leave this variable empty if your repository contains only one project. <br/>For each specified module you should specify configuration for this module down below. | 'BACKEND,FRONTEND' (for mono repository with two modules: BACKEND and FRONTEND)                             |
+| \<MODULE\>_MAIN_BRANCH_NAME         |          2.0.0          |       No        | The name of the main project's branch (for specific \<MODULE>).                                                                                                                                                                                                              | 'main' or 'master'                                                                                          |
+| \<MODULE\>_VERSION_FILE             |          2.0.0          |       No        | File which contains version information (for specific \<MODULE>).                                                                                                                                                                                                            | 'package.json' <br/> (for node.js application)                                                              |
+| \<MODULE\>_TEXT_BEFORE_VERSION_CODE |          2.0.0          |       No        | Unique text which will be just before version number including spaces (for specific \<MODULE>).                                                                                                                                                                              | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number") |
+| \<MODULE\>_TEXT_AFTER_VERSION_CODE  |          2.0.0          |       No        | Unique text which will be just after version number including spaces (for specific \<MODULE>).                                                                                                                                                                               | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")           |
+| \<MODULE\>_MODULE_ROOT_PATH         |          2.0.0          |       No        | Root path of the project module relative to the repository root.                                                                                                                                                                                                             | '/frontend'                                                                                                 |
+
+To configure your own project you should select one of the configuration template from [project-config-templates]
+and copy it to the root directory of your project as '.vuh'.
+
+To check that your '.vuh' file was configured properly use commands (from the root your repo):
+1) make sure next command will return only one single line which will contain your projects/module version:
+```
+cat "<config:VERSION_FILE_NAME>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E "<config:TEXT_AFTER_VERSION_CODE>"
+```
+If you are struggling to grep the only one line with needed version, you can add comment on that line.
+2) If .vuh file was configured properly vuh should show you suggesting version for your project/module:
+```
+vuh sv
+vuh sv -pm=YOUR_PROJECT_MODULE  # in case you have monorepository with multiple modules
+```
+
+[//]: # (TODO link to example js repo, python repo, java repo, ...)
+[//]: # (TODO link to example monorepo, f.e. with WEB, BACKEND, OPENAPI_SCHEMA)
 
 ## Version comparing logic
 

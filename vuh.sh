@@ -44,8 +44,6 @@
 #
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
-# TODO add compare function to simply compare two versions and show largest
-
 # Current vuh version
 VUH_VERSION='2.1.0'
 
