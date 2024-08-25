@@ -545,7 +545,9 @@ function read_local_version() {
     grep_text_before_cmd='grep -E "<config:TEXT_BEFORE_VERSION_CODE>"'
     grep_text_after_cmd='grep -E "<config:TEXT_AFTER_VERSION_CODE>"'
     check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
-    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."  # TODO it should return the only line.
+    make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
+'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
+    _show_error_message "$make_sure_message"
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
@@ -588,7 +590,9 @@ function read_main_version() {
     _show_error_message "Failed to get main version from $handling_file!"
     check_line_command='cat "<config:VERSION_FILE>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E '\
 '"<config:TEXT_AFTER_VERSION_CODE>"'
-    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."  # TODO the only one line with your version
+    make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
+'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
+    _show_error_message "$make_sure_message"
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
     make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
 'has different .vuh configuration.'
