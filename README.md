@@ -8,46 +8,31 @@ Actions: [create fork](https://github.com/Greewil/version-update-helper/fork), [
 ## Overview
 
 This project allows you to simplify operations with project's version on dev machines or in CI/CD pipelines.
+It can work with every possible type of configuration files, because it simply greps versions from files to get them. 
 
-After 2.0.0 vuh also can work with monorepos, so you can handle few different modules stored in one mono repository.
+This tool can help you to:
 
-vuh script allows you to
+- update version your local version to specified or autoincrement it
+- suggest minimal valid version or check that specified version is valid 
+(version supposed to be valid if it's greater than origin/YOUR_MAIN_BRANCH_NAME)
+- compare versions from different branches (f.e. current with origin/main)
+- get version from any local or remote branch (or branch which you set as main)
+- show configuration for each module of your monorepo 
+(so you can store them in one place and call them with vuh)
 
-- suggest relevant version according to your local and main versions
+After 2.0.0 vuh also can work with monorepos, so you can handle 
+few different modules with their own versions stored in one mono repository.
 
-  ('***vuh sv***' or '***vuh suggesting-version***')
-
-- check that your input version allowed to be new main branch version
-
-  ('***vuh sv -v=1.6.5***' or '***vuh suggesting-version -v=1.6.5***')
-
-- update your local version to suggested version
-
-  ('***vuh uv***' or '***vuh update-version***')
-
-- easily get local project's version
-
-  ('***vuh lv***' or '***vuh local-version***')
-
-- easily get version from origin/MAIN_BRANCH_NAME branch
-
-  ('***vuh mv***' or '***vuh main-version***')
-
-- easily get version from specified branch
-
-  ('***vuh mv -mb=<YOUR_BRANCH>***' or '***vuh main-version -mb=<YOUR_BRANCH>***')
-
-- easily get list of all modules which are stored in current mono repository
-
-  ('***vuh pm***' or '***vuh project-modules***')
-
+Runs under any platform which supports bash.
 Works only with git projects!
 
 ## Requirements
 
-- git version 2.24 (Version 2.24 was tested. You can use lower versions at your own risk)
+- git version 2.24 (Version 2.24 was tested. You can use lower versions at your own risk.)
 
 ## Installation
+
+Default installation supported for linux, solaris, bsd, msys (yes, it will work under gitbash console), cygwin, darwin.
 
 To install vuh you can use one-liner (at any directory):
 
@@ -67,24 +52,6 @@ To use default installation start installer with:
 
 Default installation selects installation directories automatically. 
 It can be useful if you don't want to select installation directories manually.
-
-## Configuring projects
-
-To configure your own project you should select one of the configuration template from [project-config-templates] 
-and copy it to the root directory of your project as '.vuh'. 
-
-To check that your '.vuh' file was configured properly use commands (from the root your repo):
-1) cat "<config:VERSION_FILE_NAME>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E "<config:TEXT_AFTER_VERSION_CODE>"
-2) vuh sv
-
-If all was configured properly the first command will return the line with your version.
-The second command should return you local version of the project, main version and next suggesting version.
-
-When comparing versions by default vuh will use this logic: 
-if versions are the same except prerelease info the largest version will be the one without any prerelease info 
-and other will be treated as equals. 
-But you can override get_larger_prerelease_info function in .vuh file
-if you want to use your own function for comparing prerelease information for your project. 
 
 ## Usage
 
@@ -110,10 +77,16 @@ To use vuh with your project you should first create .vuh file in root folder of
         sv, suggesting-version   show suggesting version which this branch should use
             [-q | --quiet]           to show only version number (or errors messages if there are so)
             [-v=<version>]           to specify your own version which also will be taken into account
+                                     This parameter can't be use with '-vp' parameter!
+            [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+                                     This parameter can't be use with '-v' parameter!
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
         uv, update-version       replace your local version with suggesting version which this branch should use
             [-v=<version>]           to specify your own version which also will be taken into account
+                                     This parameter can't be use with '-vp' parameter!
+            [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+                                     This parameter can't be use with '-v' parameter!
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
         mrp, module-root-path     show root path of specified module (for monorepos projects)
@@ -126,6 +99,58 @@ To use vuh with your project you should first create .vuh file in root folder of
     Vuh can work with your project's versions from any directory inside of your local repository.
     Vuh also can work with monorepos, so you can handle few different modules stored in one mono repository.
     Project repository: https://github.com/Greewil/version-update-helper
+
+## Configuring projects
+
+List of basic .vuh config variables for your project:
+
+| Variable                            | Vuh version supporting  | Required always | Description                                                            | Example                                                                                                     |
+|-------------------------------------|:-----------------------:|:---------------:|------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| MAIN_BRANCH_NAME                    |          0.1.0          |       Yes       | The name of the main project's branch.                                 | 'main' or 'master'                                                                                          |
+| VERSION_FILE                        |          0.1.0          |       Yes       | File which contains version information.                               | 'package.json' <br/> (for node.js application)                                                              |
+| TEXT_BEFORE_VERSION_CODE            |          0.1.0          |       Yes       | Unique text which will be just before version number including spaces. | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number") |
+| TEXT_AFTER_VERSION_CODE             |          0.1.0          |       Yes       | Unique text which will be just after version number including spaces.  | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")           |
+
+If you want to work with versions for multiple modules in one monorepo you should specify in config few more variables.
+Variables which corresponds to modules should be started with module name
+(So they should be named like: <MODULE_NAME>_<VARIABLE_NAME>).
+
+List of all config variables for monorepos:
+
+| Variable                            | Vuh version supporting  | Required always | Description                                                                                                                                                                                                                                                                  | Example                                                                                                     |
+|-------------------------------------|:-----------------------:|:---------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| PROJECT_MODULES                     |          2.0.0          |       No        | List of all modules in your mono repository that will have different versioning mechanisms. <br/>You can leave this variable empty if your repository contains only one project. <br/>For each specified module you should specify configuration for this module down below. | 'BACKEND,FRONTEND' (for mono repository with two modules: BACKEND and FRONTEND)                             |
+| \<MODULE\>_MAIN_BRANCH_NAME         |          2.0.0          |       No        | The name of the main project's branch (for specific \<MODULE>).                                                                                                                                                                                                              | 'main' or 'master'                                                                                          |
+| \<MODULE\>_VERSION_FILE             |          2.0.0          |       No        | File which contains version information (for specific \<MODULE>).                                                                                                                                                                                                            | 'package.json' <br/> (for node.js application)                                                              |
+| \<MODULE\>_TEXT_BEFORE_VERSION_CODE |          2.0.0          |       No        | Unique text which will be just before version number including spaces (for specific \<MODULE>).                                                                                                                                                                              | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number") |
+| \<MODULE\>_TEXT_AFTER_VERSION_CODE  |          2.0.0          |       No        | Unique text which will be just after version number including spaces (for specific \<MODULE>).                                                                                                                                                                               | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")           |
+| \<MODULE\>_MODULE_ROOT_PATH         |          2.0.0          |       No        | Root path of the project module relative to the repository root.                                                                                                                                                                                                             | '/frontend'                                                                                                 |
+
+To configure your own project you should select one of the configuration template from [project-config-templates]
+and copy it to the root directory of your project as '.vuh'.
+
+To check that your '.vuh' file was configured properly use commands (from the root your repo):
+1) make sure next command will return only one single line which will contain your projects/module version:
+```
+cat "<config:VERSION_FILE_NAME>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E "<config:TEXT_AFTER_VERSION_CODE>"
+```
+If you are struggling to grep the only one line with needed version, you can add comment on that line.
+2) If .vuh file was configured properly vuh should show you suggesting version for your project/module:
+```
+vuh sv
+vuh sv -pm=YOUR_PROJECT_MODULE  # in case you have monorepository with multiple modules
+```
+
+[//]: # (TODO link to example js repo, python repo, java repo, ...)
+[//]: # (TODO link to example monorepo, f.e. with WEB, BACKEND, OPENAPI_SCHEMA)
+
+## Version comparing logic
+
+When comparing versions by default vuh will use this logic:
+if versions are the same except prerelease info the largest version will be the one without any prerelease info
+and other will be treated as equals.
+But you can override get_larger_prerelease_info function in .vuh file if you want to use
+your own function for comparing prerelease information for your project.
 
 ## License
 

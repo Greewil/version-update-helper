@@ -19,10 +19,16 @@
 #/     sv, suggesting-version   show suggesting version which this branch should use
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so)
 #/         [-v=<version>]           to specify your own version which also will be taken into account
+#/                                  This parameter can't be use with '-vp' parameter!
+#/         [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+#/                                  This parameter can't be use with '-v' parameter!
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
 #/         [-v=<version>]           to specify your own version which also will be taken into account
+#/                                  This parameter can't be use with '-vp' parameter!
+#/         [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+#/                                  This parameter can't be use with '-v' parameter!
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
 #/     mrp, module-root-path     show root path of specified module (for monorepos projects)
@@ -39,7 +45,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.0.0'
+VUH_VERSION='2.1.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -58,7 +64,6 @@ BROWN='\e[0;33m'      # for inputs
 LIGHT_CYAN='\e[1;36m' # for changes
 
 # vuh global variables (Please don't modify!)
-LOADED_CONF_FILE_VERSION=''
 ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
@@ -73,6 +78,7 @@ VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
 # Console input variables (Please don't modify!)
 COMMAND=''
 SPECIFIED_VERSION=''
+SPECIFIED_INCREASING_VERSION_PART='patch'
 SPECIFIED_PROJECT_MODULE=''
 SPECIFIED_MAIN_BRANCH=''
 ARGUMENT_QUIET='false'
@@ -317,6 +323,36 @@ function _get_largest_version() {
   fi || return 1
 }
 
+function _get_incremented_patch_version() {
+  v_major=$1
+  v_minor=$2
+  v_patch=$3
+  v_prerelease_info=$4
+  v_metadata=$5
+  v_patch=$(( v_patch + 1 )) || return 1
+  echo "$v_major.$v_minor.$v_patch$v_prerelease_info$v_metadata"
+}
+
+function _get_incremented_minor_version() {
+  v_major=$1
+  v_minor=$2
+  v_patch=$3
+  v_prerelease_info=$4
+  v_metadata=$5
+  v_minor=$(( v_minor + 1 )) || return 1
+  echo "$v_major.$v_minor.0$v_prerelease_info$v_metadata"
+}
+
+function _get_incremented_major_version() {
+  v_major=$1
+  v_minor=$2
+  v_patch=$3
+  v_prerelease_info=$4
+  v_metadata=$5
+  v_major=$(( v_major + 1 )) || return 1
+  echo "$v_major.0.0$v_prerelease_info$v_metadata"
+}
+
 function _get_incremented_version() {
   v=$1
   if [[ $v =~ $VERSION_REG_EXP ]]; then
@@ -324,8 +360,14 @@ function _get_incremented_version() {
     metadata=$(_get_metadata "$v") || return 1
     major_version=$(_get_major_version "$v") || return 1
     minor_version=$(_get_minor_version "$v") || return 1
-    patch_version=$(( $(_get_patch_version "$v") + 1 )) || return 1
-    echo "$major_version.$minor_version.$patch_version$prerelease_info$metadata"
+    patch_version=$(_get_patch_version "$v") || return 1
+    if [ "$SPECIFIED_INCREASING_VERSION_PART" = "patch" ]; then
+      _get_incremented_patch_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
+    elif [ "$SPECIFIED_INCREASING_VERSION_PART" = "minor" ]; then
+      _get_incremented_minor_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
+    elif [ "$SPECIFIED_INCREASING_VERSION_PART" = "major" ]; then
+      _get_incremented_major_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
+    fi
   else
     return 1
   fi
@@ -347,10 +389,10 @@ function _get_version_from_file() {
     return 1
   fi
   version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$version_line") || return 1
-  version=${version_line##*$version_prefix} || return 1
+  version=${version_line##*"$version_prefix"} || return 1
   if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
     version_postfix=$(sed -r "s/.*($TEXT_AFTER_VERSION_CODE)/\1/" <<< "$version") || return 1
-    version=${version%%$version_postfix*} || return 1
+    version=${version%%"$version_postfix"*} || return 1
   fi
   _check_version_syntax "$version" || return 1
   echo "$version"
@@ -376,7 +418,7 @@ function _unset_conf_variables() {
 # Throws an error if some of default variables wasn't loaded at all.
 #
 # Returns nothing.
-function _check_conf_data_version() {
+function _check_conf_data_loaded_properly() {
   # vuh-0.1.0
   if [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ] ||
       [ "$VERSION_FILE" = 'NO_VERSION_FILE' ] ||
@@ -384,8 +426,6 @@ function _check_conf_data_version() {
       [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ]; then
     _show_error_message "Configuration test failed! Configuration variables were empty or weren't loaded at all!"
     return 1
-  else
-    LOADED_CONF_FILE_VERSION='0.1.0'
   fi
 }
 
@@ -400,7 +440,7 @@ function _load_local_conf_file() {
     _show_error_message "Failed to load variables from local configuration file $ROOT_REPO_DIR/.vuh!"
     return 1
   }
-  _check_conf_data_version || return 1
+  _check_conf_data_loaded_properly || return 1
 }
 
 function _load_remote_conf_file() {
@@ -414,7 +454,7 @@ function _load_remote_conf_file() {
     _show_error_message "Failed to load variables from remote configuration file origin/$branch_name:.vuh!"
     return 1
   }
-  _check_conf_data_version || return 1
+  _check_conf_data_loaded_properly || return 1
 }
 
 function _get_latest_available_vuh_version() {
@@ -422,7 +462,7 @@ function _get_latest_available_vuh_version() {
   main_vuh_branch='main'
   vuh_conf_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/.vuh") || return 1
   _load_project_variables_from_config "$vuh_conf_file" || return 1
-  _check_conf_data_version || return 1
+  _check_conf_data_loaded_properly || return 1
   vuh_version_file=$(curl -s "https://raw.githubusercontent.com/$OFFICIAL_REPO/$main_vuh_branch/$VERSION_FILE") || return 1
   AVAILABLE_VERSION=$(_get_version_from_file "$vuh_version_file") || return 1
 }
@@ -503,7 +543,9 @@ function read_local_version() {
     grep_text_before_cmd='grep -E "<config:TEXT_BEFORE_VERSION_CODE>"'
     grep_text_after_cmd='grep -E "<config:TEXT_AFTER_VERSION_CODE>"'
     check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
-    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."
+    make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
+'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
+    _show_error_message "$make_sure_message"
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
@@ -546,7 +588,9 @@ function read_main_version() {
     _show_error_message "Failed to get main version from $handling_file!"
     check_line_command='cat "<config:VERSION_FILE>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E '\
 '"<config:TEXT_AFTER_VERSION_CODE>"'
-    _show_error_message "Make sure that command '$check_line_command' will throw the line with your version."
+    make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
+'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
+    _show_error_message "$make_sure_message"
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
     make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
 'has different .vuh configuration.'
@@ -573,35 +617,57 @@ function get_suggesting_version() {
   else
     fair_largest_version="$largest_version"
   fi
-  if [[ "$SPECIFIED_VERSION" != '' ]]; then
+  if [ "$SPECIFIED_VERSION" = '' ]; then
+    # if used -vp=.. param
+
+    incremented_main_version=$(_get_incremented_version "$MAIN_VERSION") || {
+      _show_error_message "Failed to increment $SPECIFIED_INCREASING_VERSION_PART version of '$MAIN_VERSION'!"
+      exit 1
+    }
+    if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
+      SUGGESTING_VERSION="$incremented_main_version"
+    else
+      largest_version=$(_get_largest_version "$incremented_main_version" "$LOCAL_VERSION") || {
+        _show_error_message "Failed to select larger version between '$incremented_main_version' and '$LOCAL_VERSION'!"
+        exit 1
+      }
+      if [ "$largest_version" = '=' ]; then
+        SUGGESTING_VERSION="$incremented_main_version"
+      else
+        SUGGESTING_VERSION="$largest_version"
+      fi
+    fi
+  else
+    # if used -v=.. param
+
     largest_version=$(_get_largest_version "$fair_largest_version" "$SPECIFIED_VERSION") || {
       _show_error_message "Failed to select larger version between '$fair_largest_version' and '$SPECIFIED_VERSION'!"
       exit 1
     }
-  fi
-  if [ "$largest_version" = '=' ]; then
-    if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
+    if [ "$largest_version" = '=' ]; then
+      if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
+        SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
+          _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
+          exit 1
+        }
+      elif [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
+        SUGGESTING_VERSION=$LOCAL_VERSION
+      else
+        SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
+          _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
+          exit 1
+        }
+      fi
+    elif [ "$largest_version" = "$MAIN_VERSION" ]; then
       SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
         _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
         exit 1
       }
-    elif [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
-      SUGGESTING_VERSION=$LOCAL_VERSION
+    elif [ "$largest_version" = "$SPECIFIED_VERSION" ]; then
+      SUGGESTING_VERSION=$SPECIFIED_VERSION
     else
-      SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-        _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-        exit 1
-      }
+      SUGGESTING_VERSION=$LOCAL_VERSION
     fi
-  elif [ "$largest_version" = "$MAIN_VERSION" ]; then
-    SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-      _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-      exit 1
-    }
-  elif [ "$largest_version" = "$SPECIFIED_VERSION" ]; then
-    SUGGESTING_VERSION=$SPECIFIED_VERSION
-  else
-    SUGGESTING_VERSION=$LOCAL_VERSION
   fi
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     _show_suggested_versions_comparison
@@ -737,7 +803,19 @@ while [[ $# -gt 0 ]]; do
     shift ;;
   -v=*)
     _check_arg "$1"
+    if [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ]; then
+      _show_invalid_usage_error_message "You can't use both parameters: '-v' and '-vp'!"
+      exit 1
+    fi
     SPECIFIED_VERSION=${1#*=}
+    shift ;;
+  -vp=*)
+    _check_arg "$1"
+    if [ "$SPECIFIED_VERSION" != '' ]; then
+      _show_invalid_usage_error_message "You can't use both parameters: '-v' and '-vp'!"
+      exit 1
+    fi
+    SPECIFIED_INCREASING_VERSION_PART=${1#*=}
     shift ;;
   -pm=*)
     _check_arg "$1"
