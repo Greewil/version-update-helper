@@ -10,7 +10,7 @@
 
 # This configuration file is based on project-config-templates/xml-versions-template.
 
-# ------------------------------------- begin-variables-vuh-0.1.0 ------------------------------------- #
+# ------------------------------------- begin basic variables ------------------------------------- #
 
 # MAIN_BRANCH_NAME: the name of the main project's branch
 # example: 'main' or 'master'
@@ -28,14 +28,4 @@ TEXT_BEFORE_VERSION_CODE="^    <version>"
 # example: '\",' (for variable "version" in json files so it can find line "version": "version_number")
 TEXT_AFTER_VERSION_CODE="<\/version>"
 
-# You can override get_larger_prerelease_info function here. Here's a template for it:
-#
-# $1 - Prerelease information of the first version to compare
-# $2 - Prerelease information of the second version to compare
-#
-# Returns larger prerelease version or '=' if inputs are treated as equal.
-#function get_larger_prerelease_info() {
-#  <Your comparing logic>
-#}
-
-# ------------------------------------- end-variables-vuh-0.1.0 ------------------------------------- #
+# ------------------------------------- end basic variables ------------------------------------- #
