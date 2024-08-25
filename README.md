@@ -53,6 +53,19 @@ To use default installation start installer with:
 Default installation selects installation directories automatically. 
 It can be useful if you don't want to select installation directories manually.
 
+### Update
+
+Vuh is automatically checking for updates each day. 
+Information about latest update check will be stored in /usr/share/vuh/latest_update_check 
+(if you selected default data directory due installation).
+
+If new version released, vuh will ask you to update it.
+
+If you want to update vuh manually to latest version you can run:
+```
+sudo vuh --update
+```
+
 ## Usage
 
 To use vuh with your project you should first create .vuh file in root folder of your project 
