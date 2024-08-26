@@ -170,7 +170,11 @@ function _yes_no_question() {
 # $1 - Module name
 function _use_module_configuration() {
   next_handling_module=$1
-  eval MAIN_BRANCH_NAME='$'"$next_handling_module"'_MAIN_BRANCH_NAME'
+  cur_module_main_branch_name=''  # just for shellcheck
+  eval cur_module_main_branch_name='$'"$next_handling_module"'_MAIN_BRANCH_NAME'
+  if [ "$cur_module_main_branch_name" != '' ]; then
+    MAIN_BRANCH_NAME="$cur_module_main_branch_name"
+  fi
   eval VERSION_FILE='$'"$next_handling_module"'_VERSION_FILE'
   eval TEXT_BEFORE_VERSION_CODE='$'"$next_handling_module"'_TEXT_BEFORE_VERSION_CODE'
   eval TEXT_AFTER_VERSION_CODE='$'"$next_handling_module"'_TEXT_AFTER_VERSION_CODE'
