@@ -45,7 +45,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.1.0'
+VUH_VERSION='2.2.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -157,6 +157,8 @@ function _use_module_configuration() {
   eval TEXT_BEFORE_VERSION_CODE='$'"$next_handling_module"'_TEXT_BEFORE_VERSION_CODE'
   eval TEXT_AFTER_VERSION_CODE='$'"$next_handling_module"'_TEXT_AFTER_VERSION_CODE'
   eval MODULE_ROOT_PATH='$'"$next_handling_module"'_MODULE_ROOT_PATH'
+  eval IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='$'"$next_handling_module"'_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES'
+  [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" == '' ] && IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
   [ "$MAIN_BRANCH_NAME" == '' ] && _show_error_message "$next_handling_module"'_MAIN_BRANCH_NAME variable is empty!'
   [ "$VERSION_FILE" == '' ] && _show_error_message "$next_handling_module"'_VERSION_FILE variable is empty!'
   if [ "$MAIN_BRANCH_NAME" == '' ] || [ "$VERSION_FILE" == '' ]; then
@@ -373,6 +375,25 @@ function _get_incremented_version() {
   fi
 }
 
+# Compares two versions and returns the largest one. If input versions are equal returns '='.
+#
+# $1 - Version to handle
+# $2 - Is increasing allowed
+#
+# Returns input version if increasing not allowed or increased version otherwise.
+function _get_incremented_version_if_allowed() {
+  v=$1
+  is_operation_allowed=$2
+  output_version="$v"
+  if [ "$is_operation_allowed" = 'true' ]; then
+    output_version=$(_get_incremented_version "$v") || {
+      _show_error_message "Failed to increment $SPECIFIED_INCREASING_VERSION_PART version of '$v'!"
+      exit 1
+    }
+  fi
+  echo "$output_version"
+}
+
 function _get_root_repo_dir() {
   ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
     _show_error_message "Can't find root repo directory!"
@@ -412,7 +433,12 @@ function _unset_conf_variables() {
   VERSION_FILE='NO_VERSION_FILE'
   TEXT_BEFORE_VERSION_CODE='NO_TEXT_BEFORE_VERSION_CODE'
   TEXT_AFTER_VERSION_CODE='NO_TEXT_AFTER_VERSION_CODE'
+  # vuh-2.2.0
+  MODULE_ROOT_PATH=''
+  IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 }
+
+# TODO unset conf variables for specified module and run it for every module
 
 # Checks compatibility of vuh and loaded configuration file.
 # Throws an error if some of default variables wasn't loaded at all.
@@ -617,13 +643,26 @@ function get_suggesting_version() {
   else
     fair_largest_version="$largest_version"
   fi
-  if [ "$SPECIFIED_VERSION" = '' ]; then
-    # if used -vp=.. param
 
-    incremented_main_version=$(_get_incremented_version "$MAIN_VERSION") || {
-      _show_error_message "Failed to increment $SPECIFIED_INCREASING_VERSION_PART version of '$MAIN_VERSION'!"
+  # checking is version increasing allowed or not
+  is_version_increasing_allowed='true'  # TODO add parameter to force allowance
+  if [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; then
+    main_branch_path="HEAD..origin/$MAIN_BRANCH_NAME"
+    git_diff=$(git diff --name-only $main_branch_path "$MODULE_ROOT_PATH") || {
+      _show_error_message "Failed to get git diff with branch '$main_branch_path' for directory '$MODULE_ROOT_PATH'!"
       exit 1
     }
+    if [ "$git_diff" = '' ]; then
+      echo "Directory '$MODULE_ROOT_PATH' has no difference with branch '$main_branch_path'."
+      is_version_increasing_allowed='false'
+    else
+      echo "Git diff with branch '$main_branch_path' was not empty for directory '$MODULE_ROOT_PATH'."
+    fi
+  fi
+
+  if [ "$SPECIFIED_VERSION" = '' ]; then
+    # if used -vp=.. param
+    incremented_main_version=$(_get_incremented_version_if_allowed "$MAIN_VERSION" "$is_version_increasing_allowed")
     if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
       SUGGESTING_VERSION="$incremented_main_version"
     else
@@ -639,30 +678,18 @@ function get_suggesting_version() {
     fi
   else
     # if used -v=.. param
-
     largest_version=$(_get_largest_version "$fair_largest_version" "$SPECIFIED_VERSION") || {
       _show_error_message "Failed to select larger version between '$fair_largest_version' and '$SPECIFIED_VERSION'!"
       exit 1
     }
     if [ "$largest_version" = '=' ]; then
-      if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
-        SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-          _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-          exit 1
-        }
-      elif [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
+      if [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
         SUGGESTING_VERSION=$LOCAL_VERSION
       else
-        SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-          _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-          exit 1
-        }
+        SUGGESTING_VERSION=$(_get_incremented_version_if_allowed "$MAIN_VERSION" "$is_version_increasing_allowed")
       fi
     elif [ "$largest_version" = "$MAIN_VERSION" ]; then
-      SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-        _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-        exit 1
-      }
+      SUGGESTING_VERSION=$(_get_incremented_version_if_allowed "$MAIN_VERSION" "$is_version_increasing_allowed")
     elif [ "$largest_version" = "$SPECIFIED_VERSION" ]; then
       SUGGESTING_VERSION=$SPECIFIED_VERSION
     else
