@@ -34,8 +34,9 @@ TEXT_AFTER_VERSION_CODE='"'
 MODULE_ROOT_PATH=''
 
 # IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES: if this variable set to 'true' and current branch has no difference
-#   with HEAD..origin/MAIN_BRANCH_NAME, vuh will be ok if your current version is the same as main version.
-#   If it's 'false' (which is by default) vuh will suggest you to increase your current version.
+#   with HEAD..origin/MAIN_BRANCH_NAME, vuh will not modify your current version if your current version
+#   is the same as main version.
+#   If this variable is 'false' (which is by default) vuh will suggest you to increase your current version.
 # example: 'true' ('false' by default)
 IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
 
@@ -59,7 +60,7 @@ API_VERSION_FILE='api/build.gradle.kts'
 API_TEXT_BEFORE_VERSION_CODE='version = "'
 API_TEXT_AFTER_VERSION_CODE='"'
 API_MODULE_ROOT_PATH="api"
-API_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
+API_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 
 # variables for WEB module
 WEB_MAIN_BRANCH_NAME='main'
@@ -67,6 +68,6 @@ WEB_VERSION_FILE='web/package.json'
 WEB_TEXT_BEFORE_VERSION_CODE='"version": "'
 WEB_TEXT_AFTER_VERSION_CODE='",'
 WEB_MODULE_ROOT_PATH="web"
-WEB_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
+WEB_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 
 # ------------------------------------- end mono repository variables ------------------------------------- #

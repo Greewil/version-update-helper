@@ -24,6 +24,9 @@
 #/                                  This parameter can't be use with '-v' parameter!
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+#/         [--check-git-diff]       to automatically increase version only if current branch has git difference
+#/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
+#/                                  modify your current version if your current version is the same as main version.
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
 #/         [-v=<version>]           to specify your own version which also will be taken into account
 #/                                  This parameter can't be use with '-vp' parameter!
@@ -31,6 +34,9 @@
 #/                                  This parameter can't be use with '-v' parameter!
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
+#/         [--check-git-diff]       to automatically increase version only if current branch has git difference
+#/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
+#/                                  modify your current version if your current version is the same as main version.
 #/     mrp, module-root-path     show root path of specified module (for monorepos projects)
 #/         [-q | --quiet]           to show only root path (or errors messages if there are so)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
@@ -82,6 +88,7 @@ SPECIFIED_INCREASING_VERSION_PART='patch'
 SPECIFIED_PROJECT_MODULE=''
 SPECIFIED_MAIN_BRANCH=''
 ARGUMENT_QUIET='false'
+ARGUMENT_CHECK_GIT_DIFF='false'
 
 
 function _show_function_title() {
@@ -645,8 +652,8 @@ function get_suggesting_version() {
   fi
 
   # checking is version increasing allowed or not
-  is_version_increasing_allowed='true'  # TODO add parameter to force allowance
-  if [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; then
+  is_version_increasing_allowed='true'
+  if [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ] || [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; then
     main_branch_path="HEAD..origin/$MAIN_BRANCH_NAME"
     git_diff=$(git diff --name-only $main_branch_path "$MODULE_ROOT_PATH") || {
       _show_error_message "Failed to get git diff with branch '$main_branch_path' for directory '$MODULE_ROOT_PATH'!"
@@ -851,6 +858,10 @@ while [[ $# -gt 0 ]]; do
   -q|--quiet)
     _check_arg "$1"
     ARGUMENT_QUIET='true'
+    shift ;;
+  --check-git-diff)
+    _check_arg "$1"
+    ARGUMENT_CHECK_GIT_DIFF='true'
     shift ;;
   -mb=*)
     _check_arg "$1"

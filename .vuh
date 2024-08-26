@@ -34,10 +34,11 @@ TEXT_AFTER_VERSION_CODE="'"
 MODULE_ROOT_PATH=''
 
 # IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES: if this variable set to 'true' and current branch has no difference
-#   with HEAD..origin/MAIN_BRANCH_NAME, vuh will be ok if your current version is the same as main version.
-#   If it's 'false' (which is by default) vuh will suggest you to increase your current version.
+#   with HEAD..origin/MAIN_BRANCH_NAME, vuh will not modify your current version if your current version
+#   is the same as main version.
+#   If this variable is 'false' (which is by default) vuh will suggest you to increase your current version.
 # example: 'true' ('false' by default)
-IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
+IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 
 # You can override get_larger_prerelease_info function here. Here's a template for it:
 #
