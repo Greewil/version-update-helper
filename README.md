@@ -98,6 +98,11 @@ To use vuh with your project you should first create .vuh file in root folder of
             [--check-git-diff]       to automatically increase version only if current branch has git difference
                                      with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
                                      modify your current version if your current version is the same as main version.
+                                     This parameter can't be used with '--dont-check-git-diff'.
+            [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway. 
+                                     Suggesting to use this parameter to force increasing version when your project 
+                                     configuration expects to increase versions only when there is git diff.
+                                     This parameter can't be used with '--check-git-diff'.
         uv, update-version       replace your local version with suggesting version which this branch should use
             [-v=<version>]           to specify your own version which also will be taken into account
                                      This parameter can't be use with '-vp' parameter!
@@ -108,6 +113,11 @@ To use vuh with your project you should first create .vuh file in root folder of
             [--check-git-diff]       to automatically increase version only if current branch has git difference
                                      with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
                                      modify your current version if your current version is the same as main version.
+                                     This parameter can't be used with '--dont-check-git-diff'.
+            [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway. 
+                                     Suggesting to use this parameter to force increasing version when your project 
+                                     configuration expects to increase versions only when there is git diff.
+                                     This parameter can't be used with '--check-git-diff'.
         mrp, module-root-path     show root path of specified module (for monorepos projects)
             [-q | --quiet]           to show only root path (or errors messages if there are so)
             [-pm=<project_module>]   to use specified module of mono repository project (instead of default)

@@ -27,6 +27,11 @@
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
 #/                                  modify your current version if your current version is the same as main version.
+#/                                  This parameter can't be used with '--dont-check-git-diff'.
+#/         [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway.
+#/                                  Suggesting to use this parameter to force increasing version when your project
+#/                                  configuration expects to increase versions only when there is git diff.
+#/                                  This parameter can't be used with '--check-git-diff'.
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
 #/         [-v=<version>]           to specify your own version which also will be taken into account
 #/                                  This parameter can't be use with '-vp' parameter!
@@ -37,6 +42,11 @@
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
 #/                                  modify your current version if your current version is the same as main version.
+#/                                  This parameter can't be used with '--dont-check-git-diff'.
+#/         [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway.
+#/                                  Suggesting to use this parameter to force increasing version when your project
+#/                                  configuration expects to increase versions only when there is git diff.
+#/                                  This parameter can't be used with '--check-git-diff'.
 #/     mrp, module-root-path     show root path of specified module (for monorepos projects)
 #/         [-q | --quiet]           to show only root path (or errors messages if there are so)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
@@ -89,6 +99,7 @@ SPECIFIED_PROJECT_MODULE=''
 SPECIFIED_MAIN_BRANCH=''
 ARGUMENT_QUIET='false'
 ARGUMENT_CHECK_GIT_DIFF='false'
+ARGUMENT_DONT_CHECK_GIT_DIFF='false'
 
 
 function _show_function_title() {
@@ -653,7 +664,8 @@ function get_suggesting_version() {
 
   # checking is version increasing allowed or not
   is_version_increasing_allowed='true'
-  if [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ] || [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; then
+  if [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ] ||
+      [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" != 'true' ] && [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; then
     main_branch_path="HEAD..origin/$MAIN_BRANCH_NAME"
     git_diff=$(git diff --name-only $main_branch_path "$MODULE_ROOT_PATH") || {
       _show_error_message "Failed to get git diff with branch '$main_branch_path' for directory '$MODULE_ROOT_PATH'!"
@@ -861,7 +873,19 @@ while [[ $# -gt 0 ]]; do
     shift ;;
   --check-git-diff)
     _check_arg "$1"
+    if [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" = 'true' ]; then
+      _show_invalid_usage_error_message "You can't use both parameters: '--check-git-diff' and '--dont-check-git-diff'!"
+      exit 1
+    fi
     ARGUMENT_CHECK_GIT_DIFF='true'
+    shift ;;
+  --dont-check-git-diff)
+    _check_arg "$1"
+    if [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ]; then
+      _show_invalid_usage_error_message "You can't use both parameters: '--check-git-diff' and '--dont-check-git-diff'!"
+      exit 1
+    fi
+    ARGUMENT_DONT_CHECK_GIT_DIFF='true'
     shift ;;
   -mb=*)
     _check_arg "$1"
