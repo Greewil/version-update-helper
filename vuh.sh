@@ -450,17 +450,26 @@ function _fetch_remote_branches() {
 }
 
 function _unset_conf_variables() {
+  # unset module variables
+  declare -a module_variable_suffixes=('MAIN_BRANCH_NAME' 'VERSION_FILE' 'TEXT_BEFORE_VERSION_CODE'
+                                       'TEXT_AFTER_VERSION_CODE' 'MODULE_ROOT_PATH'
+                                       'IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES')
+  for module_variable_suffix in "${module_variable_suffixes[@]}"; do
+    for var in $(compgen -v | grep ".*$module_variable_suffix"); do
+      declare "$var="
+    done
+  done
+
+  # unset basic variables
   # vuh-0.1.0
   MAIN_BRANCH_NAME='NO_MAIN_BRANCH_NAME'
   VERSION_FILE='NO_VERSION_FILE'
   TEXT_BEFORE_VERSION_CODE='NO_TEXT_BEFORE_VERSION_CODE'
   TEXT_AFTER_VERSION_CODE='NO_TEXT_AFTER_VERSION_CODE'
   # vuh-2.2.0
-  MODULE_ROOT_PATH=''
+  MODULE_ROOT_PATH=''  # TODO maybe use '.' instead of ''
   IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 }
-
-# TODO unset conf variables for specified module and run it for every module
 
 # Checks compatibility of vuh and loaded configuration file.
 # Throws an error if some of default variables wasn't loaded at all.
