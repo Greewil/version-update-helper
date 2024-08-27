@@ -128,6 +128,23 @@ function _show_invalid_usage_error_message() {
   echo 'Use "vuh --help" to see available commands and options information'
 }
 
+function _show_try_grep_command_message() {
+  module_name_prefix=''
+  if [ "$SPECIFIED_PROJECT_MODULE" != '' ]; then
+    module_name_prefix="$SPECIFIED_PROJECT_MODULE"'_'
+  fi
+  # shellcheck disable=SC2016
+  cat_version_file_cmd='cat "$'"$module_name_prefix"'VERSION_FILE"'
+  # shellcheck disable=SC2016
+  grep_text_before_cmd='grep -E "$'"$module_name_prefix"'TEXT_BEFORE_VERSION_CODE"'
+  # shellcheck disable=SC2016
+  grep_text_after_cmd='grep -E "$'"$module_name_prefix"'TEXT_AFTER_VERSION_CODE"'
+  check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
+  make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
+'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
+  _show_error_message "$make_sure_message"
+}
+
 function _exit_if_using_multiple_commands() {
   last_command=$1
   if [ "$COMMAND" != '' ]; then
@@ -467,7 +484,7 @@ function _unset_conf_variables() {
   TEXT_BEFORE_VERSION_CODE='NO_TEXT_BEFORE_VERSION_CODE'
   TEXT_AFTER_VERSION_CODE='NO_TEXT_AFTER_VERSION_CODE'
   # vuh-2.2.0
-  MODULE_ROOT_PATH=''  # TODO maybe use '.' instead of ''
+  MODULE_ROOT_PATH=''
   IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 }
 
@@ -596,13 +613,7 @@ function read_local_version() {
   }
   LOCAL_VERSION=$(_get_version_from_file "$version_file") || {
     _show_error_message "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
-    cat_version_file_cmd='cat "<config:VERSION_FILE>"'
-    grep_text_before_cmd='grep -E "<config:TEXT_BEFORE_VERSION_CODE>"'
-    grep_text_after_cmd='grep -E "<config:TEXT_AFTER_VERSION_CODE>"'
-    check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
-    make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
-'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
-    _show_error_message "$make_sure_message"
+    _show_try_grep_command_message
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
@@ -643,11 +654,7 @@ function read_main_version() {
   }
   MAIN_VERSION=$(_get_version_from_file "$main_branch_file") || {
     _show_error_message "Failed to get main version from $handling_file!"
-    check_line_command='cat "<config:VERSION_FILE>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E '\
-'"<config:TEXT_AFTER_VERSION_CODE>"'
-    make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
-'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
-    _show_error_message "$make_sure_message"
+    _show_try_grep_command_message
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
     make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
 'has different .vuh configuration.'
