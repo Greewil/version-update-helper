@@ -53,6 +53,19 @@ To use default installation start installer with:
 Default installation selects installation directories automatically. 
 It can be useful if you don't want to select installation directories manually.
 
+### Update
+
+Vuh is automatically checking for updates each day. 
+Information about latest update check will be stored in /usr/share/vuh/latest_update_check 
+(if you selected default data directory due installation).
+
+If new version released, vuh will ask you to update it.
+
+If you want to update vuh manually to latest version you can run:
+```
+sudo vuh --update
+```
+
 ## Usage
 
 To use vuh with your project you should first create .vuh file in root folder of your project 
@@ -82,6 +95,14 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter can't be use with '-v' parameter!
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+            [--check-git-diff]       to automatically increase version only if current branch has git difference
+                                     with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
+                                     modify your current version if your current version is the same as main version.
+                                     This parameter can't be used with '--dont-check-git-diff'.
+            [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway. 
+                                     Suggesting to use this parameter to force increasing version when your project 
+                                     configuration expects to increase versions only when there is git diff.
+                                     This parameter can't be used with '--check-git-diff'.
         uv, update-version       replace your local version with suggesting version which this branch should use
             [-v=<version>]           to specify your own version which also will be taken into account
                                      This parameter can't be use with '-vp' parameter!
@@ -89,6 +110,14 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter can't be use with '-v' parameter!
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+            [--check-git-diff]       to automatically increase version only if current branch has git difference
+                                     with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
+                                     modify your current version if your current version is the same as main version.
+                                     This parameter can't be used with '--dont-check-git-diff'.
+            [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway. 
+                                     Suggesting to use this parameter to force increasing version when your project 
+                                     configuration expects to increase versions only when there is git diff.
+                                     This parameter can't be used with '--check-git-diff'.
         mrp, module-root-path     show root path of specified module (for monorepos projects)
             [-q | --quiet]           to show only root path (or errors messages if there are so)
             [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
@@ -104,12 +133,14 @@ To use vuh with your project you should first create .vuh file in root folder of
 
 List of basic .vuh config variables for your project:
 
-| Variable                            | Vuh version supporting  | Required always | Description                                                            | Example                                                                                                     |
-|-------------------------------------|:-----------------------:|:---------------:|------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| MAIN_BRANCH_NAME                    |          0.1.0          |       Yes       | The name of the main project's branch.                                 | 'main' or 'master'                                                                                          |
-| VERSION_FILE                        |          0.1.0          |       Yes       | File which contains version information.                               | 'package.json' <br/> (for node.js application)                                                              |
-| TEXT_BEFORE_VERSION_CODE            |          0.1.0          |       Yes       | Unique text which will be just before version number including spaces. | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number") |
-| TEXT_AFTER_VERSION_CODE             |          0.1.0          |       Yes       | Unique text which will be just after version number including spaces.  | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")           |
+| Variable                              | Vuh version supporting | Required always | Description                                                                                                                                                                                                                                                                                                    | Example                                                                                                     |
+|---------------------------------------|:----------------------:|:---------------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| MAIN_BRANCH_NAME                      |         0.1.0          |       Yes       | The name of the main project's branch.                                                                                                                                                                                                                                                                         | 'main' or 'master'                                                                                          |
+| VERSION_FILE                          |         0.1.0          |       Yes       | File which contains version information.                                                                                                                                                                                                                                                                       | 'package.json' <br/> (for node.js application)                                                              |
+| TEXT_BEFORE_VERSION_CODE              |         0.1.0          |       Yes       | Unique text which will be just before version number including spaces.                                                                                                                                                                                                                                         | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number") |
+| TEXT_AFTER_VERSION_CODE               |         0.1.0          |       Yes       | Unique text which will be just after version number including spaces.                                                                                                                                                                                                                                          | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")           |
+| MODULE_ROOT_PATH                      |         2.2.0          |       No        | Root path of the project code directory relative to the repository root (this variable can be used in git diff if IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES equals 'true').                                                                                                                                        | 'src' (for src directory in the repository root)                                                            |
+| IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES |         2.2.0          |       No        | If this variable set to 'true' and current branch has no difference with HEAD..origin/MAIN_BRANCH_NAME, vuh will not modify your current version if your current version is the same as main version. If this variable is 'false' (which is by default) vuh will suggest you to increase your current version. | 'true' or 'false' ('false' by default)                                                                      |
 
 If you want to work with versions for multiple modules in one monorepo you should specify in config few more variables.
 Variables which corresponds to modules should be started with module name
@@ -117,14 +148,15 @@ Variables which corresponds to modules should be started with module name
 
 List of all config variables for monorepos:
 
-| Variable                            | Vuh version supporting  | Required always | Description                                                                                                                                                                                                                                                                  | Example                                                                                                     |
-|-------------------------------------|:-----------------------:|:---------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| PROJECT_MODULES                     |          2.0.0          |       No        | List of all modules in your mono repository that will have different versioning mechanisms. <br/>You can leave this variable empty if your repository contains only one project. <br/>For each specified module you should specify configuration for this module down below. | 'BACKEND,FRONTEND' (for mono repository with two modules: BACKEND and FRONTEND)                             |
-| \<MODULE\>_MAIN_BRANCH_NAME         |          2.0.0          |       No        | The name of the main project's branch (for specific \<MODULE>).                                                                                                                                                                                                              | 'main' or 'master'                                                                                          |
-| \<MODULE\>_VERSION_FILE             |          2.0.0          |       No        | File which contains version information (for specific \<MODULE>).                                                                                                                                                                                                            | 'package.json' <br/> (for node.js application)                                                              |
-| \<MODULE\>_TEXT_BEFORE_VERSION_CODE |          2.0.0          |       No        | Unique text which will be just before version number including spaces (for specific \<MODULE>).                                                                                                                                                                              | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number") |
-| \<MODULE\>_TEXT_AFTER_VERSION_CODE  |          2.0.0          |       No        | Unique text which will be just after version number including spaces (for specific \<MODULE>).                                                                                                                                                                               | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")           |
-| \<MODULE\>_MODULE_ROOT_PATH         |          2.0.0          |       No        | Root path of the project module relative to the repository root.                                                                                                                                                                                                             | '/frontend'                                                                                                 |
+| Variable                                          | Vuh version supporting | Required always | Description                                                                                                                                                                                                                                                                                                              | Example                                                                                                     |
+|---------------------------------------------------|:----------------------:|:---------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| PROJECT_MODULES                                   |         2.0.0          |       No        | List of all modules in your mono repository that will have different versioning mechanisms. <br/>You can leave this variable empty if your repository contains only one project. <br/>For each specified module you should specify configuration for this module down below.                                             | 'BACKEND,FRONTEND' (for mono repository with two modules: BACKEND and FRONTEND)                             |
+| \<MODULE\>_MAIN_BRANCH_NAME                       |         2.0.0          |       No        | The name of the main project's branch (for specific \<MODULE>). By default this value will be equal to MAIN_BRANCH_NAME variable.                                                                                                                                                                                        | 'main' or 'master'                                                                                          |
+| \<MODULE\>_VERSION_FILE                           |         2.0.0          |       No        | File which contains version information (for specific \<MODULE>).                                                                                                                                                                                                                                                        | 'package.json' <br/> (for node.js application)                                                              |
+| \<MODULE\>_TEXT_BEFORE_VERSION_CODE               |         2.0.0          |       No        | Unique text which will be just before version number including spaces (for specific \<MODULE>).                                                                                                                                                                                                                          | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number") |
+| \<MODULE\>_TEXT_AFTER_VERSION_CODE                |         2.0.0          |       No        | Unique text which will be just after version number including spaces (for specific \<MODULE>).                                                                                                                                                                                                                           | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")           |
+| \<MODULE\>_MODULE_ROOT_PATH                       |         2.0.0          |       No        | Root path of the project module code directory relative to the repository root (this variable can be used in git diff if \<MODULE>_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES equals 'true').                                                                                                                                 | 'frontend' (for frontend directory in the repository root)                                                  |
+| \<MODULE\>_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  |         2.2.0          |       No        | If this variable set to 'true' and current branch has no difference with HEAD..origin/\<MODULE>_MAIN_BRANCH_NAME, vuh will not modify your current version if your current version is the same as main version. If this variable is 'false' (which is by default) vuh will suggest you to increase your current version. | 'true' or 'false' ('false' by default)                                                                      |
 
 To configure your own project you should select one of the configuration template from [project-config-templates]
 and copy it to the root directory of your project as '.vuh'.

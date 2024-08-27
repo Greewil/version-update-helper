@@ -24,6 +24,14 @@
 #/                                  This parameter can't be use with '-v' parameter!
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+#/         [--check-git-diff]       to automatically increase version only if current branch has git difference
+#/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
+#/                                  modify your current version if your current version is the same as main version.
+#/                                  This parameter can't be used with '--dont-check-git-diff'.
+#/         [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway.
+#/                                  Suggesting to use this parameter to force increasing version when your project
+#/                                  configuration expects to increase versions only when there is git diff.
+#/                                  This parameter can't be used with '--check-git-diff'.
 #/     uv, update-version       replace your local version with suggesting version which this branch should use
 #/         [-v=<version>]           to specify your own version which also will be taken into account
 #/                                  This parameter can't be use with '-vp' parameter!
@@ -31,6 +39,14 @@
 #/                                  This parameter can't be use with '-v' parameter!
 #/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
+#/         [--check-git-diff]       to automatically increase version only if current branch has git difference
+#/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
+#/                                  modify your current version if your current version is the same as main version.
+#/                                  This parameter can't be used with '--dont-check-git-diff'.
+#/         [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway.
+#/                                  Suggesting to use this parameter to force increasing version when your project
+#/                                  configuration expects to increase versions only when there is git diff.
+#/                                  This parameter can't be used with '--check-git-diff'.
 #/     mrp, module-root-path     show root path of specified module (for monorepos projects)
 #/         [-q | --quiet]           to show only root path (or errors messages if there are so)
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
@@ -45,7 +61,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.1.0'
+VUH_VERSION='2.2.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -82,6 +98,8 @@ SPECIFIED_INCREASING_VERSION_PART='patch'
 SPECIFIED_PROJECT_MODULE=''
 SPECIFIED_MAIN_BRANCH=''
 ARGUMENT_QUIET='false'
+ARGUMENT_CHECK_GIT_DIFF='false'
+ARGUMENT_DONT_CHECK_GIT_DIFF='false'
 
 
 function _show_function_title() {
@@ -108,6 +126,23 @@ function _show_invalid_usage_error_message() {
   message=$1
   _show_error_message "$message"
   echo 'Use "vuh --help" to see available commands and options information'
+}
+
+function _show_try_grep_command_message() {
+  module_name_prefix=''
+  if [ "$SPECIFIED_PROJECT_MODULE" != '' ]; then
+    module_name_prefix="$SPECIFIED_PROJECT_MODULE"'_'
+  fi
+  # shellcheck disable=SC2016
+  cat_version_file_cmd='cat "$'"$module_name_prefix"'VERSION_FILE"'
+  # shellcheck disable=SC2016
+  grep_text_before_cmd='grep -E "$'"$module_name_prefix"'TEXT_BEFORE_VERSION_CODE"'
+  # shellcheck disable=SC2016
+  grep_text_after_cmd='grep -E "$'"$module_name_prefix"'TEXT_AFTER_VERSION_CODE"'
+  check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
+  make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
+'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
+  _show_error_message "$make_sure_message"
 }
 
 function _exit_if_using_multiple_commands() {
@@ -152,11 +187,17 @@ function _yes_no_question() {
 # $1 - Module name
 function _use_module_configuration() {
   next_handling_module=$1
-  eval MAIN_BRANCH_NAME='$'"$next_handling_module"'_MAIN_BRANCH_NAME'
+  cur_module_main_branch_name=''  # just for shellcheck
+  eval cur_module_main_branch_name='$'"$next_handling_module"'_MAIN_BRANCH_NAME'
+  if [ "$cur_module_main_branch_name" != '' ]; then
+    MAIN_BRANCH_NAME="$cur_module_main_branch_name"
+  fi
   eval VERSION_FILE='$'"$next_handling_module"'_VERSION_FILE'
   eval TEXT_BEFORE_VERSION_CODE='$'"$next_handling_module"'_TEXT_BEFORE_VERSION_CODE'
   eval TEXT_AFTER_VERSION_CODE='$'"$next_handling_module"'_TEXT_AFTER_VERSION_CODE'
   eval MODULE_ROOT_PATH='$'"$next_handling_module"'_MODULE_ROOT_PATH'
+  eval IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='$'"$next_handling_module"'_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES'
+  [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" == '' ] && IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
   [ "$MAIN_BRANCH_NAME" == '' ] && _show_error_message "$next_handling_module"'_MAIN_BRANCH_NAME variable is empty!'
   [ "$VERSION_FILE" == '' ] && _show_error_message "$next_handling_module"'_VERSION_FILE variable is empty!'
   if [ "$MAIN_BRANCH_NAME" == '' ] || [ "$VERSION_FILE" == '' ]; then
@@ -373,6 +414,25 @@ function _get_incremented_version() {
   fi
 }
 
+# Compares two versions and returns the largest one. If input versions are equal returns '='.
+#
+# $1 - Version to handle
+# $2 - Is increasing allowed
+#
+# Returns input version if increasing not allowed or increased version otherwise.
+function _get_incremented_version_if_allowed() {
+  v=$1
+  is_operation_allowed=$2
+  output_version="$v"
+  if [ "$is_operation_allowed" = 'true' ]; then
+    output_version=$(_get_incremented_version "$v") || {
+      _show_error_message "Failed to increment $SPECIFIED_INCREASING_VERSION_PART version of '$v'!"
+      exit 1
+    }
+  fi
+  echo "$output_version"
+}
+
 function _get_root_repo_dir() {
   ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
     _show_error_message "Can't find root repo directory!"
@@ -407,11 +467,25 @@ function _fetch_remote_branches() {
 }
 
 function _unset_conf_variables() {
+  # unset module variables
+  declare -a module_variable_suffixes=('MAIN_BRANCH_NAME' 'VERSION_FILE' 'TEXT_BEFORE_VERSION_CODE'
+                                       'TEXT_AFTER_VERSION_CODE' 'MODULE_ROOT_PATH'
+                                       'IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES')
+  for module_variable_suffix in "${module_variable_suffixes[@]}"; do
+    for var in $(compgen -v | grep ".*$module_variable_suffix"); do
+      declare "$var="
+    done
+  done
+
+  # unset basic variables
   # vuh-0.1.0
   MAIN_BRANCH_NAME='NO_MAIN_BRANCH_NAME'
   VERSION_FILE='NO_VERSION_FILE'
   TEXT_BEFORE_VERSION_CODE='NO_TEXT_BEFORE_VERSION_CODE'
   TEXT_AFTER_VERSION_CODE='NO_TEXT_AFTER_VERSION_CODE'
+  # vuh-2.2.0
+  MODULE_ROOT_PATH=''
+  IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 }
 
 # Checks compatibility of vuh and loaded configuration file.
@@ -539,13 +613,7 @@ function read_local_version() {
   }
   LOCAL_VERSION=$(_get_version_from_file "$version_file") || {
     _show_error_message "Failed to get local version from $ROOT_REPO_DIR/$VERSION_FILE!"
-    cat_version_file_cmd='cat "<config:VERSION_FILE>"'
-    grep_text_before_cmd='grep -E "<config:TEXT_BEFORE_VERSION_CODE>"'
-    grep_text_after_cmd='grep -E "<config:TEXT_AFTER_VERSION_CODE>"'
-    check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
-    make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
-'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
-    _show_error_message "$make_sure_message"
+    _show_try_grep_command_message
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
@@ -586,11 +654,7 @@ function read_main_version() {
   }
   MAIN_VERSION=$(_get_version_from_file "$main_branch_file") || {
     _show_error_message "Failed to get main version from $handling_file!"
-    check_line_command='cat "<config:VERSION_FILE>" | grep -E "<config:TEXT_BEFORE_VERSION_CODE>" | grep -E '\
-'"<config:TEXT_AFTER_VERSION_CODE>"'
-    make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
-'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
-    _show_error_message "$make_sure_message"
+    _show_try_grep_command_message
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
     make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
 'has different .vuh configuration.'
@@ -617,13 +681,31 @@ function get_suggesting_version() {
   else
     fair_largest_version="$largest_version"
   fi
-  if [ "$SPECIFIED_VERSION" = '' ]; then
-    # if used -vp=.. param
 
-    incremented_main_version=$(_get_incremented_version "$MAIN_VERSION") || {
-      _show_error_message "Failed to increment $SPECIFIED_INCREASING_VERSION_PART version of '$MAIN_VERSION'!"
+  # checking is version increasing allowed or not
+  is_version_increasing_allowed='true'
+  if { [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" != 'true' ] && [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; } ||
+      [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ]; then
+    main_branch_path="HEAD..origin/$MAIN_BRANCH_NAME"
+    git_diff_dir="$MODULE_ROOT_PATH"
+    if [ "$MODULE_ROOT_PATH" = '' ]; then
+      git_diff_dir="."
+    fi
+    git_diff=$(git diff --name-only $main_branch_path "$git_diff_dir") || {
+      _show_error_message "Failed to get git diff with branch '$main_branch_path' for directory '$MODULE_ROOT_PATH'!"
       exit 1
     }
+    if [ "$git_diff" = '' ]; then
+      echo "Directory '$MODULE_ROOT_PATH' has no difference with branch '$main_branch_path'."
+      is_version_increasing_allowed='false'
+    else
+      echo "Git diff with branch '$main_branch_path' was not empty for directory '$MODULE_ROOT_PATH'."
+    fi
+  fi
+
+  if [ "$SPECIFIED_VERSION" = '' ]; then
+    # if used -vp=.. param
+    incremented_main_version=$(_get_incremented_version_if_allowed "$MAIN_VERSION" "$is_version_increasing_allowed")
     if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
       SUGGESTING_VERSION="$incremented_main_version"
     else
@@ -639,30 +721,18 @@ function get_suggesting_version() {
     fi
   else
     # if used -v=.. param
-
     largest_version=$(_get_largest_version "$fair_largest_version" "$SPECIFIED_VERSION") || {
       _show_error_message "Failed to select larger version between '$fair_largest_version' and '$SPECIFIED_VERSION'!"
       exit 1
     }
     if [ "$largest_version" = '=' ]; then
-      if [ "$fair_largest_version" = "$MAIN_VERSION" ]; then
-        SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-          _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-          exit 1
-        }
-      elif [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
+      if [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
         SUGGESTING_VERSION=$LOCAL_VERSION
       else
-        SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-          _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-          exit 1
-        }
+        SUGGESTING_VERSION=$(_get_incremented_version_if_allowed "$MAIN_VERSION" "$is_version_increasing_allowed")
       fi
     elif [ "$largest_version" = "$MAIN_VERSION" ]; then
-      SUGGESTING_VERSION=$(_get_incremented_version "$MAIN_VERSION") || {
-        _show_error_message "Failed to increment patch version of '$MAIN_VERSION'!"
-        exit 1
-      }
+      SUGGESTING_VERSION=$(_get_incremented_version_if_allowed "$MAIN_VERSION" "$is_version_increasing_allowed")
     elif [ "$largest_version" = "$SPECIFIED_VERSION" ]; then
       SUGGESTING_VERSION=$SPECIFIED_VERSION
     else
@@ -824,6 +894,22 @@ while [[ $# -gt 0 ]]; do
   -q|--quiet)
     _check_arg "$1"
     ARGUMENT_QUIET='true'
+    shift ;;
+  --check-git-diff)
+    _check_arg "$1"
+    if [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" = 'true' ]; then
+      _show_invalid_usage_error_message "You can't use both parameters: '--check-git-diff' and '--dont-check-git-diff'!"
+      exit 1
+    fi
+    ARGUMENT_CHECK_GIT_DIFF='true'
+    shift ;;
+  --dont-check-git-diff)
+    _check_arg "$1"
+    if [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ]; then
+      _show_invalid_usage_error_message "You can't use both parameters: '--check-git-diff' and '--dont-check-git-diff'!"
+      exit 1
+    fi
+    ARGUMENT_DONT_CHECK_GIT_DIFF='true'
     shift ;;
   -mb=*)
     _check_arg "$1"

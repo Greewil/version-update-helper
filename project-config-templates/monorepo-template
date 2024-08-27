@@ -10,7 +10,7 @@
 
 # This configuration file is based on project-config-templates/monorepo-template.
 
-# ------------------------------------- begin-variables-vuh-0.1.0 ------------------------------------- #
+# ------------------------------------- begin basic variables ------------------------------------- #
 
 # MAIN_BRANCH_NAME: the name of the main project's branch
 # example: 'main' or 'master'
@@ -28,42 +28,44 @@ TEXT_BEFORE_VERSION_CODE='version = "'
 # example: '",' (for variable "version" in json files so it can find line "version": "version_number")
 TEXT_AFTER_VERSION_CODE='"'
 
-# You can override get_larger_prerelease_info function here. Here's a template for it:
-#
-# $1 - Prerelease information of the first version to compare
-# $2 - Prerelease information of the second version to compare
-#
-# Returns larger prerelease version or '=' if inputs are treated as equal.
-#function get_larger_prerelease_info() {
-#  <Your comparing logic>
-#}
+# MODULE_ROOT_PATH: root path of the project code directory relative to the repository root.
+#   This variable can be used in git diff if IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES equals 'true'.
+# example: 'src' (for src directory in the repository root)
+MODULE_ROOT_PATH=''
 
-# ------------------------------------- end-variables-vuh-0.1.0 ------------------------------------- #
+# IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES: if this variable set to 'true' and current branch has no difference
+#   with HEAD..origin/MAIN_BRANCH_NAME, vuh will not modify your current version if your current version
+#   is the same as main version.
+#   If this variable is 'false' (which is by default) vuh will suggest you to increase your current version.
+# example: 'true' ('false' by default)
+IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
 
-# ------------------------------------- begin-variables-vuh-2.0.0 ------------------------------------- #
+# ------------------------------------- end basic variables ------------------------------------- #
+
+# ------------------------------------- begin mono repository variables ------------------------------------- #
 
 # PROJECT_MODULES: list of all modules in your mono repository that will have different versioning mechanisms.
-# You can leave this variable empty if your repository contains only one project.
-# For each specified module you should specify configuration for this module down below.
-# For each module you should specify: MAIN_BRANCH_NAME, VERSION_FILE, TEXT_BEFORE_VERSION_CODE,
-# TEXT_AFTER_VERSION_CODE, MODULE_ROOT_PATH (relative to the repository root).
-# Configuration variable for module should looks like: <MODULE_NAME>_<VARIABLE_NAME>.
+#   You can leave this variable empty if your repository contains only one project.
+#   For each specified module you should specify configuration for this module down below.
+#   For each module you should specify: MAIN_BRANCH_NAME, VERSION_FILE, TEXT_BEFORE_VERSION_CODE,
+#   TEXT_AFTER_VERSION_CODE, MODULE_ROOT_PATH (relative to the repository root).
+#   Configuration variable for module should looks like: <MODULE_NAME>_<VARIABLE_NAME>.
 # example: 'UI,API' (for mono repository with two modules: UI and API)
-# Also you can see example here: https://github.com/Greewil/version-update-helper/blob/main/.vuh
+#   Also you can see example here: https://github.com/Greewil/version-update-helper/blob/main/.vuh
 PROJECT_MODULES='API,WEB'
 
 # variables for API module
-API_MAIN_BRANCH_NAME='main'
 API_VERSION_FILE='api/build.gradle.kts'
 API_TEXT_BEFORE_VERSION_CODE='version = "'
 API_TEXT_AFTER_VERSION_CODE='"'
 API_MODULE_ROOT_PATH="api"
+API_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 
 # variables for WEB module
-WEB_MAIN_BRANCH_NAME='main'
 WEB_VERSION_FILE='web/package.json'
 WEB_TEXT_BEFORE_VERSION_CODE='"version": "'
 WEB_TEXT_AFTER_VERSION_CODE='",'
 WEB_MODULE_ROOT_PATH="web"
+WEB_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 
-# ------------------------------------- end-variables-vuh-2.0.0 ------------------------------------- #
+# ------------------------------------- end mono repository variables ------------------------------------- #
