@@ -684,10 +684,14 @@ function get_suggesting_version() {
 
   # checking is version increasing allowed or not
   is_version_increasing_allowed='true'
-  if [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ] ||
-      [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" != 'true' ] && [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; then
+  if { [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" != 'true' ] && [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; } ||
+      [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ]; then
     main_branch_path="HEAD..origin/$MAIN_BRANCH_NAME"
-    git_diff=$(git diff --name-only $main_branch_path "$MODULE_ROOT_PATH") || {
+    git_diff_dir="$MODULE_ROOT_PATH"
+    if [ "$MODULE_ROOT_PATH" = '' ]; then
+      git_diff_dir="."
+    fi
+    git_diff=$(git diff --name-only $main_branch_path "$git_diff_dir") || {
       _show_error_message "Failed to get git diff with branch '$main_branch_path' for directory '$MODULE_ROOT_PATH'!"
       exit 1
     }
