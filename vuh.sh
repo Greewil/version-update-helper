@@ -61,7 +61,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.2.0'
+VUH_VERSION='2.3.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -84,7 +84,7 @@ ROOT_REPO_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SUGGESTING_VERSION=''
-MODULE_ROOT_PATH=''
+INCREASING_VERSION_PART='patch'
 
 # variables for handling semantic versions
 VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
@@ -145,6 +145,20 @@ function _show_try_grep_command_message() {
   _show_error_message "$make_sure_message"
 }
 
+function _show_git_diff_result() {
+  result_successful=$1
+  handling_revision=$2
+  handling_location=$3
+  comment_on_success=$4
+  if [ "$ARGUMENT_QUIET" = 'false' ]; then
+    if [ "$result_successful" = 'true' ]; then
+      echo "Git diff with '$handling_revision' was not empty (location: '$handling_location'). $comment_on_success"
+    else
+      echo "Location '$handling_location' has no difference with '$handling_revision'."
+    fi
+  fi
+}
+
 function _exit_if_using_multiple_commands() {
   last_command=$1
   if [ "$COMMAND" != '' ]; then
@@ -197,6 +211,7 @@ function _use_module_configuration() {
   eval TEXT_AFTER_VERSION_CODE='$'"$next_handling_module"'_TEXT_AFTER_VERSION_CODE'
   eval MODULE_ROOT_PATH='$'"$next_handling_module"'_MODULE_ROOT_PATH'
   eval IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='$'"$next_handling_module"'_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES'
+  # TODO setup MINOR_CHANGING_LOCATIONS and other <VERSION_PART>_CHANGING_LOCATIONS variables
   [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" == '' ] && IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
   [ "$MAIN_BRANCH_NAME" == '' ] && _show_error_message "$next_handling_module"'_MAIN_BRANCH_NAME variable is empty!'
   [ "$VERSION_FILE" == '' ] && _show_error_message "$next_handling_module"'_VERSION_FILE variable is empty!'
@@ -402,11 +417,11 @@ function _get_incremented_version() {
     major_version=$(_get_major_version "$v") || return 1
     minor_version=$(_get_minor_version "$v") || return 1
     patch_version=$(_get_patch_version "$v") || return 1
-    if [ "$SPECIFIED_INCREASING_VERSION_PART" = "patch" ]; then
+    if [ "$INCREASING_VERSION_PART" = "patch" ]; then
       _get_incremented_patch_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
-    elif [ "$SPECIFIED_INCREASING_VERSION_PART" = "minor" ]; then
+    elif [ "$INCREASING_VERSION_PART" = "minor" ]; then
       _get_incremented_minor_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
-    elif [ "$SPECIFIED_INCREASING_VERSION_PART" = "major" ]; then
+    elif [ "$INCREASING_VERSION_PART" = "major" ]; then
       _get_incremented_major_version "$major_version" "$minor_version" "$patch_version" "$prerelease_info" "$metadata" || return 1
     fi
   else
@@ -426,11 +441,39 @@ function _get_incremented_version_if_allowed() {
   output_version="$v"
   if [ "$is_operation_allowed" = 'true' ]; then
     output_version=$(_get_incremented_version "$v") || {
-      _show_error_message "Failed to increment $SPECIFIED_INCREASING_VERSION_PART version of '$v'!"
+      _show_error_message "Failed to increment $INCREASING_VERSION_PART version of '$v'!"
       exit 1
     }
   fi
   echo "$output_version"
+}
+
+function _update_increasing_version_part() {
+  suggesting_version_part=$1
+  if [ "$suggesting_version_part" != 'patch' ] &&
+      [ "$suggesting_version_part" != 'minor' ] &&
+      [ "$suggesting_version_part" != 'major' ]; then
+    _show_error_message "Unknown type of version part: '$suggesting_version_part'!"
+    exit 1
+  fi
+  if [ "$INCREASING_VERSION_PART" = '' ]; then
+    INCREASING_VERSION_PART="$suggesting_version_part"
+  fi
+  # TODO handle patch minor major comparison
+#  INCREASING_VERSION_PART=''
+}
+
+function _is_git_diff_in_location() {
+  location_for_git_diff=$1
+  git_diff=$(git diff --name-only "$main_branch_path" "$location_for_git_diff") || {
+    _show_error_message "Failed to get git diff with branch '$main_branch_path' for directory '$MODULE_ROOT_PATH'!"
+    exit 1
+  }
+  if [ "$git_diff" = '' ]; then
+    echo 'false'
+  else
+    echo 'true'
+  fi
 }
 
 function _get_root_repo_dir() {
@@ -470,7 +513,7 @@ function _unset_conf_variables() {
   # unset module variables
   declare -a module_variable_suffixes=('MAIN_BRANCH_NAME' 'VERSION_FILE' 'TEXT_BEFORE_VERSION_CODE'
                                        'TEXT_AFTER_VERSION_CODE' 'MODULE_ROOT_PATH'
-                                       'IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES')
+                                       'IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES' '_CHANGING_LOCATIONS')
   for module_variable_suffix in "${module_variable_suffixes[@]}"; do
     for var in $(compgen -v | grep ".*$module_variable_suffix"); do
       declare "$var="
@@ -687,19 +730,30 @@ function get_suggesting_version() {
   if { [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" != 'true' ] && [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" = 'true' ]; } ||
       [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ]; then
     main_branch_path="HEAD..origin/$MAIN_BRANCH_NAME"
-    git_diff_dir="$MODULE_ROOT_PATH"
+
+    # checking is version increasing allowed or not
+    module_location="$MODULE_ROOT_PATH"
     if [ "$MODULE_ROOT_PATH" = '' ]; then
-      git_diff_dir="."
+      module_location="."
     fi
-    git_diff=$(git diff --name-only $main_branch_path "$git_diff_dir") || {
-      _show_error_message "Failed to get git diff with branch '$main_branch_path' for directory '$MODULE_ROOT_PATH'!"
-      exit 1
-    }
-    if [ "$git_diff" = '' ]; then
-      echo "Directory '$MODULE_ROOT_PATH' has no difference with branch '$main_branch_path'."
-      is_version_increasing_allowed='false'
-    else
-      echo "Git diff with branch '$main_branch_path' was not empty for directory '$MODULE_ROOT_PATH'."
+    is_version_increasing_allowed=$(_is_git_diff_in_location "$module_location")
+    comment_if_allowed=""
+    _show_git_diff_result "$is_version_increasing_allowed" "$main_branch_path" "$module_location" "$comment_if_allowed"
+
+    # checking is there differences leading to minor updates
+    if [ "$MINOR_CHANGING_LOCATIONS" != '' ]; then
+      is_increasing_minor=$(_is_git_diff_in_location "$MINOR_CHANGING_LOCATIONS")
+      [ "$is_increasing_minor" = 'true' ] && _update_increasing_version_part 'minor'
+      comment_if_allowed=""
+      _show_git_diff_result "$is_increasing_minor" "$main_branch_path" "$MINOR_CHANGING_LOCATIONS" "$comment_if_allowed"
+    fi
+
+    # checking is there differences leading to major updates
+    if [ "$MAJOR_CHANGING_LOCATIONS" != '' ]; then
+      is_increasing_major=$(_is_git_diff_in_location "$MAJOR_CHANGING_LOCATIONS")
+      [ "$is_increasing_major" = 'true' ] && _update_increasing_version_part 'major'
+      comment_if_allowed=""
+      _show_git_diff_result "$is_increasing_major" "$main_branch_path" "$MAJOR_CHANGING_LOCATIONS" "$comment_if_allowed"
     fi
   fi
 
@@ -886,6 +940,7 @@ while [[ $# -gt 0 ]]; do
       exit 1
     fi
     SPECIFIED_INCREASING_VERSION_PART=${1#*=}
+    _update_increasing_version_part "$SPECIFIED_INCREASING_VERSION_PART"
     shift ;;
   -pm=*)
     _check_arg "$1"

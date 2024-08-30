@@ -40,6 +40,15 @@ MODULE_ROOT_PATH=''
 # example: 'true' ('false' by default)
 IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 
+# <VERSION_PART>_CHANGING_LOCATIONS: if there are changes between HEAD..origin/MAIN_BRANCH_NAME and
+#   current branch in this files or directories, <VERSION_PART> version should be increased. Works only if you
+#   checking git diff (you configured your .vuh config such way or you using --check-git-diff parameter).
+#   Locations should be separated with spaces.
+#   Empty variable means there is no locations which leads to <VERSION_PART> increasing on every change in them.
+# example: 'openapi/schema.yaml very/important/directory' (for 'openapi/schema.yaml' and 'very/important/directory')
+MINOR_CHANGING_LOCATIONS=''
+MAJOR_CHANGING_LOCATIONS=''
+
 # You can override get_larger_prerelease_info function here. Here's a template for it:
 #
 # $1 - Prerelease information of the first version to compare
