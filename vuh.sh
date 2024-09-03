@@ -211,7 +211,12 @@ function _use_module_configuration() {
   eval TEXT_AFTER_VERSION_CODE='$'"$next_handling_module"'_TEXT_AFTER_VERSION_CODE'
   eval MODULE_ROOT_PATH='$'"$next_handling_module"'_MODULE_ROOT_PATH'
   eval IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='$'"$next_handling_module"'_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES'
-  # TODO setup MINOR_CHANGING_LOCATIONS and other <VERSION_PART>_CHANGING_LOCATIONS variables
+  for var in $(compgen -v | grep "$next_handling_module\_.*_CHANGING_LOCATIONS"); do
+    global_var_name=${var##*"$next_handling_module"\_}
+    global_var_value=''
+    eval global_var_value='$'"$var"
+    eval "${global_var_name}"="${global_var_value}"
+  done
   [ "$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES" == '' ] && IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
   [ "$MAIN_BRANCH_NAME" == '' ] && _show_error_message "$next_handling_module"'_MAIN_BRANCH_NAME variable is empty!'
   [ "$VERSION_FILE" == '' ] && _show_error_message "$next_handling_module"'_VERSION_FILE variable is empty!'
@@ -459,8 +464,13 @@ function _update_increasing_version_part() {
   if [ "$INCREASING_VERSION_PART" = '' ]; then
     INCREASING_VERSION_PART="$suggesting_version_part"
   fi
-  # TODO handle patch minor major comparison
-#  INCREASING_VERSION_PART=''
+  if [ "$suggesting_version_part" = 'major' ] || [ "$INCREASING_VERSION_PART" = 'major' ]; then
+    INCREASING_VERSION_PART='major'
+  elif [ "$suggesting_version_part" = 'minor' ] || [ "$INCREASING_VERSION_PART" = 'minor' ]; then
+    INCREASING_VERSION_PART='minor'
+  elif [ "$suggesting_version_part" = 'patch' ] || [ "$INCREASING_VERSION_PART" = 'patch' ]; then
+    INCREASING_VERSION_PART='patch'
+  fi
 }
 
 function _is_git_diff_in_location() {
@@ -516,7 +526,7 @@ function _unset_conf_variables() {
                                        'IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES' '_CHANGING_LOCATIONS')
   for module_variable_suffix in "${module_variable_suffixes[@]}"; do
     for var in $(compgen -v | grep ".*$module_variable_suffix"); do
-      declare "$var="
+      eval "${var}"=''
     done
   done
 
@@ -714,6 +724,7 @@ function read_main_version() {
 function get_suggesting_version() {
   read_local_version || exit 1
   read_main_version || exit 1
+  _load_local_conf_file || exit 1
   [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'suggesting relevant version'
   largest_version=$(_get_largest_version "$MAIN_VERSION" "$LOCAL_VERSION") || {
     _show_error_message "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
@@ -744,7 +755,7 @@ function get_suggesting_version() {
     if [ "$MINOR_CHANGING_LOCATIONS" != '' ]; then
       is_increasing_minor=$(_is_git_diff_in_location "$MINOR_CHANGING_LOCATIONS")
       [ "$is_increasing_minor" = 'true' ] && _update_increasing_version_part 'minor'
-      comment_if_allowed=""
+      comment_if_allowed="This changes require minor version update."
       _show_git_diff_result "$is_increasing_minor" "$main_branch_path" "$MINOR_CHANGING_LOCATIONS" "$comment_if_allowed"
     fi
 
@@ -752,7 +763,7 @@ function get_suggesting_version() {
     if [ "$MAJOR_CHANGING_LOCATIONS" != '' ]; then
       is_increasing_major=$(_is_git_diff_in_location "$MAJOR_CHANGING_LOCATIONS")
       [ "$is_increasing_major" = 'true' ] && _update_increasing_version_part 'major'
-      comment_if_allowed=""
+      comment_if_allowed="This changes require major version update."
       _show_git_diff_result "$is_increasing_major" "$main_branch_path" "$MAJOR_CHANGING_LOCATIONS" "$comment_if_allowed"
     fi
   fi
