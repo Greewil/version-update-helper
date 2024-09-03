@@ -61,7 +61,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.3.0'
+VUH_VERSION='2.4.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -521,6 +521,7 @@ function _fetch_remote_branches() {
 
 function _unset_conf_variables() {
   # unset module variables
+  PROJECT_MODULES=''
   declare -a module_variable_suffixes=('MAIN_BRANCH_NAME' 'VERSION_FILE' 'TEXT_BEFORE_VERSION_CODE'
                                        'TEXT_AFTER_VERSION_CODE' 'MODULE_ROOT_PATH'
                                        'IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES' '_CHANGING_LOCATIONS')
@@ -551,7 +552,14 @@ function _check_conf_data_loaded_properly() {
       [ "$VERSION_FILE" = 'NO_VERSION_FILE' ] ||
       [ "$TEXT_BEFORE_VERSION_CODE" = 'NO_TEXT_BEFORE_VERSION_CODE' ] ||
       [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ]; then
-    _show_error_message "Configuration test failed! Configuration variables were empty or weren't loaded at all!"
+    if [ "$PROJECT_MODULES" != '' ] && [ "$SPECIFIED_PROJECT_MODULE" = '' ]; then
+      this_is_monorepo_message="This repository was configured as mono repository with multiple modules."
+      specify_module_message="So you should specify module with which you want to work in parameter '-pm=MODULE_NAME'."
+      available_modules_message="Here is the list of available modules for this repository: '$PROJECT_MODULES'"
+      _show_error_message "$this_is_monorepo_message $specify_module_message $available_modules_message"
+    else
+      _show_error_message "Configuration test failed! Configuration variables were empty or weren't loaded at all!"
+    fi
     return 1
   fi
 }
