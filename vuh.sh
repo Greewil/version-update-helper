@@ -61,7 +61,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.4.0'
+VUH_VERSION='2.5.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -103,6 +103,7 @@ ARGUMENT_DONT_CHECK_GIT_DIFF='false'
 
 
 function _show_function_title() {
+
   printf '\n'
   echo "$1"
 }
@@ -140,7 +141,7 @@ function _show_try_grep_command_message() {
   # shellcheck disable=SC2016
   grep_text_after_cmd='grep -E "$'"$module_name_prefix"'TEXT_AFTER_VERSION_CODE"'
   check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
-  make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
+  make_sure_message="Run command '$check_line_command' and make sure that first output line contains your version. "\
 '\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
   _show_error_message "$make_sure_message"
 }
@@ -193,6 +194,17 @@ function _yes_no_question() {
       ;;
     esac
   done
+}
+
+# This function calls after each successful version update.
+# This is default function but it can be overridden from .vuh config!
+#
+# $1 - Version before update
+# $2 - New version after update
+function after_successful_version_update() {
+  # shellcheck disable=SC2034
+  old_version=$1
+  new_version=$2
 }
 
 # Changes default configuration values to configuration values of specified module.
@@ -324,7 +336,7 @@ function _get_metadata() {
   echo "$metadata"
 }
 
-# This is default function but it can be overridden from .vuh confing!
+# This is default function but it can be overridden from .vuh config!
 #
 # $1 - Prerelease information of the first version to compare
 # $2 - Prerelease information of the second version to compare
@@ -494,13 +506,19 @@ function _get_root_repo_dir() {
   }
 }
 
-function _get_version_from_file() {
+function _get_version_line_from_file() {
   version_file=$1
-  version_line=$(echo "$version_file" | grep -E "$TEXT_BEFORE_VERSION_CODE" | grep -E "$TEXT_AFTER_VERSION_CODE")
+  version_line=$(echo "$version_file" | grep -E "$TEXT_BEFORE_VERSION_CODE" | grep -E "$TEXT_AFTER_VERSION_CODE" | sed 1q)
   if [ "$version_line" = '' ]; then
     _show_error_message "Failed to get line, containing version from file $handling_file!"
     return 1
   fi
+  echo "$version_line"
+}
+
+function _get_version_from_file() {
+  version_file=$1
+  version_line=$(_get_version_line_from_file "$version_file") || return 1
   version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$version_line") || return 1
   version=${version_line##*"$version_prefix"} || return 1
   if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
@@ -850,19 +868,28 @@ function show_module_root_path() {
 
 function update_version() {
   new_version=$1
-  _show_function_title 'updating local version'
+  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'updating local version'
   _load_local_conf_file || exit 1
   version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
     _show_error_message "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
     exit 1
   }
   if [ "$LOCAL_VERSION" != "$new_version" ]; then
-    old_version_string="$TEXT_BEFORE_VERSION_CODE$LOCAL_VERSION$TEXT_AFTER_VERSION_CODE"
-    new_version_string="$TEXT_BEFORE_VERSION_CODE$new_version$TEXT_AFTER_VERSION_CODE"
-    echo "${version_file/$old_version_string/$new_version_string}" > "$ROOT_REPO_DIR/$VERSION_FILE"
-    _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
+    old_version_line=$(_get_version_line_from_file "$version_file")
+    version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$old_version_line") || exit 1
+    version_and_postfix=${old_version_line##*"$version_prefix"} || exit 1
+    if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
+      version_postfix=$(sed -r "s/.*($TEXT_AFTER_VERSION_CODE)/\1/" <<< "$version_and_postfix") || exit 1
+    fi
+    new_version_line="$version_prefix$new_version$version_postfix"
+    echo "${version_file/$old_version_line/$new_version_line}" > "$ROOT_REPO_DIR/$VERSION_FILE"
+    after_successful_version_update "$LOCAL_VERSION" "$new_version"
+    [ "$ARGUMENT_QUIET" = 'false' ] && _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
+    [ "$ARGUMENT_QUIET" = 'true' ] && echo "$new_version"
   else
-    echo "your local version already up to date: $LOCAL_VERSION"
+    after_successful_version_update "$LOCAL_VERSION" "$new_version"
+    [ "$ARGUMENT_QUIET" = 'false' ] && echo "your local version already up to date: $LOCAL_VERSION"
+    [ "$ARGUMENT_QUIET" = 'true' ] && echo "$LOCAL_VERSION"
   fi
 }
 
