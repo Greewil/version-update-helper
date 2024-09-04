@@ -61,7 +61,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.4.0'
+VUH_VERSION='2.4.1'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -494,13 +494,19 @@ function _get_root_repo_dir() {
   }
 }
 
-function _get_version_from_file() {
+function _get_version_line_from_file() {
   version_file=$1
   version_line=$(echo "$version_file" | grep -E "$TEXT_BEFORE_VERSION_CODE" | grep -E "$TEXT_AFTER_VERSION_CODE")
   if [ "$version_line" = '' ]; then
     _show_error_message "Failed to get line, containing version from file $handling_file!"
     return 1
   fi
+  echo "$version_line"
+}
+
+function _get_version_from_file() {
+  version_file=$1
+  version_line=$(_get_version_line_from_file "$version_file") || return 1
   version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$version_line") || return 1
   version=${version_line##*"$version_prefix"} || return 1
   if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
@@ -857,9 +863,14 @@ function update_version() {
     exit 1
   }
   if [ "$LOCAL_VERSION" != "$new_version" ]; then
-    old_version_string="$TEXT_BEFORE_VERSION_CODE$LOCAL_VERSION$TEXT_AFTER_VERSION_CODE"
-    new_version_string="$TEXT_BEFORE_VERSION_CODE$new_version$TEXT_AFTER_VERSION_CODE"
-    echo "${version_file/$old_version_string/$new_version_string}" > "$ROOT_REPO_DIR/$VERSION_FILE"
+    old_version_line=$(_get_version_line_from_file "$version_file")
+    version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$old_version_line") || exit 1
+    version_and_postfix=${old_version_line##*"$version_prefix"} || exit 1
+    if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
+      version_postfix=$(sed -r "s/.*($TEXT_AFTER_VERSION_CODE)/\1/" <<< "$version_and_postfix") || exit 1
+    fi
+    new_version_line="$version_prefix$new_version$version_postfix"
+    echo "${version_file/$old_version_line/$new_version_line}" > "$ROOT_REPO_DIR/$VERSION_FILE"
     _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
   else
     echo "your local version already up to date: $LOCAL_VERSION"
