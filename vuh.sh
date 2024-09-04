@@ -103,6 +103,7 @@ ARGUMENT_DONT_CHECK_GIT_DIFF='false'
 
 
 function _show_function_title() {
+
   printf '\n'
   echo "$1"
 }
@@ -193,6 +194,17 @@ function _yes_no_question() {
       ;;
     esac
   done
+}
+
+# This function calls after each successful version update.
+# This is default function but it can be overridden from .vuh config!
+#
+# $1 - Version before update
+# $2 - New version after update
+function after_successful_version_update() {
+  # shellcheck disable=SC2034
+  old_version=$1
+  new_version=$2
 }
 
 # Changes default configuration values to configuration values of specified module.
@@ -324,7 +336,7 @@ function _get_metadata() {
   echo "$metadata"
 }
 
-# This is default function but it can be overridden from .vuh confing!
+# This is default function but it can be overridden from .vuh config!
 #
 # $1 - Prerelease information of the first version to compare
 # $2 - Prerelease information of the second version to compare
@@ -856,7 +868,7 @@ function show_module_root_path() {
 
 function update_version() {
   new_version=$1
-  _show_function_title 'updating local version'
+  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'updating local version'
   _load_local_conf_file || exit 1
   version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
     _show_error_message "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
@@ -871,9 +883,13 @@ function update_version() {
     fi
     new_version_line="$version_prefix$new_version$version_postfix"
     echo "${version_file/$old_version_line/$new_version_line}" > "$ROOT_REPO_DIR/$VERSION_FILE"
-    _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
+    after_successful_version_update "$LOCAL_VERSION" "$new_version"
+    [ "$ARGUMENT_QUIET" = 'false' ] && _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
+    [ "$ARGUMENT_QUIET" = 'true' ] && echo "$new_version"
   else
-    echo "your local version already up to date: $LOCAL_VERSION"
+    after_successful_version_update "$LOCAL_VERSION" "$new_version"
+    [ "$ARGUMENT_QUIET" = 'false' ] && echo "your local version already up to date: $LOCAL_VERSION"
+    [ "$ARGUMENT_QUIET" = 'true' ] && echo "$LOCAL_VERSION"
   fi
 }
 
