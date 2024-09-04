@@ -61,7 +61,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.4.1'
+VUH_VERSION='2.5.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -140,7 +140,7 @@ function _show_try_grep_command_message() {
   # shellcheck disable=SC2016
   grep_text_after_cmd='grep -E "$'"$module_name_prefix"'TEXT_AFTER_VERSION_CODE"'
   check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
-  make_sure_message="Make sure that command '$check_line_command' will throw the only one line with your version. "\
+  make_sure_message="Run command '$check_line_command' and make sure that first output line contains your version. "\
 '\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
   _show_error_message "$make_sure_message"
 }
@@ -496,7 +496,7 @@ function _get_root_repo_dir() {
 
 function _get_version_line_from_file() {
   version_file=$1
-  version_line=$(echo "$version_file" | grep -E "$TEXT_BEFORE_VERSION_CODE" | grep -E "$TEXT_AFTER_VERSION_CODE")
+  version_line=$(echo "$version_file" | grep -E "$TEXT_BEFORE_VERSION_CODE" | grep -E "$TEXT_AFTER_VERSION_CODE" | sed 1q)
   if [ "$version_line" = '' ]; then
     _show_error_message "Failed to get line, containing version from file $handling_file!"
     return 1
