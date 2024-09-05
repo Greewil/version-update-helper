@@ -61,7 +61,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.5.0'
+VUH_VERSION='2.5.1'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -623,7 +623,7 @@ function _get_latest_available_vuh_version() {
 function _check_auto_update_logs() {
   update_log_file=$1
   logs=$(<"$update_log_file")
-  [[ "$logs" == *'Installation failed'* ]] && _show_error_message 'Failed to install update!'
+  [[ "$logs" == *'was successfully installed'* ]] || _show_error_message 'Failed to install update!'
   [[ "$logs" == *'ermission denied'* ]] && _show_error_message "Permission denied so try 'sudo vuh --update' to start update!"
 }
 
@@ -1028,7 +1028,10 @@ done
 if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
     [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]] &&
     [[ "$ARGUMENT_QUIET" != 'true' ]]; then
+  tmp_specified_project_module="$SPECIFIED_PROJECT_MODULE"
+  SPECIFIED_PROJECT_MODULE=''
   _regular_check_available_updates
+  SPECIFIED_PROJECT_MODULE="$tmp_specified_project_module"
 fi
 
 case "$COMMAND" in
