@@ -61,7 +61,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.5.2'
+VUH_VERSION='2.5.3'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -81,6 +81,8 @@ LIGHT_CYAN='\e[1;36m' # for changes
 
 # vuh global variables (Please don't modify!)
 ROOT_REPO_DIR=''
+CUR_DIR=''
+PROJECT_COPY_TMP_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SUGGESTING_VERSION=''
@@ -510,7 +512,7 @@ function _get_version_line_from_file() {
   version_file=$1
   version_line=$(echo "$version_file" | grep -E "$TEXT_BEFORE_VERSION_CODE" | grep -E "$TEXT_AFTER_VERSION_CODE" | sed 1q)
   if [ "$version_line" = '' ]; then
-    _show_error_message "Failed to get line, containing version from file $handling_file!"
+    _show_error_message "Failed to get line, containing version from version file!"
     return 1
   fi
   echo "$version_line"
@@ -535,6 +537,31 @@ function _fetch_remote_branches() {
     _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
     return 1
   }
+}
+
+function _clone_main_to_tmp() {
+  cur_date_time="$(date +%s%N)"
+  PROJECT_COPY_TMP_DIR="vuh_project_copy_$cur_date_time"
+  remote_origin_url_name="$(git config remote.origin.url)"
+  git clone -q -n --depth 1 "$remote_origin_url_name" "/tmp/$PROJECT_COPY_TMP_DIR" || {
+    _show_error_message "Failed to clone repository ($remote_origin_url_name) to temporary directory!"
+    _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
+    rm -f "/tmp/$PROJECT_COPY_TMP_DIR"
+    return 1
+  }
+  cd "/tmp/$PROJECT_COPY_TMP_DIR" || return 1
+  git checkout -q "$MAIN_BRANCH_NAME" || {
+    _show_error_message "Failed to get '$MAIN_BRANCH_NAME' in temporary repository!"
+    _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
+    rm -f "/tmp/$PROJECT_COPY_TMP_DIR"
+    return 1
+  }
+  cd "$CUR_DIR" || return 1
+}
+
+function _remove_tmp_dir() {
+  dir_to_remove=$1
+  [ "$dir_to_remove" != '' ] && rm -rf "/tmp/$dir_to_remove"
 }
 
 function _unset_conf_variables() {
@@ -599,7 +626,7 @@ function _load_local_conf_file() {
 function _load_remote_conf_file() {
   _unset_conf_variables || return 1
   branch_name=$1
-  main_branch_config_file=$(git show "origin/$branch_name:.vuh") || {
+  main_branch_config_file=$(cat "/tmp/$PROJECT_COPY_TMP_DIR/.vuh") || {
     _show_error_message "Failed to read remote configuration file origin/$branch_name:.vuh!"
     return 1
   }
@@ -712,8 +739,7 @@ function read_main_version() {
       exit 1
     }
   fi
-  _fetch_remote_branches || exit 1
-  handling_file="origin/$remote_branch:$VERSION_FILE"
+  _clone_main_to_tmp || exit 1
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     _load_remote_conf_file "$remote_branch" || {
       _show_warning_message "vuh will use local configuration to get remote version from origin/$remote_branch"
@@ -727,12 +753,12 @@ function read_main_version() {
       }
     } > /dev/null
   fi
-  main_branch_file=$(git show "$handling_file") || {
-    _show_error_message "Failed to load file $handling_file"
+  main_branch_file=$(cat "/tmp/$PROJECT_COPY_TMP_DIR/$VERSION_FILE") || {
+    _show_error_message "Failed to load file 'origin/$remote_branch:$VERSION_FILE'"
     exit 1
   }
   MAIN_VERSION=$(_get_version_from_file "$main_branch_file") || {
-    _show_error_message "Failed to get main version from $handling_file!"
+    _show_error_message "Failed to get main version from 'origin/$remote_branch:$VERSION_FILE'!"
     _show_try_grep_command_message
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
     make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
@@ -740,6 +766,7 @@ function read_main_version() {
     _show_error_message "$make_sure_message"
     exit 1
   }
+  _remove_tmp_dir "$PROJECT_COPY_TMP_DIR" || exit 1
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     echo "origin/$remote_branch: $MAIN_VERSION"
   elif [ "$ARGUMENT_QUIET" = 'true' ] && [ "$COMMAND" = 'main-version' ]; then
@@ -926,6 +953,8 @@ function show_help() {
   grep '^#/' <"$0" | cut -c4-
 }
 
+
+CUR_DIR="$(pwd)"
 
 _unset_conf_variables
 
