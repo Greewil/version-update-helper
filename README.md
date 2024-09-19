@@ -80,14 +80,17 @@ To use vuh with your project you should first create .vuh file in root folder of
         --update                 check for available vuh updates and ask to install latest version
     
     Commands:
-        lv, local-version        show local current version (default format)
+        lv, local-version            show local current version (default format)
             [-q | --quiet]           to show only version number (or errors messages if there are so)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
-        mv, main-version         show version of origin/MAIN_BRANCH_NAME
+        mv, main-version             show version of origin/MAIN_BRANCH_NAME
             [-q | --quiet]           to show only version number (or errors messages if there are so)
             [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
-        sv, suggesting-version   show suggesting version which this branch should use
+            [--offline
+              | --airplane-mode]     to work offline without updating origin/MAIN_BRANCH_NAME
+                                     and to stop searching for vuh updates.
+        sv, suggesting-version       show suggesting version which this branch should use
             [-q | --quiet]           to show only version number (or errors messages if there are so)
             [-v=<version>]           to specify your own version which also will be taken into account
                                      This parameter can't be use with '-vp' parameter!
@@ -103,7 +106,10 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      Suggesting to use this parameter to force increasing version when your project 
                                      configuration expects to increase versions only when there is git diff.
                                      This parameter can't be used with '--check-git-diff'.
-        uv, update-version       replace your local version with suggesting version which this branch should use
+            [--offline
+              | --airplane-mode]     to work offline without updating origin/MAIN_BRANCH_NAME
+                                     and to stop searching for vuh updates.
+        uv, update-version           replace your local version with suggesting version which this branch should use
             [-v=<version>]           to specify your own version which also will be taken into account
                                      This parameter can't be use with '-vp' parameter!
             [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
@@ -118,10 +124,13 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      Suggesting to use this parameter to force increasing version when your project 
                                      configuration expects to increase versions only when there is git diff.
                                      This parameter can't be used with '--check-git-diff'.
-        mrp, module-root-path     show root path of specified module (for monorepos projects)
+            [--offline
+              | --airplane-mode]     to work offline without updating origin/MAIN_BRANCH_NAME
+                                     and to stop searching for vuh updates.
+        mrp, module-root-path        show root path of specified module (for monorepos projects)
             [-q | --quiet]           to show only root path (or errors messages if there are so)
             [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
-        pm, project-modules      show all project modules of current mono repository that were specified in .vuh
+        pm, project-modules          show all project modules of current mono repository that were specified in .vuh
             [-q | --quiet]           to show only project modules (or errors messages if there are so)
     
     This tool suggest relevant version for your current project or even update your local project's version.
