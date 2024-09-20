@@ -9,49 +9,100 @@
 #/     --update                 check for available vuh updates and ask to install latest version
 #/
 #/ Commands:
-#/     lv, local-version        show local current version (default format)
-#/         [-q | --quiet]           to show only version number (or errors messages if there are so)
-#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
-#/     mv, main-version         show version of origin/MAIN_BRANCH_NAME
-#/         [-q | --quiet]           to show only version number (or errors messages if there are so)
-#/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
-#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
-#/     sv, suggesting-version   show suggesting version which this branch should use
-#/         [-q | --quiet]           to show only version number (or errors messages if there are so)
-#/         [-v=<version>]           to specify your own version which also will be taken into account
+#/
+#/     lv, local-version            Show local current version (default format).
+#/
+#/         [-q | --quiet]           to show only version number (or errors messages if there are so).
+#/
+#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/
+#/     mv, main-version             Show version of origin/MAIN_BRANCH_NAME.
+#/
+#/         [-q | --quiet]           to show only version number (or errors messages if there are so).
+#/
+#/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file).
+#/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
+#/
+#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/
+#/         [--offline | --airplane-mode]
+#/                                  to work offline without updating origin/MAIN_BRANCH_NAME
+#/                                  and to stop searching for vuh updates.
+#/
+#/     sv, suggesting-version       Show suggesting version which this branch should use.
+#/
+#/         [-q | --quiet]           to show only version number (or errors messages if there are so).
+#/
+#/         [-v=<version>]           to specify your own version which also will be taken into account.
 #/                                  This parameter can't be use with '-vp' parameter!
-#/         [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+#/
+#/         [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch').
 #/                                  This parameter can't be use with '-v' parameter!
-#/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
-#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+#/
+#/         [-mb=<main_branch_name>] to use another main branch (instead of main branch specified in .vuh file).
+#/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
+#/
+#/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
 #/                                  modify your current version if your current version is the same as main version.
+#/                                  This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES
+#/                                  configuration variable from .vuh file.
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
-#/         [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway.
+#/
+#/         [--dont-check-git-diff]  to increase anyway either there are changes or not.
 #/                                  Suggesting to use this parameter to force increasing version when your project
 #/                                  configuration expects to increase versions only when there is git diff.
+#/                                  This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES
+#/                                  configuration variable from .vuh file.
 #/                                  This parameter can't be used with '--check-git-diff'.
-#/     uv, update-version       replace your local version with suggesting version which this branch should use
-#/         [-v=<version>]           to specify your own version which also will be taken into account
+#/
+#/         [--offline | --airplane-mode]
+#/                                  to work offline without updating origin/MAIN_BRANCH_NAME
+#/                                  and to stop searching for vuh updates.
+#/
+#/     uv, update-version           Replace your local version with suggesting version which this branch should use.
+#/
+#/         [-v=<version>]           to specify your own version which also will be taken into account.
 #/                                  This parameter can't be use with '-vp' parameter!
-#/         [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+#/
+#/         [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch').
 #/                                  This parameter can't be use with '-v' parameter!
-#/         [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
-#/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
+#/
+#/         [-mb=<main_branch_name>] to use another main branch (instead of main branch specified in .vuh file).
+#/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
+#/
+#/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
+#/
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
 #/                                  modify your current version if your current version is the same as main version.
+#/                                  This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES
+#/                                  configuration variable from .vuh file.
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
-#/         [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway.
+#/
+#/         [--dont-check-git-diff]  to increase anyway either there are changes or not.
 #/                                  Suggesting to use this parameter to force increasing version when your project
 #/                                  configuration expects to increase versions only when there is git diff.
+#/                                  This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES
+#/                                  configuration variable from .vuh file.
 #/                                  This parameter can't be used with '--check-git-diff'.
-#/     mrp, module-root-path     show root path of specified module (for monorepos projects)
-#/         [-q | --quiet]           to show only root path (or errors messages if there are so)
-#/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
-#/     pm, project-modules      show all project modules of current mono repository that were specified in .vuh
-#/         [-q | --quiet]           to show only project modules (or errors messages if there are so)
+#/
+#/         [--offline | --airplane-mode]
+#/                                  to work offline without updating origin/MAIN_BRANCH_NAME
+#/                                  and to stop searching for vuh updates.
+#/
+#/     mrp, module-root-path        Show root path of specified module (for monorepos projects).
+#/
+#/         [-q | --quiet]           to show only root path (or errors messages if there are so).
+#/
+#/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
+#/
+#/     pm, project-modules          Show all project modules of current mono repository
+#/                                  that were specified in .vuh file.
+#/
+#/         [-q | --quiet]           to show only project modules (or errors messages if there are so).
 #/
 #/ This tool suggest relevant version for your current project or even update your local project's version.
 #/ Vuh can work with your project's versions from any directory inside of your local repository.
@@ -61,7 +112,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.5.3'
+VUH_VERSION='2.6.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -102,6 +153,7 @@ SPECIFIED_MAIN_BRANCH=''
 ARGUMENT_QUIET='false'
 ARGUMENT_CHECK_GIT_DIFF='false'
 ARGUMENT_DONT_CHECK_GIT_DIFF='false'
+ARGUMENT_OFFLINE='false'
 
 
 function _show_function_title() {
@@ -542,20 +594,32 @@ function _fetch_remote_branches() {
 function _clone_main_to_tmp() {
   cur_date_time="$(date +%s%N)"
   PROJECT_COPY_TMP_DIR="vuh_project_copy_$cur_date_time"
-  remote_origin_url_name="$(git config remote.origin.url)"
-  git clone -q -n --depth 1 "$remote_origin_url_name" "/tmp/$PROJECT_COPY_TMP_DIR" || {
-    _show_error_message "Failed to clone repository ($remote_origin_url_name) to temporary directory!"
-    _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
-    rm -f "/tmp/$PROJECT_COPY_TMP_DIR"
-    return 1
-  }
-  cd "/tmp/$PROJECT_COPY_TMP_DIR" || return 1
-  git checkout -q "$MAIN_BRANCH_NAME" || {
-    _show_error_message "Failed to get '$MAIN_BRANCH_NAME' in temporary repository!"
-    _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
-    rm -f "/tmp/$PROJECT_COPY_TMP_DIR"
-    return 1
-  }
+  if [ "$ARGUMENT_OFFLINE" = 'true' ]; then
+    # TODO copy from current origin/MAIN_BRANCH_NAME for faster result
+    cp -r "$ROOT_REPO_DIR" "/tmp/$PROJECT_COPY_TMP_DIR"
+    cd "/tmp/$PROJECT_COPY_TMP_DIR" || return 1
+    git checkout -fq "$MAIN_BRANCH_NAME" || {
+      _show_error_message "Failed to get '$MAIN_BRANCH_NAME' in temporary repository!"
+      _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
+      _remove_tmp_dir "$PROJECT_COPY_TMP_DIR"
+      return 1
+    }
+  else
+    remote_origin_url_name="$(git config remote.origin.url)"
+    git clone -q -n --depth 1 "$remote_origin_url_name" "/tmp/$PROJECT_COPY_TMP_DIR" || {
+      _show_error_message "Failed to clone repository ($remote_origin_url_name) to temporary directory!"
+      _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
+      _remove_tmp_dir "$PROJECT_COPY_TMP_DIR"
+      return 1
+    }
+    cd "/tmp/$PROJECT_COPY_TMP_DIR" || return 1
+    git checkout -q "$MAIN_BRANCH_NAME" || {
+      _show_error_message "Failed to get '$MAIN_BRANCH_NAME' in temporary repository!"
+      _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
+      _remove_tmp_dir "$PROJECT_COPY_TMP_DIR"
+      return 1
+    }
+  fi
   cd "$CUR_DIR" || return 1
 }
 
@@ -740,18 +804,18 @@ function read_main_version() {
     }
   fi
   _clone_main_to_tmp || exit 1
-  if [ "$ARGUMENT_QUIET" = 'false' ]; then
-    _load_remote_conf_file "$remote_branch" || {
-      _show_warning_message "vuh will use local configuration to get remote version from origin/$remote_branch"
-      _load_local_conf_file || exit 1
-    }
-  elif [ "$ARGUMENT_QUIET" = 'true' ]; then
+  if [ "$ARGUMENT_QUIET" = 'true' ]; then
     {
       _load_remote_conf_file "$remote_branch" || {
         _show_warning_message "vuh will use local configuration to get remote version from origin/$remote_branch"
         _load_local_conf_file || exit 1
       }
     } > /dev/null
+  else
+    _load_remote_conf_file "$remote_branch" || {
+      _show_warning_message "vuh will use local configuration to get remote version from origin/$remote_branch"
+      _load_local_conf_file || exit 1
+    }
   fi
   main_branch_file=$(cat "/tmp/$PROJECT_COPY_TMP_DIR/$VERSION_FILE") || {
     _show_error_message "Failed to load file 'origin/$remote_branch:$VERSION_FILE'"
@@ -777,8 +841,9 @@ function read_main_version() {
 function get_suggesting_version() {
   read_local_version || exit 1
   read_main_version || exit 1
+  [ "$ARGUMENT_OFFLINE" = 'true' ] || _fetch_remote_branches || exit 1
   _load_local_conf_file || exit 1
-  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'suggesting relevant version'
+  [ "$ARGUMENT_QUIET" = 'true' ] || _show_function_title 'suggesting relevant version'
   largest_version=$(_get_largest_version "$MAIN_VERSION" "$LOCAL_VERSION") || {
     _show_error_message "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
     exit 1
@@ -1041,6 +1106,10 @@ while [[ $# -gt 0 ]]; do
     fi
     ARGUMENT_DONT_CHECK_GIT_DIFF='true'
     shift ;;
+  --offline|--airplane-mode)
+    _check_arg "$1"
+    ARGUMENT_OFFLINE='true'
+    shift ;;
   -mb=*)
     _check_arg "$1"
     SPECIFIED_MAIN_BRANCH=${1#*=}
@@ -1056,7 +1125,7 @@ done
 
 if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
     [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]] &&
-    [[ "$ARGUMENT_QUIET" != 'true' ]]; then
+    [[ "$ARGUMENT_QUIET" != 'true' ]] && [[ "$ARGUMENT_OFFLINE" != 'true' ]]; then
   tmp_specified_project_module="$SPECIFIED_PROJECT_MODULE"
   SPECIFIED_PROJECT_MODULE=''
   _regular_check_available_updates
