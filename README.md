@@ -80,58 +80,99 @@ To use vuh with your project you should first create .vuh file in root folder of
         --update                 check for available vuh updates and ask to install latest version
     
     Commands:
-        lv, local-version            show local current version (default format)
-            [-q | --quiet]           to show only version number (or errors messages if there are so)
-            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
-        mv, main-version             show version of origin/MAIN_BRANCH_NAME
-            [-q | --quiet]           to show only version number (or errors messages if there are so)
-            [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
-            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
-            [--offline
-              | --airplane-mode]     to work offline without updating origin/MAIN_BRANCH_NAME
+        lv, local-version            Show local current version (default format).
+
+            [-q | --quiet]           to show only version number (or errors messages if there are so).
+
+            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+
+        mv, main-version             Show version of origin/MAIN_BRANCH_NAME.
+
+            [-q | --quiet]           to show only version number (or errors messages if there are so).
+
+            [-mb=<main_branch_name>] to use another main branch (instead of main branch specified in .vuh file).
+                                     This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
+
+            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+
+            [--offline | --airplane-mode]     
+                                     to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
-        sv, suggesting-version       show suggesting version which this branch should use
-            [-q | --quiet]           to show only version number (or errors messages if there are so)
-            [-v=<version>]           to specify your own version which also will be taken into account
+
+        sv, suggesting-version       Show suggesting version which this branch should use.
+
+            [-q | --quiet]           to show only version number (or errors messages if there are so).
+
+            [-v=<version>]           to specify your own version which also will be taken into account.
                                      This parameter can't be use with '-vp' parameter!
-            [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+
+            [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch').
                                      This parameter can't be use with '-v' parameter!
-            [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
-            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+
+            [-mb=<main_branch_name>] to use another main branch (instead of main branch specified in .vuh file).
+                                     This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
+
+            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+
             [--check-git-diff]       to automatically increase version only if current branch has git difference
                                      with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
                                      modify your current version if your current version is the same as main version.
+                                     This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
+                                     configuration variable from .vuh file.
                                      This parameter can't be used with '--dont-check-git-diff'.
-            [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway. 
+
+            [--dont-check-git-diff]  to increase anyway either there are changes or not. 
                                      Suggesting to use this parameter to force increasing version when your project 
                                      configuration expects to increase versions only when there is git diff.
+                                     This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
+                                     configuration variable from .vuh file.
                                      This parameter can't be used with '--check-git-diff'.
-            [--offline
-              | --airplane-mode]     to work offline without updating origin/MAIN_BRANCH_NAME
+
+            [--offline | --airplane-mode]     
+                                     to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
-        uv, update-version           replace your local version with suggesting version which this branch should use
-            [-v=<version>]           to specify your own version which also will be taken into account
+
+        uv, update-version           Replace your local version with suggesting version which this branch should use.
+
+            [-v=<version>]           to specify your own version which also will be taken into account.
                                      This parameter can't be use with '-vp' parameter!
-            [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch')
+
+            [-vp=<version_part>]     to force increasing specified part of the version ('major', 'minor' or 'patch').
                                      This parameter can't be use with '-v' parameter!
-            [-mb=<version>]          to use another main branch (instead of main branch specified in .vuh file)
-            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default)
+
+            [-mb=<main_branch_name>] to use another main branch (instead of main branch specified in .vuh file).
+                                     This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
+
+            [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+
             [--check-git-diff]       to automatically increase version only if current branch has git difference
                                      with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
                                      modify your current version if your current version is the same as main version.
+                                     This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
+                                     configuration variable from .vuh file.
                                      This parameter can't be used with '--dont-check-git-diff'.
-            [--dont-check-git-diff]  if this parameter was used vuh will require to increse version anyway. 
+
+            [--dont-check-git-diff]  to increase anyway either there are changes or not. 
                                      Suggesting to use this parameter to force increasing version when your project 
                                      configuration expects to increase versions only when there is git diff.
+                                     This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
+                                     configuration variable from .vuh file.
                                      This parameter can't be used with '--check-git-diff'.
-            [--offline
-              | --airplane-mode]     to work offline without updating origin/MAIN_BRANCH_NAME
+
+            [--offline | --airplane-mode]     
+                                     to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
-        mrp, module-root-path        show root path of specified module (for monorepos projects)
-            [-q | --quiet]           to show only root path (or errors messages if there are so)
-            [-pm=<project_module>]   to use specified module of mono repository project (instead of default)
-        pm, project-modules          show all project modules of current mono repository that were specified in .vuh
-            [-q | --quiet]           to show only project modules (or errors messages if there are so)
+
+        mrp, module-root-path        Show root path of specified module (for monorepos projects).
+
+            [-q | --quiet]           to show only root path (or errors messages if there are so).
+
+            [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
+
+        pm, project-modules          Show all project modules of current mono repository 
+                                     that were specified in .vuh file.
+
+            [-q | --quiet]           to show only project modules (or errors messages if there are so).
     
     This tool suggest relevant version for your current project or even update your local project's version.
     Vuh can work with your project's versions from any directory inside of your local repository.
