@@ -16,6 +16,14 @@
 #/
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
 #/
+#/         [--dont-use-git]         don't use any git commands.
+#/                                  In this case you should run vuh in root directory (which contains .vuh)
+#/                                  or specify path to it using '--config-path=<path>' parameter.
+#/
+#/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+#/                                  You dont need to specify it if you are working with git repository.
+#/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
+#/
 #/     mv, main-version             Show version of origin/MAIN_BRANCH_NAME.
 #/
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so).
@@ -28,6 +36,7 @@
 #/         [--offline | --airplane-mode]
 #/                                  to work offline without updating origin/MAIN_BRANCH_NAME
 #/                                  and to stop searching for vuh updates.
+#/
 #/     sv, suggesting-version       Show suggesting version which this branch should use.
 #/
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so).
@@ -65,9 +74,13 @@
 #/
 #/         [--dont-use-git]         don't use any git commands.
 #/                                  In this case you should run vuh in root directory (which contains .vuh)
-#/                                  or specify path to it.
+#/                                  or specify path to it using '--config-path=<path>' parameter.
 #/                                  This parameter can't be used with '--check-git-diff'.
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
+#/
+#/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+#/                                  You dont need to specify it if you are working with git repository.
+#/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     uv, update-version           Replace your local version with suggesting version which this branch should use.
 #/
@@ -104,9 +117,13 @@
 #/
 #/         [--dont-use-git]         don't use any git commands.
 #/                                  In this case you should run vuh in root directory (which contains .vuh)
-#/                                  or specify path to it.
+#/                                  or specify path to it using '--config-path=<path>' parameter.
 #/                                  This parameter can't be used with '--check-git-diff'.
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
+#/
+#/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+#/                                  You dont need to specify it if you are working with git repository.
+#/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     mrp, module-root-path        Show root path of specified module (for monorepos projects).
 #/
@@ -114,10 +131,26 @@
 #/
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
 #/
+#/         [--dont-use-git]         don't use any git commands.
+#/                                  In this case you should run vuh in root directory (which contains .vuh)
+#/                                  or specify path to it using '--config-path=<path>' parameter.
+#/
+#/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+#/                                  You dont need to specify it if you are working with git repository.
+#/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
+#/
 #/     pm, project-modules          Show all project modules of current mono repository
 #/                                  that were specified in .vuh file.
 #/
 #/         [-q | --quiet]           to show only project modules (or errors messages if there are so).
+#/
+#/         [--dont-use-git]         don't use any git commands.
+#/                                  In this case you should run vuh in root directory (which contains .vuh)
+#/                                  or specify path to it using '--config-path=<path>' parameter.
+#/
+#/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+#/                                  You dont need to specify it if you are working with git repository.
+#/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/ This tool suggest relevant version for your current project or even update your local project's version.
 #/ Vuh can work with your project's versions from any directory inside of your local repository.
@@ -165,6 +198,7 @@ SPECIFIED_VERSION=''
 SPECIFIED_INCREASING_VERSION_PART='patch'
 SPECIFIED_PROJECT_MODULE=''
 SPECIFIED_MAIN_BRANCH=''
+SPECIFIED_CONFIG_DIR=''
 ARGUMENT_QUIET='false'
 ARGUMENT_CHECK_GIT_DIFF='false'
 ARGUMENT_DONT_CHECK_GIT_DIFF='false'
@@ -581,7 +615,11 @@ function _is_git_diff_in_location() {
 
 function _get_root_repo_dir() {
   if [ "$ARGUMENT_DONT_USE_GIT" = 'true' ]; then
-    ROOT_REPO_DIR="$CUR_DIR"
+    if [ "$SPECIFIED_CONFIG_DIR" = '' ]; then
+      ROOT_REPO_DIR="$CUR_DIR"
+    else
+      ROOT_REPO_DIR="$SPECIFIED_CONFIG_DIR"
+    fi
   else
     ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
       _show_error_message "Can't find root repo directory!"
@@ -1167,6 +1205,10 @@ while [[ $# -gt 0 ]]; do
   -mb=*)
     _check_arg "$1"
     SPECIFIED_MAIN_BRANCH=${1#*=}
+    shift ;;
+  --config-dir=*)
+    _check_arg "$1"
+    SPECIFIED_CONFIG_DIR=${1#*=}
     shift ;;
   -*)
     _show_invalid_usage_error_message "Unknown option '$1'!"
