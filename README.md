@@ -120,6 +120,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
                                      configuration variable from .vuh file.
                                      This parameter can't be used with '--dont-check-git-diff'.
+                                     This parameter can't be used with '--dont-use-git'.
 
             [--dont-check-git-diff]  to increase anyway either there are changes or not. 
                                      Suggesting to use this parameter to force increasing version when your project 
@@ -127,10 +128,17 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
                                      configuration variable from .vuh file.
                                      This parameter can't be used with '--check-git-diff'.
+                                     This parameter can't be used with '--dont-use-git'.
 
             [--offline | --airplane-mode]     
                                      to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
+
+            [--dont-use-git]         don't use any git commands.
+                                     In this case you should run vuh in root directory (which contains .vuh)
+                                     or specify path to it.
+                                     This parameter can't be used with '--check-git-diff'.
+                                     This parameter can't be used with '--dont-check-git-diff'.
 
         uv, update-version           Replace your local version with suggesting version which this branch should use.
 
@@ -151,6 +159,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
                                      configuration variable from .vuh file.
                                      This parameter can't be used with '--dont-check-git-diff'.
+                                     This parameter can't be used with '--dont-use-git'.
 
             [--dont-check-git-diff]  to increase anyway either there are changes or not. 
                                      Suggesting to use this parameter to force increasing version when your project 
@@ -158,10 +167,17 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
                                      configuration variable from .vuh file.
                                      This parameter can't be used with '--check-git-diff'.
+                                     This parameter can't be used with '--dont-use-git'.
 
             [--offline | --airplane-mode]     
                                      to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
+
+            [--dont-use-git]         don't use any git commands.
+                                     In this case you should run vuh in root directory (which contains .vuh)
+                                     or specify path to it.
+                                     This parameter can't be used with '--check-git-diff'.
+                                     This parameter can't be used with '--dont-check-git-diff'.
 
         mrp, module-root-path        Show root path of specified module (for monorepos projects).
 

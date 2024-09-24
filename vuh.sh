@@ -28,7 +28,6 @@
 #/         [--offline | --airplane-mode]
 #/                                  to work offline without updating origin/MAIN_BRANCH_NAME
 #/                                  and to stop searching for vuh updates.
-#/
 #/     sv, suggesting-version       Show suggesting version which this branch should use.
 #/
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so).
@@ -50,6 +49,7 @@
 #/                                  This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES
 #/                                  configuration variable from .vuh file.
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
+#/                                  This parameter can't be used with '--dont-use-git'.
 #/
 #/         [--dont-check-git-diff]  to increase anyway either there are changes or not.
 #/                                  Suggesting to use this parameter to force increasing version when your project
@@ -57,10 +57,17 @@
 #/                                  This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES
 #/                                  configuration variable from .vuh file.
 #/                                  This parameter can't be used with '--check-git-diff'.
+#/                                  This parameter can't be used with '--dont-use-git'.
 #/
 #/         [--offline | --airplane-mode]
 #/                                  to work offline without updating origin/MAIN_BRANCH_NAME
 #/                                  and to stop searching for vuh updates.
+#/
+#/         [--dont-use-git]         don't use any git commands.
+#/                                  In this case you should run vuh in root directory (which contains .vuh)
+#/                                  or specify path to it.
+#/                                  This parameter can't be used with '--check-git-diff'.
+#/                                  This parameter can't be used with '--dont-check-git-diff'.
 #/
 #/     uv, update-version           Replace your local version with suggesting version which this branch should use.
 #/
@@ -81,6 +88,7 @@
 #/                                  This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES
 #/                                  configuration variable from .vuh file.
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
+#/                                  This parameter can't be used with '--dont-use-git'.
 #/
 #/         [--dont-check-git-diff]  to increase anyway either there are changes or not.
 #/                                  Suggesting to use this parameter to force increasing version when your project
@@ -88,10 +96,17 @@
 #/                                  This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES
 #/                                  configuration variable from .vuh file.
 #/                                  This parameter can't be used with '--check-git-diff'.
+#/                                  This parameter can't be used with '--dont-use-git'.
 #/
 #/         [--offline | --airplane-mode]
 #/                                  to work offline without updating origin/MAIN_BRANCH_NAME
 #/                                  and to stop searching for vuh updates.
+#/
+#/         [--dont-use-git]         don't use any git commands.
+#/                                  In this case you should run vuh in root directory (which contains .vuh)
+#/                                  or specify path to it.
+#/                                  This parameter can't be used with '--check-git-diff'.
+#/                                  This parameter can't be used with '--dont-check-git-diff'.
 #/
 #/     mrp, module-root-path        Show root path of specified module (for monorepos projects).
 #/
@@ -112,7 +127,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.6.1'
+VUH_VERSION='2.7.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -154,6 +169,7 @@ ARGUMENT_QUIET='false'
 ARGUMENT_CHECK_GIT_DIFF='false'
 ARGUMENT_DONT_CHECK_GIT_DIFF='false'
 ARGUMENT_OFFLINE='false'
+ARGUMENT_DONT_USE_GIT='false'
 
 
 function _show_function_title() {
@@ -849,7 +865,7 @@ function read_main_version() {
   fi
 }
 
-function get_suggesting_version() {
+function _get_suggesting_version_using_git() {
   read_local_version || exit 1
   read_main_version || exit 1
   [ "$ARGUMENT_OFFLINE" = 'true' ] || _fetch_remote_branches || exit 1
@@ -932,6 +948,30 @@ function get_suggesting_version() {
     else
       SUGGESTING_VERSION=$LOCAL_VERSION
     fi
+  fi
+}
+
+function _get_suggesting_version_without_git() {
+  [ "$ARGUMENT_QUIET" = 'true' ] || echo "Using vuh without git!"
+  read_local_version || exit 1
+  [ "$ARGUMENT_QUIET" = 'true' ] || _show_function_title 'suggesting relevant version'
+  if [ "$SPECIFIED_VERSION" = '' ]; then
+    # if used -vp=.. param
+    SUGGESTING_VERSION=$(_get_incremented_version_if_allowed "$LOCAL_VERSION" "true")
+  else
+    # if used -v=.. param
+    SUGGESTING_VERSION=$(_get_largest_version "$LOCAL_VERSION" "$SPECIFIED_VERSION") || {
+      _show_error_message "Failed to select larger version between '$LOCAL_VERSION' and '$SPECIFIED_VERSION'!"
+      exit 1
+    }
+  fi
+}
+
+function get_suggesting_version() {
+  if [ "$ARGUMENT_DONT_USE_GIT" = 'true' ]; then
+    _get_suggesting_version_without_git || exit 1
+  else
+    _get_suggesting_version_using_git || exit 1
   fi
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     _show_suggested_versions_comparison
@@ -1098,16 +1138,28 @@ while [[ $# -gt 0 ]]; do
   --check-git-diff)
     _check_arg "$1"
     _show_cant_use_both_arguments '--check-git-diff' '--dont-check-git-diff' "$ARGUMENT_DONT_CHECK_GIT_DIFF" 'false'
+    _show_cant_use_both_arguments '--check-git-diff' '--dont-use-git' "$ARGUMENT_DONT_USE_GIT" 'false'
     ARGUMENT_CHECK_GIT_DIFF='true'
     shift ;;
   --dont-check-git-diff)
     _check_arg "$1"
-    _show_cant_use_both_arguments '--check-git-diff' '--dont-check-git-diff' "$ARGUMENT_CHECK_GIT_DIFF" 'false'
+    _show_cant_use_both_arguments '--dont-check-git-diff' '--check-git-diff' "$ARGUMENT_CHECK_GIT_DIFF" 'false'
+    _show_cant_use_both_arguments '--dont-check-git-diff' '--dont-use-git' "$ARGUMENT_DONT_USE_GIT" 'false'
     ARGUMENT_DONT_CHECK_GIT_DIFF='true'
     shift ;;
   --offline|--airplane-mode)
     _check_arg "$1"
     ARGUMENT_OFFLINE='true'
+    shift ;;
+  --dont-use-git)
+    _check_arg "$1"
+    _show_cant_use_both_arguments '--dont-use-git' '--check-git-diff' "$ARGUMENT_CHECK_GIT_DIFF" 'false'
+    _show_cant_use_both_arguments '--dont-use-git' '--dont-check-git-diff' "$ARGUMENT_DONT_CHECK_GIT_DIFF" 'false'
+    if [ "$COMMAND" = 'main-version' ]; then
+      _show_invalid_usage_error_message "You can't use --dont-use-git parameter with 'mv' or 'main-version' command!"
+      exit 1
+    fi
+    ARGUMENT_DONT_USE_GIT='true'
     shift ;;
   -mb=*)
     _check_arg "$1"
