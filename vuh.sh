@@ -580,11 +580,14 @@ function _is_git_diff_in_location() {
 }
 
 function _get_root_repo_dir() {
-  ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
-    _show_error_message "Can't find root repo directory!"
-    echo
-    return 1
-  }
+  if [ "$ARGUMENT_DONT_USE_GIT" = 'true' ]; then
+    ROOT_REPO_DIR="$CUR_DIR"
+  else
+    ROOT_REPO_DIR=$(git rev-parse --show-toplevel) || {
+      _show_error_message "Can't find root repo directory!"
+      return 1
+    }
+  fi
 }
 
 function _get_version_line_from_file() {
