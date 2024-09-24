@@ -112,7 +112,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.6.0'
+VUH_VERSION='2.6.1'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -181,6 +181,17 @@ function _show_invalid_usage_error_message() {
   message=$1
   _show_error_message "$message"
   echo 'Use "vuh --help" to see available commands and options information'
+}
+
+function _show_cant_use_both_arguments() {
+  arg1_name=$1
+  arg2_name=$2
+  checking_arg_value=$3
+  checking_arg_default_value=$4
+  if [ "$checking_arg_value" != "$checking_arg_default_value" ]; then
+    _show_invalid_usage_error_message "You can't use both parameters: '$arg1_name' and '$arg2_name'!"
+    exit 1
+  fi
 }
 
 function _show_try_grep_command_message() {
@@ -1067,18 +1078,12 @@ while [[ $# -gt 0 ]]; do
     shift ;;
   -v=*)
     _check_arg "$1"
-    if [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ]; then
-      _show_invalid_usage_error_message "You can't use both parameters: '-v' and '-vp'!"
-      exit 1
-    fi
+    _show_cant_use_both_arguments '-v' '-vp' "$SPECIFIED_INCREASING_VERSION_PART" 'patch'
     SPECIFIED_VERSION=${1#*=}
     shift ;;
   -vp=*)
     _check_arg "$1"
-    if [ "$SPECIFIED_VERSION" != '' ]; then
-      _show_invalid_usage_error_message "You can't use both parameters: '-v' and '-vp'!"
-      exit 1
-    fi
+    _show_cant_use_both_arguments '-v' '-vp' "$SPECIFIED_VERSION" ''
     SPECIFIED_INCREASING_VERSION_PART=${1#*=}
     _update_increasing_version_part "$SPECIFIED_INCREASING_VERSION_PART"
     shift ;;
@@ -1092,18 +1097,12 @@ while [[ $# -gt 0 ]]; do
     shift ;;
   --check-git-diff)
     _check_arg "$1"
-    if [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" = 'true' ]; then
-      _show_invalid_usage_error_message "You can't use both parameters: '--check-git-diff' and '--dont-check-git-diff'!"
-      exit 1
-    fi
+    _show_cant_use_both_arguments '--check-git-diff' '--dont-check-git-diff' "$ARGUMENT_DONT_CHECK_GIT_DIFF" 'false'
     ARGUMENT_CHECK_GIT_DIFF='true'
     shift ;;
   --dont-check-git-diff)
     _check_arg "$1"
-    if [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ]; then
-      _show_invalid_usage_error_message "You can't use both parameters: '--check-git-diff' and '--dont-check-git-diff'!"
-      exit 1
-    fi
+    _show_cant_use_both_arguments '--check-git-diff' '--dont-check-git-diff' "$ARGUMENT_CHECK_GIT_DIFF" 'false'
     ARGUMENT_DONT_CHECK_GIT_DIFF='true'
     shift ;;
   --offline|--airplane-mode)
