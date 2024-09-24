@@ -642,7 +642,11 @@ function _get_version_from_file() {
   version_file=$1
   version_line=$(_get_version_line_from_file "$version_file") || return 1
   version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$version_line") || return 1
-  version=${version_line##*"$version_prefix"} || return 1
+  if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
+    version=${version_line##*"$version_prefix"} || return 1
+  else
+    version="$version_line"
+  fi
   if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
     version_postfix=$(sed -r "s/.*($TEXT_AFTER_VERSION_CODE)/\1/" <<< "$version") || return 1
     version=${version%%"$version_postfix"*} || return 1
