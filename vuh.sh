@@ -687,7 +687,7 @@ function _unset_conf_variables() {
 # Returns nothing.
 function _check_conf_data_loaded_properly() {
   # vuh-0.1.0
-  if [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ] ||
+  if { [ "$ARGUMENT_DONT_USE_GIT" != 'true' ] && [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ]; } ||
       [ "$VERSION_FILE" = 'NO_VERSION_FILE' ] ||
       [ "$TEXT_BEFORE_VERSION_CODE" = 'NO_TEXT_BEFORE_VERSION_CODE' ] ||
       [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ]; then
