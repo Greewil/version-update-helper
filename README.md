@@ -86,6 +86,14 @@ To use vuh with your project you should first create .vuh file in root folder of
 
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
 
+            [--dont-use-git]         don't use any git commands.
+                                     In this case you should run vuh in root directory (which contains .vuh)
+                                     or specify path to it using '--config-path=<path>' parameter.
+
+            [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+                                     You dont need to specify it if you are working with git repository.
+                                     Suggesting to use this parameter with '--dont-use-git' parameter.
+
         mv, main-version             Show version of origin/MAIN_BRANCH_NAME.
 
             [-q | --quiet]           to show only version number (or errors messages if there are so).
@@ -120,6 +128,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
                                      configuration variable from .vuh file.
                                      This parameter can't be used with '--dont-check-git-diff'.
+                                     This parameter can't be used with '--dont-use-git'.
 
             [--dont-check-git-diff]  to increase anyway either there are changes or not. 
                                      Suggesting to use this parameter to force increasing version when your project 
@@ -127,10 +136,21 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
                                      configuration variable from .vuh file.
                                      This parameter can't be used with '--check-git-diff'.
+                                     This parameter can't be used with '--dont-use-git'.
 
             [--offline | --airplane-mode]     
                                      to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
+
+            [--dont-use-git]         don't use any git commands.
+                                     In this case you should run vuh in root directory (which contains .vuh)
+                                     or specify path to it using '--config-path=<path>' parameter.
+                                     This parameter can't be used with '--check-git-diff'.
+                                     This parameter can't be used with '--dont-check-git-diff'.
+
+            [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+                                     You dont need to specify it if you are working with git repository.
+                                     Suggesting to use this parameter with '--dont-use-git' parameter.
 
         uv, update-version           Replace your local version with suggesting version which this branch should use.
 
@@ -151,6 +171,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
                                      configuration variable from .vuh file.
                                      This parameter can't be used with '--dont-check-git-diff'.
+                                     This parameter can't be used with '--dont-use-git'.
 
             [--dont-check-git-diff]  to increase anyway either there are changes or not. 
                                      Suggesting to use this parameter to force increasing version when your project 
@@ -158,10 +179,21 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES  
                                      configuration variable from .vuh file.
                                      This parameter can't be used with '--check-git-diff'.
+                                     This parameter can't be used with '--dont-use-git'.
 
             [--offline | --airplane-mode]     
                                      to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
+
+            [--dont-use-git]         don't use any git commands.
+                                     In this case you should run vuh in root directory (which contains .vuh)
+                                     or specify path to it using '--config-path=<path>' parameter.
+                                     This parameter can't be used with '--check-git-diff'.
+                                     This parameter can't be used with '--dont-check-git-diff'.
+
+            [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+                                     You dont need to specify it if you are working with git repository.
+                                     Suggesting to use this parameter with '--dont-use-git' parameter.
 
         mrp, module-root-path        Show root path of specified module (for monorepos projects).
 
@@ -169,10 +201,26 @@ To use vuh with your project you should first create .vuh file in root folder of
 
             [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
 
+            [--dont-use-git]         don't use any git commands.
+                                     In this case you should run vuh in root directory (which contains .vuh)
+                                     or specify path to it using '--config-path=<path>' parameter.
+
+            [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+                                     You dont need to specify it if you are working with git repository.
+                                     Suggesting to use this parameter with '--dont-use-git' parameter.
+
         pm, project-modules          Show all project modules of current mono repository 
                                      that were specified in .vuh file.
 
             [-q | --quiet]           to show only project modules (or errors messages if there are so).
+
+            [--dont-use-git]         don't use any git commands.
+                                     In this case you should run vuh in root directory (which contains .vuh)
+                                     or specify path to it using '--config-path=<path>' parameter.
+
+            [--config-dir=<path>]    Search for .vuh configuration file in another directory.
+                                     You dont need to specify it if you are working with git repository.
+                                     Suggesting to use this parameter with '--dont-use-git' parameter.
     
     This tool suggest relevant version for your current project or even update your local project's version.
     Vuh can work with your project's versions from any directory inside of your local repository.
