@@ -160,7 +160,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.7.1'
+VUH_VERSION='2.7.2'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -642,7 +642,7 @@ function _get_version_from_file() {
   version_file=$1
   version_line=$(_get_version_line_from_file "$version_file") || return 1
   version_prefix=$(sed -r "s/($TEXT_BEFORE_VERSION_CODE).*/\1/" <<< "$version_line") || return 1
-  if [[ "$TEXT_AFTER_VERSION_CODE" != '' ]]; then
+  if [[ "$TEXT_BEFORE_VERSION_CODE" != '' ]]; then
     version=${version_line##*"$version_prefix"} || return 1
   else
     version="$version_line"
