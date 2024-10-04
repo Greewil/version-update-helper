@@ -160,7 +160,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.7.0'
+VUH_VERSION='2.7.1'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -728,7 +728,9 @@ function _unset_conf_variables() {
 #
 # Returns nothing.
 function _check_conf_data_loaded_properly() {
-  # vuh-0.1.0
+  if [ "$COMMAND" = 'project-modules' ]; then
+    return 0
+  fi
   if { [ "$ARGUMENT_DONT_USE_GIT" != 'true' ] && [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ]; } ||
       [ "$VERSION_FILE" = 'NO_VERSION_FILE' ] ||
       [ "$TEXT_BEFORE_VERSION_CODE" = 'NO_TEXT_BEFORE_VERSION_CODE' ] ||
