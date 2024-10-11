@@ -160,7 +160,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.7.2'
+VUH_VERSION='2.8.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -361,7 +361,8 @@ function _use_module_configuration_if_it_exists() {
   next_handling_module=$1
   if [ "$next_handling_module" != "" ]; then
     module_specified='false'
-    IFS=',' read -ra ADDR <<< "$PROJECT_MODULES"
+    project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
     for module in "${ADDR[@]}"; do
       if [ "$next_handling_module" = "$module" ]; then
         _use_module_configuration "$next_handling_module" || return 1

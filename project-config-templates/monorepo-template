@@ -52,7 +52,7 @@ IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
 #   Configuration variable for module should looks like: <MODULE_NAME>_<VARIABLE_NAME>.
 # example: 'UI,API' (for mono repository with two modules: UI and API)
 #   Also you can see example here: https://github.com/Greewil/version-update-helper/blob/main/.vuh
-PROJECT_MODULES='API,WEB'
+PROJECT_MODULES='API, WEB'
 
 # variables for API module
 API_VERSION_FILE='api/build.gradle.kts'
