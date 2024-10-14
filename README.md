@@ -154,6 +154,8 @@ To use vuh with your project you should first create .vuh file in root folder of
 
         uv, update-version           Replace your local version with suggesting version which this branch should use.
 
+            [-q | --quiet]           to show only version number (or errors messages if there are so).
+
             [-v=<version>]           to specify your own version which also will be taken into account.
                                      This parameter can't be use with '-vp' parameter!
 
