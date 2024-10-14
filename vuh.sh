@@ -84,6 +84,8 @@
 #/
 #/     uv, update-version           Replace your local version with suggesting version which this branch should use.
 #/
+#/         [-q | --quiet]           to show only version number (or errors messages if there are so).
+#/
 #/         [-v=<version>]           to specify your own version which also will be taken into account.
 #/                                  This parameter can't be use with '-vp' parameter!
 #/
@@ -160,7 +162,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.8.0'
+VUH_VERSION='2.9.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
