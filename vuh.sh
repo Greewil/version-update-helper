@@ -183,7 +183,6 @@ LIGHT_CYAN='\e[1;36m' # for changes
 # vuh global variables (Please don't modify!)
 ROOT_REPO_DIR=''
 CUR_DIR=''
-PROJECT_COPY_TMP_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SUGGESTING_VERSION=''
@@ -666,38 +665,6 @@ function _fetch_remote_branches() {
   }
 }
 
-function _clone_main_to_tmp() {
-  cur_date_time="$(date +%s%N)"
-  PROJECT_COPY_TMP_DIR="vuh_project_copy_$cur_date_time"
-  if [ "$ARGUMENT_OFFLINE" = 'true' ]; then
-    # TODO copy from current origin/MAIN_BRANCH_NAME for faster result
-    cp -r "$ROOT_REPO_DIR" "/tmp/$PROJECT_COPY_TMP_DIR"
-    cd "/tmp/$PROJECT_COPY_TMP_DIR" || return 1
-    git checkout -fq "$MAIN_BRANCH_NAME" || {
-      _show_error_message "Failed to get '$MAIN_BRANCH_NAME' in temporary repository!"
-      _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
-      _remove_tmp_dir "$PROJECT_COPY_TMP_DIR"
-      return 1
-    }
-  else
-    remote_origin_url_name="$(git config remote.origin.url)"
-    git clone -q -n --depth 1 "$remote_origin_url_name" "/tmp/$PROJECT_COPY_TMP_DIR" || {
-      _show_error_message "Failed to clone repository ($remote_origin_url_name) to temporary directory!"
-      _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
-      _remove_tmp_dir "$PROJECT_COPY_TMP_DIR"
-      return 1
-    }
-    cd "/tmp/$PROJECT_COPY_TMP_DIR" || return 1
-    git checkout -q "$MAIN_BRANCH_NAME" || {
-      _show_error_message "Failed to get '$MAIN_BRANCH_NAME' in temporary repository!"
-      _show_error_message 'If git threw "Permission denied (publickey)" then maybe you should configure public keys.'
-      _remove_tmp_dir "$PROJECT_COPY_TMP_DIR"
-      return 1
-    }
-  fi
-  cd "$CUR_DIR" || return 1
-}
-
 function _remove_tmp_dir() {
   dir_to_remove=$1
   [ "$dir_to_remove" != '' ] && rm -rf "/tmp/$dir_to_remove"
@@ -767,12 +734,13 @@ function _load_local_conf_file() {
 function _load_remote_conf_file() {
   _unset_conf_variables || return 1
   branch_name=$1
-  main_branch_config_file=$(cat "/tmp/$PROJECT_COPY_TMP_DIR/.vuh") || {
-    _show_error_message "Failed to read remote configuration file origin/$branch_name:.vuh!"
+  handling_config_file="origin/$branch_name:./.vuh"
+  main_branch_config_file=$(git show "$handling_config_file") || {
+    _show_error_message "Failed to read remote configuration file $handling_config_file!"
     return 1
   }
   _load_project_variables_from_config "$main_branch_config_file" || {
-    _show_error_message "Failed to load variables from remote configuration file origin/$branch_name:.vuh!"
+    _show_error_message "Failed to load variables from remote configuration file $handling_config_file!"
     return 1
   }
   _check_conf_data_loaded_properly || return 1
@@ -880,7 +848,6 @@ function read_main_version() {
       exit 1
     }
   fi
-  _clone_main_to_tmp || exit 1
   if [ "$ARGUMENT_QUIET" = 'true' ]; then
     {
       _load_remote_conf_file "$remote_branch" || {
@@ -894,12 +861,13 @@ function read_main_version() {
       _load_local_conf_file || exit 1
     }
   fi
-  main_branch_file=$(cat "/tmp/$PROJECT_COPY_TMP_DIR/$VERSION_FILE") || {
-    _show_error_message "Failed to load file 'origin/$remote_branch:$VERSION_FILE'"
+  handling_file="origin/$remote_branch:./$VERSION_FILE"
+  main_branch_file=$(git show "$handling_file") || {
+    _show_error_message "Failed to load file $handling_file"
     exit 1
   }
   MAIN_VERSION=$(_get_version_from_file "$main_branch_file") || {
-    _show_error_message "Failed to get main version from 'origin/$remote_branch:$VERSION_FILE'!"
+    _show_error_message "Failed to get main version from '$handling_file'!"
     _show_try_grep_command_message
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
     make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
@@ -907,7 +875,6 @@ function read_main_version() {
     _show_error_message "$make_sure_message"
     exit 1
   }
-  _remove_tmp_dir "$PROJECT_COPY_TMP_DIR" || exit 1
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     echo "origin/$remote_branch: $MAIN_VERSION"
   elif [ "$ARGUMENT_QUIET" = 'true' ] && [ "$COMMAND" = 'main-version' ]; then
