@@ -1,17 +1,14 @@
 name: Release generation
 
 on:
-  push:
-    branches: [ "main" ]
-
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+#      VUH_VERSION: { required: true, type: string }
+      CHANGELOG_GENERATOR_VERSION: { required: true, type: string }
 
 jobs:
   get_version:
     runs-on: ubuntu-latest
-    env:
-      CHANGELOG_GENERATOR_VERSION: 'v0.3.3'
-#      VUH_VERSION: 'v1.0.0'
     steps:
 
       - name: Git clone this repo
@@ -20,12 +17,12 @@ jobs:
 #     Don't need this step here, but if you want to use same workflow in side apps your can download vuh.sh in repository folder like in commented step below:
 #      - name: download vuh notes generator
 #        run: |
-#          curl https://raw.githubusercontent.com/Greewil/version-update-helper/${{ env.VUH_VERSION }}/vuh.sh -O -J -L
+#          curl https://raw.githubusercontent.com/Greewil/version-update-helper/${{ inputs.VUH_VERSION }}/vuh.sh -O -J -L
 #          chmod +x vuh.sh
 
       - name: download release notes generator
         run: |
-          curl https://raw.githubusercontent.com/Greewil/release-notes-generator/${{ env.CHANGELOG_GENERATOR_VERSION }}/gen_release_notes.sh -O -J -L
+          curl https://raw.githubusercontent.com/Greewil/release-notes-generator/${{ inputs.CHANGELOG_GENERATOR_VERSION }}/gen_release_notes.sh -O -J -L
           chmod +x gen_release_notes.sh
 
       - name: get release tag_name
@@ -37,7 +34,7 @@ jobs:
       - name: generate release notes
         id: changelog
         run: |
-          ./gen_release_notes.sh .. -lt -f changelog.md
+          ./gen_release_notes.sh -i .. -lt -f changelog.md
 
           [ -f "changelog.md" ] && CHANGELOG=$(cat changelog.md) || CHANGELOG=''
           CHANGELOG="${CHANGELOG//'%'/'%25'}"
