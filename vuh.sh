@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-#/ Usage: vuh [-v | --version] [-h | --help] <command> [<args>]
+#/ Usage: vuh [-v | --version] [-h | --help] [--configuration] [--update] <command> [<args>]
 #/
-#/ Options:
+#/ Standalone commands:
 #/     -h, --help               show help text
 #/     -v, --version            show version
 #/     --configuration          show configuration
@@ -162,7 +162,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.9.0'
+VUH_VERSION='2.9.1'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'

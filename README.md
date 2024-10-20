@@ -71,9 +71,9 @@ sudo vuh --update
 To use vuh with your project you should first create .vuh file in root folder of your project 
 (read more about configuring in [configuring projects](#Configuring-projects)).
 
-    Usage: vuh [-v | --version] [-h | --help] <command> [<args>]
+    Usage: vuh [-v | --version] [-h | --help] [--configuration] [--update] <command> [<args>]
     
-    Options:
+    Standalone commands:
         -h, --help               show help text
         -v, --version            show version
         --configuration          show configuration
