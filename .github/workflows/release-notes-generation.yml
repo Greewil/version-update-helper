@@ -29,6 +29,7 @@ jobs:
         id: release_version
         run: |
           ./vuh.sh lv -q > release_version.txt
+          echo "{name}={value}" >> $GITHUB_OUTPUT
           echo "::set-output name=release_version::$(cat release_version.txt)"
 
       - name: generate release notes
@@ -40,8 +41,8 @@ jobs:
           CHANGELOG="${CHANGELOG//'%'/'%25'}"
           CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
           CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
-          echo "::set-output name=final_changelog::$(echo "$CHANGELOG")"
-          echo "${{ steps.changelog.outputs.final_changelog }}"
+          echo "FINAL_CHANGELOG='$CHANGELOG'" >> $GITHUB_ENV
+          echo "$FINAL_CHANGELOG"
 
           [ -f 'changelog.md' ] && echo "::set-output name=empty::false"
           [ -f 'changelog.md' ] || echo "::set-output name=empty::true"
@@ -54,4 +55,4 @@ jobs:
         with:
           tag_name: "v${{ steps.release_version.outputs.release_version }}"
           release_name: "v${{ steps.release_version.outputs.release_version }}"
-          body: "${{ steps.changelog.outputs.final_changelog }}"
+          body: " $FINAL_CHANGELOG"
