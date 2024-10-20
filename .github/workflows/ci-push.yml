@@ -1,0 +1,25 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  validate-version:
+    name: Validate version
+    uses: ./.github/workflows/validate-current-version.yml
+
+  quality-assurance:
+    name: Quality Assurance
+    uses: ./.github/workflows/quality-assurance.yml
+    needs: validate-version
+
+  release-notes-generation:
+    name: Release generation
+    uses: ./.github/workflows/release-notes-generation.yml
+    with:
+#      VUH_VERSION: 'v2.9.1'
+      CHANGELOG_GENERATOR_VERSION: 'v1.0.2'
+    needs: [validate-version, quality-assurance]
