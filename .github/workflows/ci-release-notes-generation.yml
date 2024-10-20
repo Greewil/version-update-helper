@@ -15,7 +15,7 @@ jobs:
     steps:
 
       - name: Git clone this repo
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
 
 #     Don't need this step here, but if you want to use same workflow in side apps your can download vuh.sh in repository folder like in commented step below:
 #      - name: download vuh notes generator

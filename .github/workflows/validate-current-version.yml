@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 #     Don't need this step here, but if you want to use same workflow in side apps your can download vuh.sh in repository folder like in commented step below:
 #      - name: Download vuh
 #        run: |
