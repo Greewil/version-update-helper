@@ -12,4 +12,4 @@ jobs:
     uses: ./.github/workflows/release-notes-generation.yml
     with:
 #      VUH_VERSION: 'v2.9.1'
-      CHANGELOG_GENERATOR_VERSION: 'v1.0.2'
+      CHANGELOG_GENERATOR_VERSION: 'v1.0.3'
