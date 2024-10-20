@@ -41,6 +41,7 @@ jobs:
           CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
           CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
           echo "::set-output name=final_changelog::$(echo "$CHANGELOG")"
+          echo "${{ steps.changelog.outputs.final_changelog }}"
 
           [ -f 'changelog.md' ] && echo "::set-output name=empty::false"
           [ -f 'changelog.md' ] || echo "::set-output name=empty::true"
@@ -53,4 +54,4 @@ jobs:
         with:
           tag_name: "v${{ steps.release_version.outputs.release_version }}"
           release_name: "v${{ steps.release_version.outputs.release_version }}"
-          body: ${{ steps.changelog.outputs.final_changelog }}
+          body: "${{ steps.changelog.outputs.final_changelog }}"
