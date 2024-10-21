@@ -162,7 +162,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.9.1'
+VUH_VERSION='2.9.2'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -665,6 +665,14 @@ function _fetch_remote_branches() {
   }
 }
 
+function _get_file_from_another_branch() {
+  branch_name=$1
+  file_path=$2
+  cd "$ROOT_REPO_DIR" || return 1
+  git show "$branch_name:./$file_path"
+  cd "$CUR_DIR" || return 1
+}
+
 function _remove_tmp_dir() {
   dir_to_remove=$1
   [ "$dir_to_remove" != '' ] && rm -rf "/tmp/$dir_to_remove"
@@ -734,8 +742,8 @@ function _load_local_conf_file() {
 function _load_remote_conf_file() {
   _unset_conf_variables || return 1
   branch_name=$1
-  handling_config_file="origin/$branch_name:./.vuh"
-  main_branch_config_file=$(git show "$handling_config_file") || {
+  handling_config_file="origin/$branch_name:.vuh"
+  main_branch_config_file=$(_get_file_from_another_branch "origin/$branch_name" ".vuh") || {
     _show_error_message "Failed to read remote configuration file $handling_config_file!"
     return 1
   }
@@ -840,6 +848,7 @@ function read_local_version() {
 
 function read_main_version() {
   [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'getting main version'
+  [ "$ARGUMENT_OFFLINE" = 'true' ] || _fetch_remote_branches || exit 1
   _load_local_conf_file || exit 1
   remote_branch=$MAIN_BRANCH_NAME
   if [[ "$SPECIFIED_MAIN_BRANCH" != '' ]]; then
@@ -861,8 +870,8 @@ function read_main_version() {
       _load_local_conf_file || exit 1
     }
   fi
-  handling_file="origin/$remote_branch:./$VERSION_FILE"
-  main_branch_file=$(git show "$handling_file") || {
+  handling_file="origin/$remote_branch:$VERSION_FILE"
+  main_branch_file=$(_get_file_from_another_branch "origin/$remote_branch" "$VERSION_FILE") || {
     _show_error_message "Failed to load file $handling_file"
     exit 1
   }
@@ -885,7 +894,6 @@ function read_main_version() {
 function _get_suggesting_version_using_git() {
   read_local_version || exit 1
   read_main_version || exit 1
-  [ "$ARGUMENT_OFFLINE" = 'true' ] || _fetch_remote_branches || exit 1
   _load_local_conf_file || exit 1
   [ "$ARGUMENT_QUIET" = 'true' ] || _show_function_title 'suggesting relevant version'
   largest_version=$(_get_largest_version "$MAIN_VERSION" "$LOCAL_VERSION") || {
