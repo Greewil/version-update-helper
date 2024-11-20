@@ -40,6 +40,22 @@ MODULE_ROOT_PATH=''
 # example: 'true' ('false' by default)
 IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
 
+# This function calls after each successful version update.
+# This realisation will generate new package-lock.json file after changing package.json.
+#
+# $1 - Version before update
+# $2 - New version after update
+function after_successful_version_update() {
+  old_version=$1
+  new_version=$2
+  if [ "$SPECIFIED_PROJECT_MODULE" = 'WEB' ]; then
+    cd "$ROOT_REPO_DIR/$MODULE_ROOT_PATH"
+    npm i --package-lock-only
+    # to update package-lock.json after updating package.json
+    cd -
+  fi
+}
+
 # ------------------------------------- end basic variables ------------------------------------- #
 
 # ------------------------------------- begin mono repository variables ------------------------------------- #

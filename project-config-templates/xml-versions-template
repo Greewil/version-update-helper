@@ -22,7 +22,7 @@ VERSION_FILE='pom.xml'
 
 # TEXT_BEFORE_VERSION_CODE: unique text which will be just before version number (including spaces)
 # example: '\"version\": \"' (for variable "version" in json files so it can find line "version": "version_number")
-TEXT_BEFORE_VERSION_CODE="^    <version>"
+TEXT_BEFORE_VERSION_CODE="<version>"
 
 # TEXT_AFTER_VERSION_CODE: unique text which will be just after version number (including spaces)
 # example: '\",' (for variable "version" in json files so it can find line "version": "version_number")
