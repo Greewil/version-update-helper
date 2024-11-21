@@ -162,7 +162,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.9.2'
+VUH_VERSION='2.9.3'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -256,10 +256,13 @@ function _show_try_grep_command_message() {
   grep_text_before_cmd='grep -E "$'"$module_name_prefix"'TEXT_BEFORE_VERSION_CODE"'
   # shellcheck disable=SC2016
   grep_text_after_cmd='grep -E "$'"$module_name_prefix"'TEXT_AFTER_VERSION_CODE"'
-  check_line_command="$cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
-  make_sure_message="Run command '$check_line_command' and make sure that first output line contains your version. "\
-'\nTip: If you are struggling to grep the only one line with needed version, you can add comment on that line.'
-  _show_error_message "$make_sure_message"
+  check_line_command="source .vuh; $cat_version_file_cmd | $grep_text_before_cmd | $grep_text_after_cmd"
+  make_sure_message_1="Run command '$check_line_command' and make sure that first output line contains your version. "
+  special_symbols="'/', '\', '^', '$', '*', '(', ')', '{', '}', '[', ']'"
+  grep_vars="$module_name_prefix"'TEXT_BEFORE_VERSION_CODE and '"$module_name_prefix"'TEXT_AFTER_VERSION_CODE variables'
+  make_sure_message_2="Also make sure you escaped all special symbols ($special_symbols) with '\' symbol in $grep_vars."
+  tip_message="If you are struggling to grep the only one line with needed version, you can add comment on that line."
+  _show_error_message "$make_sure_message_1 \n$make_sure_message_2 \nTip: $tip_message"
 }
 
 function _show_git_diff_result() {
