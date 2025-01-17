@@ -162,7 +162,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.9.3'
+VUH_VERSION='2.9.4'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -882,7 +882,7 @@ function read_main_version() {
     _show_error_message "Failed to get main version from '$handling_file'!"
     _show_try_grep_command_message
     _show_error_message "Also make sure that origin/$remote_branch has the same structure as your local version file."
-    make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that if "\
+    make_sure_message="If your origin/$remote_branch branch has different version storage logic make sure that it "\
 'has different .vuh configuration.'
     _show_error_message "$make_sure_message"
     exit 1
