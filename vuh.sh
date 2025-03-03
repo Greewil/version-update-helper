@@ -188,6 +188,7 @@ CUR_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SUGGESTING_VERSION=''
+SPECIFIED_MULTIPLE_PROJECT_MODULES='false'
 INCREASING_VERSION_PART='patch'
 
 # variables for handling semantic versions
@@ -400,8 +401,7 @@ function _load_project_variables_from_config() {
     return 1
   }
   rm -f "/tmp/${APP_NAME}_projects_conf_file"
-  # TODO don't use module configuration if specified multiple modules (-pm=API,WEB) not in case of ALL
-  [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
+  [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
 }
 
 function _check_version_syntax() {
@@ -717,7 +717,7 @@ function _unset_conf_variables() {
 #
 # Returns nothing.
 function _check_conf_data_loaded_properly() {
-  if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ] || [ "$COMMAND" = 'project-modules' ]; then
+  if [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || [ "$COMMAND" = 'project-modules' ]; then
     return 0
   fi
   if { [ "$ARGUMENT_DONT_USE_GIT" != 'true' ] && [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ]; } ||
@@ -835,6 +835,21 @@ function _show_suggested_versions_comparison() {
     echo "(specified version seems to be ok)"
   else
     echo "(suggested to use new version)"
+  fi
+}
+
+function _handle_multiple_modules_call() {
+  if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
+    _load_local_conf_file || exit 1
+    project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+    for module in "${ADDR[@]}"; do
+      echo ""
+      _show_recursion_message "Handling module: $module"
+      # TODO watch how script was started (because it can be ./vuh.sh instead of vuh)
+      vuh "$COMMAND" -pm="$module" --offline # TODO pass other params and first command start shouldn't be offline
+    done
+    exit 0
   fi
 }
 
@@ -1166,6 +1181,9 @@ while [[ $# -gt 0 ]]; do
   -pm=*)
     _check_arg "$1"
     SPECIFIED_PROJECT_MODULE=${1#*=}
+    if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then  # TODO || [ if ',' in PM ]
+      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
+    fi
     shift ;;
   -q|--quiet)
     _check_arg "$1"
@@ -1221,18 +1239,7 @@ if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
   SPECIFIED_PROJECT_MODULE=''
   _regular_check_available_updates
   SPECIFIED_PROJECT_MODULE="$tmp_specified_project_module"
-  if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
-    _load_local_conf_file || exit 1
-    project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
-    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
-    for module in "${ADDR[@]}"; do
-      echo ""
-      _show_recursion_message "Handling module: $module"
-      # TODO watch how script was started (because it can be ./vuh.sh instead of vuh)
-      vuh "$COMMAND" -pm="$module" --offline # TODO pass other params and first command start shouldn't be offline
-    done
-    exit 0
-  fi
+  [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] && _handle_multiple_modules_call
 fi
 
 case "$COMMAND" in
