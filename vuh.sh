@@ -21,7 +21,7 @@
 #/                                  or specify path to it using '--config-path=<path>' parameter.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     mv, main-version             Show version of origin/MAIN_BRANCH_NAME.
@@ -79,7 +79,7 @@
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     uv, update-version           Replace your local version with suggesting version which this branch should use.
@@ -124,7 +124,7 @@
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     mrp, module-root-path        Show root path of specified module (for monorepos projects).
@@ -138,7 +138,7 @@
 #/                                  or specify path to it using '--config-path=<path>' parameter.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     pm, project-modules          Show all project modules of current mono repository
@@ -151,7 +151,7 @@
 #/                                  or specify path to it using '--config-path=<path>' parameter.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/ This tool suggest relevant version for your current project or even update your local project's version.
@@ -162,7 +162,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.9.4'
+VUH_VERSION='2.10.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -179,6 +179,8 @@ RED='\e[1;31m'        # for errors
 YELLOW='\e[1;33m'     # for warnings
 BROWN='\e[0;33m'      # for inputs
 LIGHT_CYAN='\e[1;36m' # for changes
+VIOLATE='\e[38;5;61m' # for changes
+#\[\e[38;5;61m\]
 
 # vuh global variables (Please don't modify!)
 ROOT_REPO_DIR=''
@@ -221,6 +223,11 @@ function _show_error_message() {
 function _show_warning_message() {
   message=$1
   echo -en "$YELLOW($APP_NAME : WARNING) $message$NEUTRAL_COLOR\n"
+}
+
+function _show_recursion_message() {
+  message=$1
+  echo -en "$VIOLATE($APP_NAME : RECURSION) $message$NEUTRAL_COLOR\n"
 }
 
 function _show_updated_message() {
@@ -393,7 +400,8 @@ function _load_project_variables_from_config() {
     return 1
   }
   rm -f "/tmp/${APP_NAME}_projects_conf_file"
-  _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
+  # TODO don't use module configuration if specified multiple modules (-pm=API,WEB) not in case of ALL
+  [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
 }
 
 function _check_version_syntax() {
@@ -709,7 +717,7 @@ function _unset_conf_variables() {
 #
 # Returns nothing.
 function _check_conf_data_loaded_properly() {
-  if [ "$COMMAND" = 'project-modules' ]; then
+  if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ] || [ "$COMMAND" = 'project-modules' ]; then
     return 0
   fi
   if { [ "$ARGUMENT_DONT_USE_GIT" != 'true' ] && [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ]; } ||
@@ -1213,6 +1221,18 @@ if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
   SPECIFIED_PROJECT_MODULE=''
   _regular_check_available_updates
   SPECIFIED_PROJECT_MODULE="$tmp_specified_project_module"
+  if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
+    _load_local_conf_file || exit 1
+    project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+    for module in "${ADDR[@]}"; do
+      echo ""
+      _show_recursion_message "Handling module: $module"
+      # TODO watch how script was started (because it can be ./vuh.sh instead of vuh)
+      vuh "$COMMAND" -pm="$module" --offline # TODO pass other params and first command start shouldn't be offline
+    done
+    exit 0
+  fi
 fi
 
 case "$COMMAND" in

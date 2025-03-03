@@ -91,7 +91,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      or specify path to it using '--config-path=<path>' parameter.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
 
         mv, main-version             Show version of origin/MAIN_BRANCH_NAME.
@@ -149,7 +149,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter can't be used with '--dont-check-git-diff'.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
 
         uv, update-version           Replace your local version with suggesting version which this branch should use.
@@ -194,7 +194,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter can't be used with '--dont-check-git-diff'.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
 
         mrp, module-root-path        Show root path of specified module (for monorepos projects).
@@ -208,7 +208,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      or specify path to it using '--config-path=<path>' parameter.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
 
         pm, project-modules          Show all project modules of current mono repository 
@@ -221,7 +221,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      or specify path to it using '--config-path=<path>' parameter.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
     
     This tool suggest relevant version for your current project or even update your local project's version.
