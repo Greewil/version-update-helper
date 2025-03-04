@@ -198,6 +198,7 @@ VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
 
 # Console input variables (Please don't modify!)
 COMMAND=''
+STANDALONE_COMMAND='false'
 SPECIFIED_VERSION=''
 SPECIFIED_INCREASING_VERSION_PART='patch'
 SPECIFIED_PROJECT_MODULE=''
@@ -838,6 +839,14 @@ function _show_suggested_versions_comparison() {
   fi
 }
 
+function _get_additional_arguments_from_variables() {
+  additional_arguments_str=''
+  if [ "$ARGUMENT_QUIET" = 'true' ]; then
+    additional_arguments_str="$additional_arguments_str -q"
+  fi
+  echo "$additional_arguments_str"
+}
+
 function _handle_multiple_modules_call() {
   if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
     _load_local_conf_file || exit 1
@@ -847,7 +856,8 @@ function _handle_multiple_modules_call() {
       echo ""
       _show_recursion_message "Handling module: $module"
       # TODO watch how script was started (because it can be ./vuh.sh instead of vuh)
-      vuh "$COMMAND" -pm="$module" --offline # TODO pass other params and first command start shouldn't be offline
+      additional_params=$(_get_additional_arguments_from_variables)
+      vuh "$COMMAND" -pm="$module" --offline $additional_params # TODO pass other params and first command start shouldn't be offline
     done
     exit 0
   fi
@@ -1130,18 +1140,22 @@ while [[ $# -gt 0 ]]; do
   -h|--help)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--help'
+    STANDALONE_COMMAND='true'
     shift ;;
   -v|--version)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--version'
+    STANDALONE_COMMAND='true'
     shift ;;
   --configuration)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--configuration'
+    STANDALONE_COMMAND='true'
     shift ;;
   --update)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--update'
+    STANDALONE_COMMAND='true'
     shift ;;
   lv|local-version)
     _exit_if_using_multiple_commands "$1"
@@ -1232,13 +1246,15 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
-    [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]] &&
+if [[ "$STANDALONE_COMMAND" = 'false' ]] &&
     [[ "$ARGUMENT_QUIET" != 'true' ]] && [[ "$ARGUMENT_OFFLINE" != 'true' ]]; then
   tmp_specified_project_module="$SPECIFIED_PROJECT_MODULE"
   SPECIFIED_PROJECT_MODULE=''
   _regular_check_available_updates
   SPECIFIED_PROJECT_MODULE="$tmp_specified_project_module"
+fi
+
+if [[ "$STANDALONE_COMMAND" = 'false' ]]; then
   [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] && _handle_multiple_modules_call
 fi
 
