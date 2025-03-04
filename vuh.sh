@@ -840,11 +840,17 @@ function _show_suggested_versions_comparison() {
 }
 
 function _get_additional_arguments_from_variables() {
-  additional_arguments_str=''
-  if [ "$ARGUMENT_QUIET" = 'true' ]; then
-    additional_arguments_str="$additional_arguments_str -q"
-  fi
-  echo "$additional_arguments_str"
+  args_str=''
+  [ "$ARGUMENT_QUIET" = 'true' ] && args_str="$args_str -q"
+  [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ] && args_str="$args_str --check-git-diff"
+  [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" = 'true' ] && args_str="$args_str --dont-check-git-diff"
+  [ "$ARGUMENT_OFFLINE" = 'true' ] && args_str="$args_str --offline"
+  [ "$ARGUMENT_DONT_USE_GIT" = 'true' ] && args_str="$args_str --dont-use-git"
+  [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ] && args_str="$args_str -vp=$SPECIFIED_INCREASING_VERSION_PART"
+  [ "$SPECIFIED_VERSION" != '' ] && args_str="$args_str -v=$SPECIFIED_VERSION"  # TODO maybe throw warning if ALL modules
+  [ "$SPECIFIED_MAIN_BRANCH" != '' ] && args_str="$args_str -mb=$SPECIFIED_MAIN_BRANCH"
+  [ "$SPECIFIED_CONFIG_DIR" != '' ] && args_str="$args_str --config-dir=$SPECIFIED_CONFIG_DIR"
+  echo "$args_str"
 }
 
 function _handle_multiple_modules_call() {
@@ -857,7 +863,7 @@ function _handle_multiple_modules_call() {
       _show_recursion_message "Handling module: $module"
       # TODO watch how script was started (because it can be ./vuh.sh instead of vuh)
       additional_params=$(_get_additional_arguments_from_variables)
-      vuh "$COMMAND" -pm="$module" --offline $additional_params # TODO pass other params and first command start shouldn't be offline
+      vuh "$COMMAND" -pm="$module" --offline $additional_params
     done
     exit 0
   fi
