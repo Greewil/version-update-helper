@@ -861,9 +861,9 @@ function _handle_multiple_modules_call() {
     for module in "${ADDR[@]}"; do
       echo ""
       _show_recursion_message "Handling module: $module"
-      # TODO watch how script was started (because it can be ./vuh.sh instead of vuh)
+      vuh_cmd="${BASH_SOURCE[0]}"
       additional_params=$(_get_additional_arguments_from_variables)
-      vuh "$COMMAND" -pm="$module" --offline $additional_params
+      $vuh_cmd "$COMMAND" -pm="$module" --offline $additional_params
     done
     exit 0
   fi
