@@ -852,7 +852,7 @@ function _get_additional_arguments_from_variables() {
   [ "$ARGUMENT_OFFLINE" = 'true' ] && args_str="$args_str --offline"
   [ "$ARGUMENT_DONT_USE_GIT" = 'true' ] && args_str="$args_str --dont-use-git"
   [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ] && args_str="$args_str -vp=$SPECIFIED_INCREASING_VERSION_PART"
-  [ "$SPECIFIED_VERSION" != '' ] && args_str="$args_str -v=$SPECIFIED_VERSION"  # TODO maybe throw warning if ALL modules
+  [ "$SPECIFIED_VERSION" != '' ] && args_str="$args_str -v=$SPECIFIED_VERSION"
   [ "$SPECIFIED_MAIN_BRANCH" != '' ] && args_str="$args_str -mb=$SPECIFIED_MAIN_BRANCH"
   [ "$SPECIFIED_CONFIG_DIR" != '' ] && args_str="$args_str --config-dir=$SPECIFIED_CONFIG_DIR"
   echo "$args_str"
@@ -862,12 +862,15 @@ function _handle_multiple_modules_call() {
   if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
     _load_local_conf_file || exit 1
     project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+    is_first_handling_module='true'
     IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
     for module in "${ADDR[@]}"; do
       _show_recursion_message "Handling module: $module"
       vuh_cmd="${BASH_SOURCE[0]}"
       additional_params=$(_get_additional_arguments_from_variables)
-      $vuh_cmd "$COMMAND" -pm="$module" --offline $additional_params  # TODO first should be online
+      [ "$is_first_handling_module" = 'false' ] && additional_params="$additional_params --offline"
+      $vuh_cmd "$COMMAND" -pm="$module" $additional_params
+      is_first_handling_module='false'
     done
     exit 0
   fi
