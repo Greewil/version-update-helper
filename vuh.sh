@@ -15,13 +15,16 @@
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so).
 #/
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--dont-use-git]         don't use any git commands.
 #/                                  In this case you should run vuh in root directory (which contains .vuh)
 #/                                  or specify path to it using '--config-path=<path>' parameter.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     mv, main-version             Show version of origin/MAIN_BRANCH_NAME.
@@ -32,6 +35,9 @@
 #/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 #/
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--offline | --airplane-mode]
 #/                                  to work offline without updating origin/MAIN_BRANCH_NAME
@@ -51,6 +57,9 @@
 #/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 #/
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
@@ -79,7 +88,7 @@
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     uv, update-version           Replace your local version with suggesting version which this branch should use.
@@ -96,6 +105,9 @@
 #/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 #/
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
@@ -124,7 +136,7 @@
 #/                                  This parameter can't be used with '--dont-check-git-diff'.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     mrp, module-root-path        Show root path of specified module (for monorepos projects).
@@ -132,13 +144,16 @@
 #/         [-q | --quiet]           to show only root path (or errors messages if there are so).
 #/
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--dont-use-git]         don't use any git commands.
 #/                                  In this case you should run vuh in root directory (which contains .vuh)
 #/                                  or specify path to it using '--config-path=<path>' parameter.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/     pm, project-modules          Show all project modules of current mono repository
@@ -151,7 +166,7 @@
 #/                                  or specify path to it using '--config-path=<path>' parameter.
 #/
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-#/                                  You dont need to specify it if you are working with git repository.
+#/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
 #/
 #/ This tool suggest relevant version for your current project or even update your local project's version.
@@ -162,7 +177,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.9.4'
+VUH_VERSION='2.10.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -179,6 +194,8 @@ RED='\e[1;31m'        # for errors
 YELLOW='\e[1;33m'     # for warnings
 BROWN='\e[0;33m'      # for inputs
 LIGHT_CYAN='\e[1;36m' # for changes
+VIOLATE='\e[38;5;61m' # for changes
+#\[\e[38;5;61m\]
 
 # vuh global variables (Please don't modify!)
 ROOT_REPO_DIR=''
@@ -186,6 +203,7 @@ CUR_DIR=''
 LOCAL_VERSION=''
 MAIN_VERSION=''
 SUGGESTING_VERSION=''
+SPECIFIED_MULTIPLE_PROJECT_MODULES='false'
 INCREASING_VERSION_PART='patch'
 
 # variables for handling semantic versions
@@ -195,6 +213,7 @@ VERSION_REG_EXP='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'\
 
 # Console input variables (Please don't modify!)
 COMMAND=''
+STANDALONE_COMMAND='false'
 SPECIFIED_VERSION=''
 SPECIFIED_INCREASING_VERSION_PART='patch'
 SPECIFIED_PROJECT_MODULE=''
@@ -208,9 +227,13 @@ ARGUMENT_DONT_USE_GIT='false'
 
 
 function _show_function_title() {
+  [ "$ARGUMENT_QUIET" = 'false' ] && printf '\n'
+  [ "$ARGUMENT_QUIET" = 'false' ] && echo "$1"
+}
 
-  printf '\n'
-  echo "$1"
+function _show_info_message() {
+  message=$1
+  [ "$ARGUMENT_QUIET" = 'false' ] && echo "$message"
 }
 
 function _show_error_message() {
@@ -220,18 +243,23 @@ function _show_error_message() {
 
 function _show_warning_message() {
   message=$1
-  echo -en "$YELLOW($APP_NAME : WARNING) $message$NEUTRAL_COLOR\n"
+  [ "$ARGUMENT_QUIET" = 'false' ] && echo -en "$YELLOW($APP_NAME : WARNING) $message$NEUTRAL_COLOR\n"
+}
+
+function _show_recursion_message() {
+  message=$1
+  [ "$ARGUMENT_QUIET" = 'false' ] && echo -en "\n$VIOLATE($APP_NAME : RECURSION) $message$NEUTRAL_COLOR\n"
 }
 
 function _show_updated_message() {
   message=$1
-  echo -en "$LIGHT_CYAN($APP_NAME : CHANGED) $message$NEUTRAL_COLOR\n"
+  [ "$ARGUMENT_QUIET" = 'false' ] && echo -en "$LIGHT_CYAN($APP_NAME : CHANGED) $message$NEUTRAL_COLOR\n"
 }
 
 function _show_invalid_usage_error_message() {
   message=$1
   _show_error_message "$message"
-  echo 'Use "vuh --help" to see available commands and options information'
+  _show_info_message 'Use "vuh --help" to see available commands and options information'
 }
 
 function _show_cant_use_both_arguments() {
@@ -272,9 +300,10 @@ function _show_git_diff_result() {
   comment_on_success=$4
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     if [ "$result_successful" = 'true' ]; then
-      echo "Git diff with '$handling_revision' was not empty (location: '$handling_location'). $comment_on_success"
+      gd_msg="Git diff with '$handling_revision' was not empty (location: '$handling_location'). $comment_on_success"
+      _show_info_message "$gd_msg"
     else
-      echo "Location '$handling_location' has no difference with '$handling_revision'."
+      _show_info_message "Location '$handling_location' has no difference with '$handling_revision'."
     fi
   fi
 }
@@ -393,7 +422,7 @@ function _load_project_variables_from_config() {
     return 1
   }
   rm -f "/tmp/${APP_NAME}_projects_conf_file"
-  _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
+  [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
 }
 
 function _check_version_syntax() {
@@ -709,7 +738,7 @@ function _unset_conf_variables() {
 #
 # Returns nothing.
 function _check_conf_data_loaded_properly() {
-  if [ "$COMMAND" = 'project-modules' ]; then
+  if [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || [ "$COMMAND" = 'project-modules' ]; then
     return 0
   fi
   if { [ "$ARGUMENT_DONT_USE_GIT" != 'true' ] && [ "$MAIN_BRANCH_NAME" = 'NO_MAIN_BRANCH_NAME' ]; } ||
@@ -813,8 +842,8 @@ function _regular_check_available_updates() {
     }
     largest_version=$(_get_largest_version "$VUH_VERSION" "$AVAILABLE_VERSION") || exit 1
     if [[ "$largest_version" != "$VUH_VERSION" ]] && [[ "$largest_version" != "=" ]]; then
-      echo "your current vuh version: $VUH_VERSION"
-      echo "latest vuh available version: $AVAILABLE_VERSION"
+      _show_info_message "your current vuh version: $VUH_VERSION"
+      _show_info_message "latest vuh available version: $AVAILABLE_VERSION"
       _yes_no_question "Do you want to get update?" "_install_latest_vuh_version" "echo 'Update canceled'"
     fi
   fi
@@ -822,12 +851,48 @@ function _regular_check_available_updates() {
 
 function _show_suggested_versions_comparison() {
   if [ "$SUGGESTING_VERSION" = "$LOCAL_VERSION" ]; then
-    echo "(your local version seems to be ok)"
+    _show_info_message "(your local version seems to be ok)"
   elif [ "$SUGGESTING_VERSION" = "$SPECIFIED_VERSION" ]; then
-    echo "(specified version seems to be ok)"
+    _show_info_message "(specified version seems to be ok)"
   else
-    echo "(suggested to use new version)"
+    _show_info_message "(suggested to use new version)"
   fi
+}
+
+function _get_additional_arguments_from_variables() {
+  args_str=''
+  [ "$ARGUMENT_QUIET" = 'true' ] && args_str="$args_str -q"
+  [ "$ARGUMENT_CHECK_GIT_DIFF" = 'true' ] && args_str="$args_str --check-git-diff"
+  [ "$ARGUMENT_DONT_CHECK_GIT_DIFF" = 'true' ] && args_str="$args_str --dont-check-git-diff"
+  [ "$ARGUMENT_OFFLINE" = 'true' ] && args_str="$args_str --offline"
+  [ "$ARGUMENT_DONT_USE_GIT" = 'true' ] && args_str="$args_str --dont-use-git"
+  [ "$SPECIFIED_INCREASING_VERSION_PART" != 'patch' ] && args_str="$args_str -vp=$SPECIFIED_INCREASING_VERSION_PART"
+  [ "$SPECIFIED_VERSION" != '' ] && args_str="$args_str -v=$SPECIFIED_VERSION"
+  [ "$SPECIFIED_MAIN_BRANCH" != '' ] && args_str="$args_str -mb=$SPECIFIED_MAIN_BRANCH"
+  [ "$SPECIFIED_CONFIG_DIR" != '' ] && args_str="$args_str --config-dir=$SPECIFIED_CONFIG_DIR"
+  echo "$args_str"
+}
+
+function _handle_multiple_modules_call() {
+  project_modules_without_spaces=''
+  if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
+    _load_local_conf_file || exit 1
+    project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+  else
+    project_modules_without_spaces=$(echo "$SPECIFIED_PROJECT_MODULE" | tr -d "[:space:]")
+  fi
+  is_first_handling_module='true'
+  IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+  for module in "${ADDR[@]}"; do
+    _show_recursion_message "Handling module: $module"
+    vuh_cmd="${BASH_SOURCE[0]}"
+    additional_params=$(_get_additional_arguments_from_variables)
+    [ "$is_first_handling_module" = 'false' ] && additional_params="$additional_params --offline"
+    # shellcheck disable=SC2086
+    $vuh_cmd "$COMMAND" -pm="$module" $additional_params
+    is_first_handling_module='false'
+  done
+  exit 0
 }
 
 function read_local_version() {
@@ -843,14 +908,14 @@ function read_local_version() {
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
-    echo "local: $LOCAL_VERSION"
+    _show_info_message "local: $LOCAL_VERSION"
   elif [ "$ARGUMENT_QUIET" = 'true' ] && [ "$COMMAND" = 'local-version' ]; then
     echo "$LOCAL_VERSION"
   fi
 }
 
 function read_main_version() {
-  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'getting main version'
+  _show_function_title 'getting main version'
   [ "$ARGUMENT_OFFLINE" = 'true' ] || _fetch_remote_branches || exit 1
   _load_local_conf_file || exit 1
   remote_branch=$MAIN_BRANCH_NAME
@@ -888,7 +953,7 @@ function read_main_version() {
     exit 1
   }
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
-    echo "origin/$remote_branch: $MAIN_VERSION"
+    _show_info_message "origin/$remote_branch: $MAIN_VERSION"
   elif [ "$ARGUMENT_QUIET" = 'true' ] && [ "$COMMAND" = 'main-version' ]; then
     echo "$MAIN_VERSION"
   fi
@@ -898,7 +963,7 @@ function _get_suggesting_version_using_git() {
   read_local_version || exit 1
   read_main_version || exit 1
   _load_local_conf_file || exit 1
-  [ "$ARGUMENT_QUIET" = 'true' ] || _show_function_title 'suggesting relevant version'
+  _show_function_title 'suggesting relevant version'
   largest_version=$(_get_largest_version "$MAIN_VERSION" "$LOCAL_VERSION") || {
     _show_error_message "Failed to select larger version between '$MAIN_VERSION' and '$LOCAL_VERSION'!"
     exit 1
@@ -980,9 +1045,9 @@ function _get_suggesting_version_using_git() {
 }
 
 function _get_suggesting_version_without_git() {
-  [ "$ARGUMENT_QUIET" = 'true' ] || echo "Using vuh without git!"
+  _show_info_message "Using vuh without git!"
   read_local_version || exit 1
-  [ "$ARGUMENT_QUIET" = 'true' ] || _show_function_title 'suggesting relevant version'
+  _show_function_title 'suggesting relevant version'
   if [ "$SPECIFIED_VERSION" = '' ]; then
     # if used -vp=.. param
     SUGGESTING_VERSION=$(_get_incremented_version_if_allowed "$LOCAL_VERSION" "true")
@@ -1003,7 +1068,7 @@ function get_suggesting_version() {
   fi
   if [ "$ARGUMENT_QUIET" = 'false' ]; then
     _show_suggested_versions_comparison
-    echo "suggesting: $SUGGESTING_VERSION"
+    _show_info_message "suggesting: $SUGGESTING_VERSION"
   elif [ "$ARGUMENT_QUIET" = 'true' ] && [ "$COMMAND" = 'suggest-version' ]; then
     echo "$SUGGESTING_VERSION"
   fi
@@ -1014,32 +1079,32 @@ function get_suggesting_version() {
 }
 
 function get_project_modules() {
-  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'getting project modules'
+  _show_function_title 'getting project modules'
   _load_local_conf_file || exit 1
   if [ "$PROJECT_MODULES" = "" ]; then
     _show_error_message "PROJECT_MODULES wasn't specified in configuration file (.vuh)."
     _show_error_message "It may mean that this project has only one module and it's not pretending to be a monorepo."
     exit 1
   else
-    [ "$ARGUMENT_QUIET" = 'false' ] && echo "current project has next modules: $PROJECT_MODULES"
-    [ "$ARGUMENT_QUIET" = 'true' ] && echo "$PROJECT_MODULES"
+    _show_info_message "current project has next modules: "
+    echo "$PROJECT_MODULES"
   fi
 }
 
 function show_module_root_path() {
-  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'showing module root path'
+  _show_function_title 'showing module root path'
   _load_local_conf_file || exit 1
   if [ "$SPECIFIED_PROJECT_MODULE" = "" ]; then
     _show_error_message "Project module should be specified in this command (see 'vuh -h' for more info)!"
     exit 1
   fi
-  [ "$ARGUMENT_QUIET" = 'false' ] && echo "$SPECIFIED_PROJECT_MODULE module located in: '$MODULE_ROOT_PATH'"
-  [ "$ARGUMENT_QUIET" = 'true' ] && echo "$MODULE_ROOT_PATH"
+  _show_info_message "$SPECIFIED_PROJECT_MODULE module located in: "
+  echo "$MODULE_ROOT_PATH"
 }
 
 function update_version() {
   new_version=$1
-  [ "$ARGUMENT_QUIET" = 'false' ] && _show_function_title 'updating local version'
+  _show_function_title 'updating local version'
   _load_local_conf_file || exit 1
   version_file=$(<"$ROOT_REPO_DIR/$VERSION_FILE") || {
     _show_error_message "Failed to load file $ROOT_REPO_DIR/$VERSION_FILE!"
@@ -1055,11 +1120,11 @@ function update_version() {
     new_version_line="$version_prefix$new_version$version_postfix"
     echo "${version_file/$old_version_line/$new_version_line}" > "$ROOT_REPO_DIR/$VERSION_FILE"
     after_successful_version_update "$LOCAL_VERSION" "$new_version"
-    [ "$ARGUMENT_QUIET" = 'false' ] && _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
+    _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
     [ "$ARGUMENT_QUIET" = 'true' ] && echo "$new_version"
   else
     after_successful_version_update "$LOCAL_VERSION" "$new_version"
-    [ "$ARGUMENT_QUIET" = 'false' ] && echo "your local version already up to date: $LOCAL_VERSION"
+    _show_info_message "your local version already up to date: $LOCAL_VERSION"
     [ "$ARGUMENT_QUIET" = 'true' ] && echo "$LOCAL_VERSION"
   fi
 }
@@ -1085,10 +1150,10 @@ function check_available_updates() {
   }
   largest_version=$(_get_largest_version "$VUH_VERSION" "$AVAILABLE_VERSION") || exit 1
   if [ "$largest_version" = "$VUH_VERSION" ]; then
-    echo "you already have the latest vuh version: $VUH_VERSION"
+    _show_info_message "you already have the latest vuh version: $VUH_VERSION"
   else
-    echo "your current vuh version: $VUH_VERSION"
-    echo "latest vuh available version: $AVAILABLE_VERSION"
+    _show_info_message "your current vuh version: $VUH_VERSION"
+    _show_info_message "latest vuh available version: $AVAILABLE_VERSION"
     _yes_no_question "Do you want to get update?" "_install_latest_vuh_version" "echo 'Update canceled'"
   fi
 }
@@ -1107,18 +1172,22 @@ while [[ $# -gt 0 ]]; do
   -h|--help)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--help'
+    STANDALONE_COMMAND='true'
     shift ;;
   -v|--version)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--version'
+    STANDALONE_COMMAND='true'
     shift ;;
   --configuration)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--configuration'
+    STANDALONE_COMMAND='true'
     shift ;;
   --update)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--update'
+    STANDALONE_COMMAND='true'
     shift ;;
   lv|local-version)
     _exit_if_using_multiple_commands "$1"
@@ -1158,6 +1227,12 @@ while [[ $# -gt 0 ]]; do
   -pm=*)
     _check_arg "$1"
     SPECIFIED_PROJECT_MODULE=${1#*=}
+    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]]; then
+      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
+    fi
+    if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
+      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
+    fi
     shift ;;
   -q|--quiet)
     _check_arg "$1"
@@ -1206,13 +1281,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$COMMAND" != '--help' ]] && [[ "$COMMAND" != '--version' ]] &&
-    [[ "$COMMAND" != '--configuration' ]] && [[ "$COMMAND" != '--update' ]] &&
+if [[ "$STANDALONE_COMMAND" = 'false' ]] &&
     [[ "$ARGUMENT_QUIET" != 'true' ]] && [[ "$ARGUMENT_OFFLINE" != 'true' ]]; then
   tmp_specified_project_module="$SPECIFIED_PROJECT_MODULE"
   SPECIFIED_PROJECT_MODULE=''
   _regular_check_available_updates
   SPECIFIED_PROJECT_MODULE="$tmp_specified_project_module"
+fi
+
+if [[ "$STANDALONE_COMMAND" = 'false' ]]; then
+  [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] && _handle_multiple_modules_call
 fi
 
 case "$COMMAND" in

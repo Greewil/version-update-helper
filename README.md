@@ -85,13 +85,16 @@ To use vuh with your project you should first create .vuh file in root folder of
             [-q | --quiet]           to show only version number (or errors messages if there are so).
 
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+                                     If you want to execute command for multiple project modules you can
+                                     specify them separated with commas (f.e. '-pm=API,WEB').
+                                     If you want to execute command for all project modules you can write '-pm=ALL'.
 
             [--dont-use-git]         don't use any git commands.
                                      In this case you should run vuh in root directory (which contains .vuh)
                                      or specify path to it using '--config-path=<path>' parameter.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
 
         mv, main-version             Show version of origin/MAIN_BRANCH_NAME.
@@ -102,6 +105,9 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+                                     If you want to execute command for multiple project modules you can
+                                     specify them separated with commas (f.e. '-pm=API,WEB').
+                                     If you want to execute command for all project modules you can write '-pm=ALL'.
 
             [--offline | --airplane-mode]     
                                      to work offline without updating origin/MAIN_BRANCH_NAME
@@ -121,6 +127,9 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+                                     If you want to execute command for multiple project modules you can
+                                     specify them separated with commas (f.e. '-pm=API,WEB').
+                                     If you want to execute command for all project modules you can write '-pm=ALL'.
 
             [--check-git-diff]       to automatically increase version only if current branch has git difference
                                      with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
@@ -149,7 +158,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter can't be used with '--dont-check-git-diff'.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
 
         uv, update-version           Replace your local version with suggesting version which this branch should use.
@@ -166,6 +175,9 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 
             [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+                                     If you want to execute command for multiple project modules you can
+                                     specify them separated with commas (f.e. '-pm=API,WEB').
+                                     If you want to execute command for all project modules you can write '-pm=ALL'.
 
             [--check-git-diff]       to automatically increase version only if current branch has git difference
                                      with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
@@ -194,7 +206,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      This parameter can't be used with '--dont-check-git-diff'.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
 
         mrp, module-root-path        Show root path of specified module (for monorepos projects).
@@ -202,13 +214,16 @@ To use vuh with your project you should first create .vuh file in root folder of
             [-q | --quiet]           to show only root path (or errors messages if there are so).
 
             [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
+                                     If you want to execute command for multiple project modules you can
+                                     specify them separated with commas (f.e. '-pm=API,WEB').
+                                     If you want to execute command for all project modules you can write '-pm=ALL'.
 
             [--dont-use-git]         don't use any git commands.
                                      In this case you should run vuh in root directory (which contains .vuh)
                                      or specify path to it using '--config-path=<path>' parameter.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
 
         pm, project-modules          Show all project modules of current mono repository 
@@ -221,7 +236,7 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      or specify path to it using '--config-path=<path>' parameter.
 
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
-                                     You dont need to specify it if you are working with git repository.
+                                     You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
     
     This tool suggest relevant version for your current project or even update your local project's version.
@@ -251,7 +266,7 @@ List of all config variables for monorepos:
 
 | Variable                                        | Vuh version supporting | Required always | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Example                                                                                                         |
 |-------------------------------------------------|:----------------------:|:---------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| PROJECT_MODULES                                 |         2.0.0          |       No        | List of all modules in your mono repository that will have different versioning mechanisms. <br/>You can leave this variable empty if your repository contains only one project. <br/>For each specified module you should specify configuration for this module down below.                                                                                                                                                                                        | 'BACKEND,FRONTEND' (for mono repository with two modules: BACKEND and FRONTEND)                                 |
+| PROJECT_MODULES                                 |         2.0.0          |       No        | List of all modules in your mono repository that will have different versioning mechanisms. <br/>You can leave this variable empty if your repository contains only one project. <br/>For each specified module you should specify configuration for this module down below. Module name 'ALL' reserved, so you cant use it.                                                                                                                                        | 'BACKEND,FRONTEND' (for mono repository with two modules: BACKEND and FRONTEND)                                 |
 | \<MODULE>_MAIN_BRANCH_NAME                      |         2.0.0          |       No        | The name of the main project's branch (for specific \<MODULE>). By default this value will be equal to MAIN_BRANCH_NAME variable.                                                                                                                                                                                                                                                                                                                                   | 'main' or 'master'                                                                                              |
 | \<MODULE>_VERSION_FILE                          |         2.0.0          |       Yes       | File which contains version information (for specific \<MODULE>).                                                                                                                                                                                                                                                                                                                                                                                                   | 'package.json' <br/> (for node.js application)                                                                  |
 | \<MODULE>_TEXT_BEFORE_VERSION_CODE              |         2.0.0          |       Yes       | Unique text which will be just before version number including spaces (for specific \<MODULE>). All special symbols ('/', '\\', '^', '$', '*', '(', ')', '{', '}', '[', ']') should be escaped with '\\'.                                                                                                                                                                                                                                                           | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number")     |
