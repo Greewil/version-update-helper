@@ -15,6 +15,9 @@
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so).
 #/
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--dont-use-git]         don't use any git commands.
 #/                                  In this case you should run vuh in root directory (which contains .vuh)
@@ -32,6 +35,9 @@
 #/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 #/
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--offline | --airplane-mode]
 #/                                  to work offline without updating origin/MAIN_BRANCH_NAME
@@ -51,6 +57,9 @@
 #/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 #/
 #/         [-pm=<project_module>]   to use specified module of your mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
@@ -96,6 +105,9 @@
 #/                                  This parameter overrides MAIN_BRANCH_NAME configuration variable from .vuh file.
 #/
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
@@ -132,6 +144,9 @@
 #/         [-q | --quiet]           to show only root path (or errors messages if there are so).
 #/
 #/         [-pm=<project_module>]   to use specified module of mono repository project (instead of default).
+#/                                  If you want to execute command for multiple project modules you can
+#/                                  specify them separated with commas (f.e. '-pm=API,WEB').
+#/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
 #/
 #/         [--dont-use-git]         don't use any git commands.
 #/                                  In this case you should run vuh in root directory (which contains .vuh)
@@ -859,21 +874,25 @@ function _get_additional_arguments_from_variables() {
 }
 
 function _handle_multiple_modules_call() {
+  project_modules_without_spaces=''
   if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
     _load_local_conf_file || exit 1
     project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
-    is_first_handling_module='true'
-    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
-    for module in "${ADDR[@]}"; do
-      _show_recursion_message "Handling module: $module"
-      vuh_cmd="${BASH_SOURCE[0]}"
-      additional_params=$(_get_additional_arguments_from_variables)
-      [ "$is_first_handling_module" = 'false' ] && additional_params="$additional_params --offline"
-      $vuh_cmd "$COMMAND" -pm="$module" $additional_params
-      is_first_handling_module='false'
-    done
-    exit 0
+  else
+    project_modules_without_spaces=$(echo "$SPECIFIED_PROJECT_MODULE" | tr -d "[:space:]")
   fi
+  is_first_handling_module='true'
+  IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+  for module in "${ADDR[@]}"; do
+    _show_recursion_message "Handling module: $module"
+    vuh_cmd="${BASH_SOURCE[0]}"
+    additional_params=$(_get_additional_arguments_from_variables)
+    [ "$is_first_handling_module" = 'false' ] && additional_params="$additional_params --offline"
+    # shellcheck disable=SC2086
+    $vuh_cmd "$COMMAND" -pm="$module" $additional_params
+    is_first_handling_module='false'
+  done
+  exit 0
 }
 
 function read_local_version() {
@@ -1208,7 +1227,10 @@ while [[ $# -gt 0 ]]; do
   -pm=*)
     _check_arg "$1"
     SPECIFIED_PROJECT_MODULE=${1#*=}
-    if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then  # TODO || [ if ',' in PM ]
+    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]]; then
+      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
+    fi
+    if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
       SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
     fi
     shift ;;
