@@ -18,6 +18,12 @@
 #/                                  If you want to execute command for multiple project modules you can
 #/                                  specify them separated with commas (f.e. '-pm=API,WEB').
 #/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
+#/                                  This parameter can't be used with '-cpm | --current-project-module'.
+#/
+#/         [-cpm | --current-project-module]
+#/                                  to perform operations with current module of your mono repository project
+#/                                  (in which dir you are located).
+#/                                  This parameter can't be used with '-pm=<project_module>'.
 #/
 #/         [--dont-use-git]         don't use any git commands.
 #/                                  In this case you should run vuh in root directory (which contains .vuh)
@@ -38,6 +44,12 @@
 #/                                  If you want to execute command for multiple project modules you can
 #/                                  specify them separated with commas (f.e. '-pm=API,WEB').
 #/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
+#/                                  This parameter can't be used with '-cpm | --current-project-module'.
+#/
+#/         [-cpm | --current-project-module]
+#/                                  to perform operations with current module of your mono repository project
+#/                                  (in which dir you are located).
+#/                                  This parameter can't be used with '-pm=<project_module>'.
 #/
 #/         [--offline | --airplane-mode]
 #/                                  to work offline without updating origin/MAIN_BRANCH_NAME
@@ -60,6 +72,12 @@
 #/                                  If you want to execute command for multiple project modules you can
 #/                                  specify them separated with commas (f.e. '-pm=API,WEB').
 #/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
+#/                                  This parameter can't be used with '-cpm | --current-project-module'.
+#/
+#/         [-cpm | --current-project-module]
+#/                                  to perform operations with current module of your mono repository project
+#/                                  (in which dir you are located).
+#/                                  This parameter can't be used with '-pm=<project_module>'.
 #/
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
@@ -108,6 +126,12 @@
 #/                                  If you want to execute command for multiple project modules you can
 #/                                  specify them separated with commas (f.e. '-pm=API,WEB').
 #/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
+#/                                  This parameter can't be used with '-cpm | --current-project-module'.
+#/
+#/         [-cpm | --current-project-module]
+#/                                  to perform operations with current module of your mono repository project
+#/                                  (in which dir you are located).
+#/                                  This parameter can't be used with '-pm=<project_module>'.
 #/
 #/         [--check-git-diff]       to automatically increase version only if current branch has git difference
 #/                                  with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not
@@ -147,6 +171,12 @@
 #/                                  If you want to execute command for multiple project modules you can
 #/                                  specify them separated with commas (f.e. '-pm=API,WEB').
 #/                                  If you want to execute command for all project modules you can write '-pm=ALL'.
+#/                                  This parameter can't be used with '-cpm | --current-project-module'.
+#/
+#/         [-cpm | --current-project-module]
+#/                                  to perform operations with current module of your mono repository project
+#/                                  (in which dir you are located).
+#/                                  This parameter can't be used with '-pm=<project_module>'.
 #/
 #/         [--dont-use-git]         don't use any git commands.
 #/                                  In this case you should run vuh in root directory (which contains .vuh)
@@ -177,7 +207,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.10.0'
+VUH_VERSION='2.11.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -219,6 +249,8 @@ SPECIFIED_INCREASING_VERSION_PART='patch'
 SPECIFIED_PROJECT_MODULE=''
 SPECIFIED_MAIN_BRANCH=''
 SPECIFIED_CONFIG_DIR=''
+ARGUMENT_SPECIFIED_PROJECT_MODULE='false'
+ARGUMENT_USE_CURRENT_PROJECT_MODULE='false'
 ARGUMENT_QUIET='false'
 ARGUMENT_CHECK_GIT_DIFF='false'
 ARGUMENT_DONT_CHECK_GIT_DIFF='false'
@@ -421,6 +453,12 @@ function _load_project_variables_from_config() {
     rm -f "/tmp/${APP_NAME}_projects_conf_file"
     return 1
   }
+  if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'true' ]; then
+    SPECIFIED_PROJECT_MODULE=$(_get_project_module_for_current_directory) || {
+      _show_error_message "Failed to get project module! Current directory doesn't belong to any project module."
+      return 1
+    }
+  fi
   rm -f "/tmp/${APP_NAME}_projects_conf_file"
   [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
 }
@@ -687,6 +725,40 @@ function _get_version_from_file() {
   fi
   _check_version_syntax "$version" || return 1
   echo "$version"
+}
+
+function _get_project_module_for_current_directory() {
+  handling_dir="$CUR_DIR"
+  found_module='false'
+  keep_searching='true'
+  handling_module_root_path=''
+  while [ "$keep_searching" = 'true' ]; do
+    # TODO handle case when one module is subdir of another module
+    project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+    for module in "${ADDR[@]}"; do
+      eval handling_module_root_path='$'"$module"'_MODULE_ROOT_PATH'
+      module_root_dir_for_find="$ROOT_REPO_DIR"
+      if [ "$handling_module_root_path" != '' ]; then
+        module_root_dir_for_find="$module_root_dir_for_find/$handling_module_root_path"
+      fi
+      find_result=$(find "$module_root_dir_for_find" -type d -wholename "$handling_dir")
+      if [ "$find_result" != '' ]; then
+        echo "$module"
+        found_module='true'
+        keep_searching='false'
+      fi
+#      _use_module_configuration "$next_handling_module" || return 1
+    done
+    if [ "$handling_dir" = '/' ] || [ "$handling_dir" = "$ROOT_REPO_DIR" ]; then
+      keep_searching='false'
+    fi
+    handling_dir="$(dirname "$handling_dir")"
+  done
+  if [ "$found_module" = 'false' ]; then
+    _show_error_message "Failed to get any module root path which could contain your current path!"
+    return 1
+  fi
 }
 
 function _fetch_remote_branches() {
@@ -1226,6 +1298,8 @@ while [[ $# -gt 0 ]]; do
     shift ;;
   -pm=*)
     _check_arg "$1"
+    _show_cant_use_both_arguments '--current-project-module' '-pm=' "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" 'false'
+    ARGUMENT_SPECIFIED_PROJECT_MODULE='true'
     SPECIFIED_PROJECT_MODULE=${1#*=}
     if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]]; then
       SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
@@ -1233,6 +1307,11 @@ while [[ $# -gt 0 ]]; do
     if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
       SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
     fi
+    shift ;;
+  -cpm|--current-project-module)
+    _check_arg "$1"
+    _show_cant_use_both_arguments '-pm=' '--current-project-module' "$ARGUMENT_SPECIFIED_PROJECT_MODULE" 'false'
+    ARGUMENT_USE_CURRENT_PROJECT_MODULE='true'
     shift ;;
   -q|--quiet)
     _check_arg "$1"

@@ -88,6 +88,12 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      If you want to execute command for multiple project modules you can
                                      specify them separated with commas (f.e. '-pm=API,WEB').
                                      If you want to execute command for all project modules you can write '-pm=ALL'.
+                                     This parameter can't be used with '-cpm | --current-project-module'.
+            
+            [-cpm | --current-project-module]
+                                     to perform operations with current module of your mono repository project 
+                                     (in which dir you are located).
+                                     This parameter can't be used with '-pm=<project_module>'.
 
             [--dont-use-git]         don't use any git commands.
                                      In this case you should run vuh in root directory (which contains .vuh)
@@ -108,6 +114,12 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      If you want to execute command for multiple project modules you can
                                      specify them separated with commas (f.e. '-pm=API,WEB').
                                      If you want to execute command for all project modules you can write '-pm=ALL'.
+                                     This parameter can't be used with '-cpm | --current-project-module'.
+            
+            [-cpm | --current-project-module]
+                                     to perform operations with current module of your mono repository project 
+                                     (in which dir you are located).
+                                     This parameter can't be used with '-pm=<project_module>'.
 
             [--offline | --airplane-mode]     
                                      to work offline without updating origin/MAIN_BRANCH_NAME
@@ -130,6 +142,12 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      If you want to execute command for multiple project modules you can
                                      specify them separated with commas (f.e. '-pm=API,WEB').
                                      If you want to execute command for all project modules you can write '-pm=ALL'.
+                                     This parameter can't be used with '-cpm | --current-project-module'.
+            
+            [-cpm | --current-project-module]
+                                     to perform operations with current module of your mono repository project 
+                                     (in which dir you are located).
+                                     This parameter can't be used with '-pm=<project_module>'.
 
             [--check-git-diff]       to automatically increase version only if current branch has git difference
                                      with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
@@ -178,6 +196,12 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      If you want to execute command for multiple project modules you can
                                      specify them separated with commas (f.e. '-pm=API,WEB').
                                      If you want to execute command for all project modules you can write '-pm=ALL'.
+                                     This parameter can't be used with '-cpm | --current-project-module'.
+            
+            [-cpm | --current-project-module]
+                                     to perform operations with current module of your mono repository project 
+                                     (in which dir you are located).
+                                     This parameter can't be used with '-pm=<project_module>'.
 
             [--check-git-diff]       to automatically increase version only if current branch has git difference
                                      with HEAD..origin/MAIN_BRANCH_NAME. And if there is no git difference vuh will not 
@@ -217,6 +241,12 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      If you want to execute command for multiple project modules you can
                                      specify them separated with commas (f.e. '-pm=API,WEB').
                                      If you want to execute command for all project modules you can write '-pm=ALL'.
+                                     This parameter can't be used with '-cpm | --current-project-module'.
+            
+            [-cpm | --current-project-module]
+                                     to perform operations with current module of your mono repository project 
+                                     (in which dir you are located).
+                                     This parameter can't be used with '-pm=<project_module>'.
 
             [--dont-use-git]         don't use any git commands.
                                      In this case you should run vuh in root directory (which contains .vuh)

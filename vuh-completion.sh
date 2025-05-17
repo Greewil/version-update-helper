@@ -23,19 +23,20 @@ function _vuh_completion()
       words=""
       ;;
     lv|local-version)
-      words="-q -pm= --quiet --dont-use-git --config-dir="
+      words="-q -pm= -cpm --current-project-module --quiet --dont-use-git --config-dir="
       ;;
     mv|main-version)
-      words="-q -mb= -pm= --quiet --offline --airplane-mode --dont-use-git --config-dir="
+      words="-q -mb= -pm= -cpm --current-project-module --quiet --offline --airplane-mode --dont-use-git --config-dir="
       ;;
     sv|suggest-version)
-      words="-q -v= -vp= -mb= -pm= --quiet --check-git-diff --dont-check-git-diff --offline --airplane-mode --dont-use-git --config-dir="
+      words="-q -v= -vp= -mb= -pm= -cpm --current-project-module --quiet --check-git-diff --dont-check-git-diff --offline --airplane-mode --dont-use-git --config-dir="
       ;;
     uv|update-version)
-      words="'-q ' -v= -vp= -mb= -pm= '--quiet ' '--check-git-diff ' '--dont-check-git-diff ' '--offline ' '--airplane-mode ' '--dont-use-git ' --config-dir="
+      words="-q -v= -vp= -mb= -pm= -cpm --current-project-module --quiet --check-git-diff --dont-check-git-diff --offline --airplane-mode --dont-use-git --config-dir="
+#      words="'-q ' -v= -vp= -mb= -pm= '-cpm ' '--current-project-module ' '--quiet ' '--check-git-diff ' '--dont-check-git-diff ' '--offline ' '--airplane-mode ' '--dont-use-git ' --config-dir="
       ;;
     mrp|module-root-path)
-      words="-q -pm= --quiet --dont-use-git --config-dir="
+      words="-q -pm= -cpm --current-project-module --quiet --dont-use-git --config-dir="
       ;;
     pm|project-modules)
       words="-q --quiet --dont-use-git --config-dir="
