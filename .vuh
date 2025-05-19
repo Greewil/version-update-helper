@@ -14,15 +14,15 @@
 
 # MAIN_BRANCH_NAME: the name of the main project's branch
 # example: 'main' or 'master'
-MAIN_BRANCH_NAME='main'
+MAIN_BRANCH_NAME='test_fixture_main'
 
 # VERSION_FILE: file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
 # example: 'package.json' (for node.js application)
-VERSION_FILE='vuh.sh'
+VERSION_FILE='version_file.txt'
 
 # TEXT_BEFORE_VERSION_CODE: unique text which will be just before version number (including spaces)
 # example: '"version": "' (for variable "version" in json files so it can find line "version": "version_number")
-TEXT_BEFORE_VERSION_CODE="VUH_VERSION='"
+TEXT_BEFORE_VERSION_CODE="VERSION='"
 
 # TEXT_AFTER_VERSION_CODE: unique text which will be just after version number (including spaces)
 # example: '",' (for variable "version" in json files so it can find line "version": "version_number")
@@ -61,23 +61,3 @@ MAJOR_CHANGING_LOCATIONS=''
 
 # ------------------------------------- end basic variables ------------------------------------- #
 
-# ------------------------------------- begin mono repository variables ------------------------------------- #
-
-# PROJECT_MODULES: list of all modules in your mono repository that will have different versioning mechanisms.
-#   You can leave this variable empty if your repository contains only one project.
-#   For each specified module you should specify configuration for this module down below.
-#   For each module you should specify: MAIN_BRANCH_NAME, VERSION_FILE, TEXT_BEFORE_VERSION_CODE,
-#   TEXT_AFTER_VERSION_CODE, MODULE_ROOT_PATH (relative to the repository root).
-#   Configuration variable for module should looks like: <MODULE_NAME>_<VARIABLE_NAME>.
-# example: 'UI,API' (for mono repository with two modules: UI and API)
-#   Also you can see example here: https://github.com/Greewil/version-update-helper/blob/main/.vuh
-PROJECT_MODULES='VUH'
-
-# variables for VUH module (in this case VUH module mirrors default settings)
-VUH_VERSION_FILE="$VERSION_FILE"
-VUH_TEXT_BEFORE_VERSION_CODE="$TEXT_BEFORE_VERSION_CODE"
-VUH_TEXT_AFTER_VERSION_CODE="$TEXT_AFTER_VERSION_CODE"
-VUH_MODULE_ROOT_PATH="$MODULE_ROOT_PATH"
-VUH_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES="$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES"
-
-# ------------------------------------- end mono repository variables ------------------------------------- #
