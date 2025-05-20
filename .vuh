@@ -18,15 +18,15 @@ MAIN_BRANCH_NAME='test_fixture_main'
 
 # VERSION_FILE: file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
 # example: 'package.json' (for node.js application)
-VERSION_FILE='version_file.txt'
+VERSION_FILE='custom_version_file'
 
 # TEXT_BEFORE_VERSION_CODE: unique text which will be just before version number (including spaces)
 # example: '"version": "' (for variable "version" in json files so it can find line "version": "version_number")
-TEXT_BEFORE_VERSION_CODE="VERSION='"
+TEXT_BEFORE_VERSION_CODE=""
 
 # TEXT_AFTER_VERSION_CODE: unique text which will be just after version number (including spaces)
 # example: '",' (for variable "version" in json files so it can find line "version": "version_number")
-TEXT_AFTER_VERSION_CODE="'"
+TEXT_AFTER_VERSION_CODE=""
 
 # MODULE_ROOT_PATH: root path of the project code directory relative to the repository root.
 #   This variable can be used in git diff if IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES equals 'true'.
