@@ -14,3 +14,6 @@ jobs:
         uses: azohra/shell-linter@latest
         with:
           path: "vuh.sh,vuh-completion.sh,installer.sh,tests/run_tests.sh,tests/_clean_tmp.sh"
+      - name: Unit tests
+        run: |
+          ./run_tests.sh || exit 1

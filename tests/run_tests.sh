@@ -134,6 +134,5 @@ function run_all_tests() {
 
 run_all_tests || exit 1
 
-# TODO run only tests for specified test_id
+# TODO run only test with specified test_id
 # TODO run only tests for specified fixture branch
-# TODO run tests in CI
