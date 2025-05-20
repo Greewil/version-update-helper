@@ -1,17 +1,17 @@
-test_id,    branch_name,        correct_result,     command
+test_id,    branch_name,        correct_result,     use_separate_env,   command
 # basic operations
-bo1,        patch_smaller,      1.2.2,              lv -q
-bo2,        patch_smaller,      1.2.4,              sv -q
-# bo3,        patch_smaller,      1.2.4,              uv -q
-bo4,        patch_smaller,      1.3.0,              sv -q -vp=minor
-bo5,        patch_smaller,      2.0.0,              sv -q -vp=major
-bo6,        patch_smaller,      1.2.5,              sv -q -mb=test_fixture_patch_larger
-bo7,        patch_larger,       1.2.4,              lv -q
-bo8,        patch_larger,       1.2.4,              sv -q
-# bo9,        patch_larger,       1.2.4,              uv -q
-bo10,       versions_equal,     1.2.3,              lv -q
-bo11,       versions_equal,     1.2.4,              sv -q
-bo12,       versions_equal,     1.2.4,              uv -q
+bo1,        patch_smaller,      1.2.2,              no,                 lv -q
+bo2,        patch_smaller,      1.2.4,              no,                 sv -q
+bo3,        patch_smaller,      1.3.0,              no,                 sv -q -vp=minor
+bo4,        patch_smaller,      2.0.0,              no,                 sv -q -vp=major
+bo5,        patch_smaller,      1.2.5,              no,                 sv -q -mb=test_fixture_patch_larger
+bo6,        patch_smaller,      1.2.4,              yes,                uv -q
+bo7,        patch_larger,       1.2.4,              no,                 lv -q
+bo8,        patch_larger,       1.2.4,              no,                 sv -q
+bo9,        patch_larger,       1.2.4,              yes,                uv -q
+bo10,       versions_equal,     1.2.3,              no,                 lv -q
+bo11,       versions_equal,     1.2.4,              no,                 sv -q
+bo12,       versions_equal,     1.2.4,              no,                 uv -q
 
 # TODO add column for checking errors (additional column for asserting errors)
 # TODO check errors (config not found)
