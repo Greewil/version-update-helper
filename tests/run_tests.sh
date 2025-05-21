@@ -7,7 +7,7 @@
 #/
 #/ Arguments for running tests:
 #/     -q, --quiet
-#/          to show only passed and failed tests. #TODO
+#/          to show only information about passed and failed tests.
 #/     -t <test_id>, --test-id <test_id>
 #/          to run only test with specified <test_id>.
 #/          This parameter can't be used with '-tp | --test-id-prefix'.
