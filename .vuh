@@ -14,50 +14,36 @@
 
 # MAIN_BRANCH_NAME: the name of the main project's branch
 # example: 'main' or 'master'
-MAIN_BRANCH_NAME='test_fixture_main'
+MAIN_BRANCH_NAME='test_fixture_monorepo_main'
 
-# VERSION_FILE: file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
-# example: 'package.json' (for node.js application)
-VERSION_FILE='version_file.txt'
+# ------------------------------------- begin mono repository variables ------------------------------------- #
 
-# TEXT_BEFORE_VERSION_CODE: unique text which will be just before version number (including spaces)
-# example: '"version": "' (for variable "version" in json files so it can find line "version": "version_number")
-TEXT_BEFORE_VERSION_CODE="VERSION='"
+# PROJECT_MODULES: list of all modules in your mono repository that will have different versioning mechanisms.
+# You can leave this variable empty if your repository contains only one project.
+# For each specified module you should specify configuration for this module down below.
+# For each module you should specify: MAIN_BRANCH_NAME, VERSION_FILE, TEXT_BEFORE_VERSION_CODE,
+# TEXT_AFTER_VERSION_CODE, MODULE_ROOT_PATH.
+# Configuration variable for module should looks like: <MODULE_NAME>_<VARIABLE_NAME>.
+# example: 'UI,API' (for mono repository with two modules: UI and API)
+# Also you can see example here: https://github.com/Greewil/version-update-helper/blob/main/.vuh
+PROJECT_MODULES='MOD_1, MOD_2, MOD_3'
 
-# TEXT_AFTER_VERSION_CODE: unique text which will be just after version number (including spaces)
-# example: '",' (for variable "version" in json files so it can find line "version": "version_number")
-TEXT_AFTER_VERSION_CODE="'"
+# variables for MOD_1 module
+MOD_1_VERSION_FILE='module_1/version_file.txt'
+MOD_1_TEXT_BEFORE_VERSION_CODE="VERSION='"
+MOD_1_TEXT_AFTER_VERSION_CODE="'"
+MOD_1_MODULE_ROOT_PATH='module_1'
 
-# MODULE_ROOT_PATH: root path of the project code directory relative to the repository root.
-#   This variable can be used in git diff if IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES equals 'true'.
-# example: 'src' (for src directory in the repository root)
-MODULE_ROOT_PATH=''
+# variables for MOD_1 module
+MOD_2_VERSION_FILE='module_2/version_file.txt'
+MOD_2_TEXT_BEFORE_VERSION_CODE="VERSION = '"
+MOD_2_TEXT_AFTER_VERSION_CODE="'"
+MOD_2_MODULE_ROOT_PATH='module_2'
 
-# IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES: if this variable set to 'true' and current branch has no difference
-#   with HEAD..origin/MAIN_BRANCH_NAME, vuh will not modify your current version if your current version
-#   is the same as main version.
-#   If this variable is 'false' (which is by default) vuh will suggest you to increase your current version.
-# example: 'true' ('false' by default)
-IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
+# variables for MOD_1 module
+MOD_3_VERSION_FILE='module_3/version_file.txt'
+MOD_3_TEXT_BEFORE_VERSION_CODE=""
+MOD_3_TEXT_AFTER_VERSION_CODE=""
+MOD_3_MODULE_ROOT_PATH='module_3'
 
-# <VERSION_PART>_CHANGING_LOCATIONS: if there are changes between HEAD..origin/MAIN_BRANCH_NAME and
-#   current branch in this files or directories, <VERSION_PART> version should be increased. Works only if you
-#   checking git diff (you configured your .vuh config such way or you using --check-git-diff parameter).
-#   Locations should be separated with spaces.
-#   Empty variable means there is no locations which leads to <VERSION_PART> increasing on every change in them.
-# example: 'openapi/schema.yaml very/important/directory' (for 'openapi/schema.yaml' and 'very/important/directory')
-MINOR_CHANGING_LOCATIONS=''
-MAJOR_CHANGING_LOCATIONS=''
-
-# You can override get_larger_prerelease_info function here. Here's a template for it:
-#
-# $1 - Prerelease information of the first version to compare
-# $2 - Prerelease information of the second version to compare
-#
-# Returns larger prerelease version or '=' if inputs are treated as equal.
-#function get_larger_prerelease_info() {
-#  <Your comparing logic>
-#}
-
-# ------------------------------------- end basic variables ------------------------------------- #
-
+# ------------------------------------- end mono repository variables ------------------------------------- #
