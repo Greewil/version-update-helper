@@ -27,7 +27,7 @@ ARGUMENT_STARTING_FROM_TEST_ID='false'
 ARGUMENT_TEST_ID_PREFIX='false'
 # -- Specified params:
 SPECIFIED_TEST_ID=''
-SPECIFIED_STARTING_FROM_TEST_ID=''  # TODO
+SPECIFIED_STARTING_FROM_TEST_ID=''
 SPECIFIED_TEST_ID_PREFIX=''
 
 
@@ -38,7 +38,7 @@ function _show_function_title() {
 
 function _show_info_message() {
   message=$1
-  [ "$ARGUMENT_QUIET" = 'false' ] && echo "$message"
+  echo "$message"
 }
 
 function _show_error_message() {
@@ -165,14 +165,30 @@ function run_tests() {
         current_test_dir="$test_dir"
       fi
 
-      # starting test
+      # handling starting filters
       if [ "$ARGUMENT_STARTING_FROM_TEST_ID" = 'true' ] && [ "$test_id" = "$SPECIFIED_STARTING_FROM_TEST_ID" ]; then
         start_point_passed='true'
       fi
+      is_test_planned_to_start='false'
       if [ "$start_point_passed" = 'true' ]; then
-        if [ "$SPECIFIED_TEST_ID" = '' ] || [ "$test_id" = "$SPECIFIED_TEST_ID" ]; then
-          _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$command" "$current_test_dir"
+        if [ "$ARGUMENT_TEST_ID" = 'true' ]; then
+          if [ "$test_id" = "$SPECIFIED_TEST_ID" ]; then
+            is_test_planned_to_start='true'
+          fi
+        elif [ "$ARGUMENT_TEST_ID_PREFIX" = 'true' ]; then
+          if [[ $test_id =~ ^$SPECIFIED_TEST_ID_PREFIX ]]; then
+            is_test_planned_to_start='true'
+          fi
+        else
+          is_test_planned_to_start='true'
         fi
+      fi
+
+      # starting test
+      if [ "$is_test_planned_to_start" = 'true' ]; then
+        _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$command" "$current_test_dir"
+      else
+        _show_info_message "test $test_id skipped"
       fi
     fi
   done < "$ASSERT_DATA_FILE"
@@ -187,22 +203,24 @@ while [[ $# -gt 0 ]]; do
 #    COMMAND='--help'
 #    shift ;;
   -t|--test-id)
-    _show_cant_use_both_arguments '--t | --test-id' '--ft | --from-test-id' "$ARGUMENT_STARTING_FROM_TEST_ID" 'false'
+    _show_cant_use_both_arguments '-t | --test-id' '-ft | --from-test-id' "$ARGUMENT_STARTING_FROM_TEST_ID" 'false'
+    _show_cant_use_both_arguments '-t | --test-id' '-tp | --test-id-prefix' "$ARGUMENT_TEST_ID_PREFIX" 'false'
     ARGUMENT_TEST_ID='true'
     SPECIFIED_TEST_ID="$2"
     shift # past value
     shift ;;
   -ft|--from-test-id)
-    _show_cant_use_both_arguments '--ft | --from-test-id' '--t | --test-id' "$ARGUMENT_TEST_ID" 'false'
+    _show_cant_use_both_arguments '-ft | --from-test-id' '-t | --test-id' "$ARGUMENT_TEST_ID" 'false'
     ARGUMENT_STARTING_FROM_TEST_ID='true'
     SPECIFIED_STARTING_FROM_TEST_ID="$2"
     shift # past value
     shift ;;
-#  -tp|--test-id-prefix)
-#    ARGUMENT_TEST_ID_PREFIX='true'
-#    SPECIFIED_TEST_ID_PREFIX="$2"
-#    shift # past value
-#    shift ;;
+  -tp|--test-id-prefix)
+    _show_cant_use_both_arguments '-tp | --test-id-prefix' '-t | --test-id' "$ARGUMENT_TEST_ID" 'false'
+    ARGUMENT_TEST_ID_PREFIX='true'
+    SPECIFIED_TEST_ID_PREFIX="$2"
+    shift # past value
+    shift ;;
   -*)
     _show_invalid_usage_error_message "Unknown option '$1'!"
     exit 1 ;;
@@ -223,4 +241,3 @@ run-tests)
   exit 0
   ;;
 esac
-# TODO run only tests for specified fixture branch
