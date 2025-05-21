@@ -19,6 +19,13 @@ BROWN='\e[0;33m'      # for inputs
 LIGHT_CYAN='\e[1;36m' # for changes
 GREEN='\e[1;32m'      # for success
 
+# Console input variables (Please don't modify!)
+COMMAND='run-tests'
+# -- Arguments:
+# -- Specified params:
+SPECIFIED_TEST_ID=''
+SPECIFIED_TEST_ID_PREFIX=''
+
 
 function _show_function_title() {
   printf '\n'
@@ -86,7 +93,7 @@ function _run_test_in_tmp_environment() {
 }
 
 
-function run_all_tests() {
+function run_tests() {
   test_dir="all-tests-$(date +%s%N)"
   while IFS="" read -r line || [ -n "$line" ]
   do
@@ -125,14 +132,47 @@ function run_all_tests() {
       if [ "$use_separate_env" = 'no' ]; then
         current_test_dir="$test_dir"
       fi
-      _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$command" "$current_test_dir"
+      if [ "$SPECIFIED_TEST_ID" = '' ] || [ "$test_id" = "$SPECIFIED_TEST_ID" ]; then
+        _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$command" "$current_test_dir"
+      fi
     fi
   done < "$ASSERT_DATA_FILE"
   _show_success_message "All test successfully finished"
 }
 
 
-run_all_tests || exit 1
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+#  -h|--help)
+#    _exit_if_using_multiple_commands "$1"
+#    COMMAND='--help'
+#    shift ;;
+  -t|--test-id)
+    SPECIFIED_TEST_ID="$2"
+    shift # past value
+    shift ;;
+#  -tp|--test-id-prefix)
+#    SPECIFIED_TEST_ID_PREFIX="$2"
+#    shift # past value
+#    shift ;;
+  -*)
+    _show_invalid_usage_error_message "Unknown option '$1'!"
+    exit 1 ;;
+  *)
+    _show_invalid_usage_error_message "Unknown command '$1'!"
+    exit 1 ;;
+  esac
+done
 
-# TODO run only test with specified test_id
+
+case "$COMMAND" in
+#--help) # TODO add help
+#  show_help
+#  exit 0
+#  ;;
+run-tests)
+  run_tests || exit 1
+  exit 0
+  ;;
+esac
 # TODO run only tests for specified fixture branch
