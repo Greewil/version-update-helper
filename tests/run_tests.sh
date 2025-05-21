@@ -141,6 +141,7 @@ function _run_test_in_tmp_environment() {
 function run_tests() {
   test_dir="all-tests-$(date +%s%N)"
   start_point_passed='false'
+  tests_passed=0
   if [ "$ARGUMENT_STARTING_FROM_TEST_ID" = 'false' ]; then
     start_point_passed='true'
   fi
@@ -206,12 +207,22 @@ function run_tests() {
       # starting test
       if [ "$is_test_planned_to_start" = 'true' ]; then
         _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$command" "$current_test_dir"
+        tests_passed=$((tests_passed+1))
       else
         _show_info_message "test $test_id skipped"
       fi
     fi
   done < "$ASSERT_DATA_FILE"
-  _show_success_message "All test successfully finished"
+  if [ "$ARGUMENT_TEST_ID" = 'true' ]; then
+    if [ "$tests_passed" = 0 ]; then
+      _show_error_message "Test $SPECIFIED_TEST_ID not found"
+    fi
+    if [ "$tests_passed" = 1 ]; then
+      _show_success_message "Test $SPECIFIED_TEST_ID successfully finished"
+    fi
+  else
+    _show_success_message "All tests ($tests_passed) successfully finished"
+  fi
 }
 
 
