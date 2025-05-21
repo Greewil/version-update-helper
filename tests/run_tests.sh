@@ -22,14 +22,23 @@ GREEN='\e[1;32m'      # for success
 # Console input variables (Please don't modify!)
 COMMAND='run-tests'
 # -- Arguments:
+ARGUMENT_TEST_ID='false'
+ARGUMENT_STARTING_FROM_TEST_ID='false'
+ARGUMENT_TEST_ID_PREFIX='false'
 # -- Specified params:
 SPECIFIED_TEST_ID=''
+SPECIFIED_STARTING_FROM_TEST_ID=''  # TODO
 SPECIFIED_TEST_ID_PREFIX=''
 
 
 function _show_function_title() {
   printf '\n'
   echo "$1"
+}
+
+function _show_info_message() {
+  message=$1
+  [ "$ARGUMENT_QUIET" = 'false' ] && echo "$message"
 }
 
 function _show_error_message() {
@@ -45,6 +54,23 @@ function _show_updated_message() {
 function _show_success_message() {
   message=$1
   echo -en "$GREEN($APP_NAME : SUCCESS) $message$NEUTRAL_COLOR\n"
+}
+
+function _show_invalid_usage_error_message() {
+  message=$1
+  _show_error_message "$message"
+  _show_info_message 'Use "vuh --help" to see available commands and options information'
+}
+
+function _show_cant_use_both_arguments() {
+  arg1_name=$1
+  arg2_name=$2
+  checking_arg_value=$3
+  checking_arg_default_value=$4
+  if [ "$checking_arg_value" != "$checking_arg_default_value" ]; then
+    _show_invalid_usage_error_message "You can't use both parameters: '$arg1_name' and '$arg2_name'!"
+    exit 1
+  fi
 }
 
 function _run_test() {
@@ -95,6 +121,10 @@ function _run_test_in_tmp_environment() {
 
 function run_tests() {
   test_dir="all-tests-$(date +%s%N)"
+  start_point_passed='false'
+  if [ "$ARGUMENT_STARTING_FROM_TEST_ID" = 'false' ]; then
+    start_point_passed='true'
+  fi
   while IFS="" read -r line || [ -n "$line" ]
   do
     line_without_comments=${line%%\#*}
@@ -128,12 +158,21 @@ function run_tests() {
         _show_error_message "'$line'"
         return 1
       fi
+
+      # selecting tmp dir for test
       current_test_dir=''
       if [ "$use_separate_env" = 'no' ]; then
         current_test_dir="$test_dir"
       fi
-      if [ "$SPECIFIED_TEST_ID" = '' ] || [ "$test_id" = "$SPECIFIED_TEST_ID" ]; then
-        _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$command" "$current_test_dir"
+
+      # starting test
+      if [ "$ARGUMENT_STARTING_FROM_TEST_ID" = 'true' ] && [ "$test_id" = "$SPECIFIED_STARTING_FROM_TEST_ID" ]; then
+        start_point_passed='true'
+      fi
+      if [ "$start_point_passed" = 'true' ]; then
+        if [ "$SPECIFIED_TEST_ID" = '' ] || [ "$test_id" = "$SPECIFIED_TEST_ID" ]; then
+          _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$command" "$current_test_dir"
+        fi
       fi
     fi
   done < "$ASSERT_DATA_FILE"
@@ -148,10 +187,19 @@ while [[ $# -gt 0 ]]; do
 #    COMMAND='--help'
 #    shift ;;
   -t|--test-id)
+    _show_cant_use_both_arguments '--t | --test-id' '--ft | --from-test-id' "$ARGUMENT_STARTING_FROM_TEST_ID" 'false'
+    ARGUMENT_TEST_ID='true'
     SPECIFIED_TEST_ID="$2"
     shift # past value
     shift ;;
+  -ft|--from-test-id)
+    _show_cant_use_both_arguments '--ft | --from-test-id' '--t | --test-id' "$ARGUMENT_TEST_ID" 'false'
+    ARGUMENT_STARTING_FROM_TEST_ID='true'
+    SPECIFIED_STARTING_FROM_TEST_ID="$2"
+    shift # past value
+    shift ;;
 #  -tp|--test-id-prefix)
+#    ARGUMENT_TEST_ID_PREFIX='true'
 #    SPECIFIED_TEST_ID_PREFIX="$2"
 #    shift # past value
 #    shift ;;
