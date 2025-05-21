@@ -41,6 +41,7 @@ GREEN='\e[1;32m'      # for success
 # Console input variables (Please don't modify!)
 COMMAND='run-tests'
 # -- Arguments:
+ARGUMENT_QUIET='false'
 ARGUMENT_TEST_ID='false'
 ARGUMENT_STARTING_FROM_TEST_ID='false'
 ARGUMENT_TEST_ID_PREFIX='false'
@@ -57,7 +58,7 @@ function _show_function_title() {
 
 function _show_info_message() {
   message=$1
-  echo "$message"
+  [ "$ARGUMENT_QUIET" = 'false' ] && echo "$message"
 }
 
 function _show_error_message() {
@@ -151,7 +152,7 @@ function run_tests() {
     trimmed_line="$(echo "$line_without_comments" | tr -d '[:space:]')" || exit 1
     # check line not empty and its not a header line
     if [ "$trimmed_line" != '' ] && [ "$trimmed_line" != "$TRIMMED_HEADER" ]; then
-      echo "Line without comments: $line_without_comments"
+      _show_info_message "handling line: $line_without_comments"
       incorrect_line='false'
 
       # checking line hase same columns as table header
@@ -231,6 +232,9 @@ while [[ $# -gt 0 ]]; do
   -h|--help)
     _exit_if_using_multiple_commands "$1"
     COMMAND='--help'
+    shift ;;
+  -q|--quiet)
+    ARGUMENT_QUIET='true'
     shift ;;
   -t|--test-id)
     _show_cant_use_both_arguments '-t | --test-id' '-ft | --from-test-id' "$ARGUMENT_STARTING_FROM_TEST_ID" 'false'
