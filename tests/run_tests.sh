@@ -1,6 +1,25 @@
 #!/usr/bin/env bash
 
-#/ script for testing vuh
+#/ Usage: ./run_tests.sh [-h | --help] [<args>]
+#/
+#/ Standalone commands:
+#/     -h, --help               show help text
+#/
+#/ Arguments for running tests:
+#/     -q, --quiet
+#/          to show only passed and failed tests. #TODO
+#/     -t <test_id>, --test-id <test_id>
+#/          to run only test with specified <test_id>.
+#/          This parameter can't be used with '-tp | --test-id-prefix'.
+#/          This parameter can't be used with '-ft | --from-test-id'.
+#/     -ft <test_id>, --from-test-id <test_id>
+#/          to run tests listed after test with specified <test_id> (including).
+#/          This parameter can't be used with '-t | --test-id'.
+#/     -tp <test_id_prefix>, --test-id-prefix <test_id_prefix>
+#/          to run only tests with specified prefixes.
+#/          This parameter can't be used with '-t | --test-id'.
+#/
+#/ This is script for testing vuh.
 
 APP_NAME='run_tests.sh'
 
@@ -198,10 +217,10 @@ function run_tests() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-#  -h|--help)
-#    _exit_if_using_multiple_commands "$1"
-#    COMMAND='--help'
-#    shift ;;
+  -h|--help)
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='--help'
+    shift ;;
   -t|--test-id)
     _show_cant_use_both_arguments '-t | --test-id' '-ft | --from-test-id' "$ARGUMENT_STARTING_FROM_TEST_ID" 'false'
     _show_cant_use_both_arguments '-t | --test-id' '-tp | --test-id-prefix' "$ARGUMENT_TEST_ID_PREFIX" 'false'
@@ -230,12 +249,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+function show_help() {
+  grep '^#/' <"$0" | cut -c4-
+}
+
 
 case "$COMMAND" in
-#--help) # TODO add help
-#  show_help
-#  exit 0
-#  ;;
+--help)
+  show_help
+  exit 0
+  ;;
 run-tests)
   run_tests || exit 1
   exit 0
