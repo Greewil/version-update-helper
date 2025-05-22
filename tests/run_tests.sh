@@ -108,6 +108,7 @@ function _run_test() {
     eval "\"$STARTING_DIR/../vuh.sh\" $command"
     return 1
   }
+  vuh_output=$(echo "$vuh_output" | awk '{$1=$1};1') || exit 1
   if [ "$vuh_output" != "$correct_result" ]; then
     _show_error_message "Incorrect vuh output!"
     _show_error_message "Expected output: '$correct_result'"
