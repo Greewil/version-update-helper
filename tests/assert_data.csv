@@ -103,15 +103,22 @@ nrd8,       monorepo_equals,            3.3.0,              no,                 
 nrd9,       monorepo_equals,            2.2.3,              yes,                cd module_2; {{vuh}} uv -q -cpm
 nrd10,      monorepo_equals,            3.2.2,              yes,                cd module_3; {{vuh}} uv -q -cpm
 
+# check git diff
+cgd1,       versions_equal,             1.2.3,              no,                 {{vuh}} sv -q --check-git-diff
+cgd2,       check_git_diff_equal,       1.2.3,              no,                 {{vuh}} sv -q
+cgd3,       check_git_diff_equal,       1.2.3,              no,                 {{vuh}} sv -q --check-git-diff
+cgd4,       check_git_diff_equal,       1.2.4,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd5,       check_git_diff_smaller,     1.2.4,              no,                 {{vuh}} sv -q
+cgd6,       check_git_diff_smaller,     1.2.4,              no,                 {{vuh}} sv -q --dont-check-git-diff
+# TODO tests for --check-git-diff when in config specified minor and major increasing directories (also with -vp=minor -vp=major)
+# TODO --check-git-diff for monorepos
+
+
 # TODO add column for checking errors (additional column for asserting errors)
 # TODO check errors (config not found)
 # TODO check errors (params incompatible)
 
-# TODO check --check-git-diff --dont-check-git-diff params
-# TODO tests for --check-git-diff when in config specified minor and major increasing directories (also with -vp=minor -vp=major)
-
 # TODO check files updated correctly (maybe separate additional column in separate csv file)
-
 # TODO check functions override (fe. after_successful_version_update)
 
 # TODO (more like e2e) check installer works correct
