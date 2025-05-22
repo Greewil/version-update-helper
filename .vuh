@@ -14,7 +14,7 @@
 
 # MAIN_BRANCH_NAME: the name of the main project's branch
 # example: 'main' or 'master'
-MAIN_BRANCH_NAME='test_fixture_main'
+MAIN_BRANCH_NAME='test_fixture_main_check_git_diff'
 
 # VERSION_FILE: file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
 # example: 'package.json' (for node.js application)
