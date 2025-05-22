@@ -833,7 +833,7 @@ function _load_local_conf_file() {
   _unset_conf_variables || return 1
   _get_root_repo_dir || return 1
   full_conf_dir="$ROOT_REPO_DIR"
-  if [ "$SPECIFIED_CONFIG_DIR" != '' ]; then
+  if [ "$SPECIFIED_CONFIG_DIR" != '' ] && [ "$ARGUMENT_DONT_USE_GIT" = 'false' ]; then
     full_conf_dir="$ROOT_REPO_DIR/$SPECIFIED_CONFIG_DIR"
   fi
   conf_file=$(<"$full_conf_dir/.vuh") || {

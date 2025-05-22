@@ -43,10 +43,11 @@ cc4,        custom_version_file,        1.2.3,              no,                 
 cc5,        custom_version_file,        1.2.4,              no,                 sv -q
 cc6,        custom_version_file,        1.2.4,              yes,                uv -q
 cc7,        custom_version_file,        1.2.5,              no,                 sv -q -mb=test_fixture_patch_larger
-# cc4,        dont_use_git,               1.2.3,              no,                 lv -q --config-dir=custom_config_dir --dont-use-git
-# cc5,        dont_use_git,               1.2.4,              no,                 sv -q --config-dir=custom_config_dir --dont-use-git
-# cc6,        dont_use_git,               1.2.4,              yes,                uv -q --config-dir=custom_config_dir --dont-use-git
-# TODO check offline mode
+cc8,        patch_smaller,              1.2.4,              no,                 sv -q --offline
+cc9,        patch_smaller,              1.2.4,              no,                 sv -q --airplane-mode  # alias for --offline
+cc10,       dont_use_git,               1.2.3,              no,                 lv -q --config-dir=custom_config_dir --dont-use-git
+cc11,       dont_use_git,               1.2.4,              no,                 sv -q --config-dir=custom_config_dir --dont-use-git
+cc12,       dont_use_git,               1.2.4,              yes,                uv -q --config-dir=custom_config_dir --dont-use-git
 
 
 # monorepos operations
@@ -87,7 +88,6 @@ mmo8,       monorepo_reversed,          3.2.1 3.2.2,        yes,                
 # TODO check --check-git-diff --dont-check-git-diff params
 # TODO tests for --check-git-diff when in config specified minor and major increasing directories (also with -vp=minor -vp=major)
 
-# TODO check functions for monorepos
 # TODO check run from different directories
 # TODO check -cpm param
 
