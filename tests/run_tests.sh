@@ -26,6 +26,7 @@ APP_NAME='run_tests.sh'
 TRIMMED_HEADER='test_id,branch_name,correct_result,use_separate_env,command'
 ASSERT_DATA_FILE='assert_data.csv'
 TEXT_FOR_COMMA_REPLACEMENT='{{comma}}'
+TEXT_FOR_VUH_REPLACEMENT='{{vuh}}'
 
 STARTING_DIR="$(pwd)"
 
@@ -102,10 +103,11 @@ function _run_test() {
   repo_name=$5
   cd "$repo_name" || return 1
   git checkout "test_fixture_$branch_name" || return 1
-  # shellcheck disable=SC2086
-  vuh_output="$(eval "\"$STARTING_DIR/../vuh.sh\" $command")" || {
+  eval_command="${command//$TEXT_FOR_COMMA_REPLACEMENT/,}" || return 1
+  eval_command="${eval_command//$TEXT_FOR_VUH_REPLACEMENT/\"$STARTING_DIR/../vuh.sh\"}" || return 1
+  vuh_output="$(eval "$eval_command")" || {
     _show_error_message 'vuh throw an error during execution!'
-    eval "\"$STARTING_DIR/../vuh.sh\" $command"
+    eval "\"$STARTING_DIR/../vuh.sh\" $eval_command"
     return 1
   }
   vuh_output=$(echo "$vuh_output" | awk '{$1=$1};1') || exit 1
@@ -176,7 +178,6 @@ function run_tests() {
       use_separate_env=$(echo "$use_separate_env" | awk '{$1=$1};1') || exit 1
       command=$(echo "$line_without_comments" | cut -d',' -f5) || incorrect_line='true'
       command=$(echo "$command" | awk '{$1=$1};1') || exit 1
-      command="${command//$TEXT_FOR_COMMA_REPLACEMENT/,}"
       if [ "$incorrect_line" = 'true' ]; then
         _show_error_message 'Incorrect format in line:'
         _show_error_message "'$line'"
