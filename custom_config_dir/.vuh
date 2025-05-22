@@ -18,7 +18,7 @@ MAIN_BRANCH_NAME='test_fixture_main_custom_config_dir'
 
 # VERSION_FILE: file which contains version information (As in current branch so and in origin/MAIN_BRANCH_NAME branch!)
 # example: 'package.json' (for node.js application)
-VERSION_FILE='version_file.txt'
+VERSION_FILE='../version_file.txt'
 
 # TEXT_BEFORE_VERSION_CODE: unique text which will be just before version number (including spaces)
 # example: '"version": "' (for variable "version" in json files so it can find line "version": "version_number")
@@ -27,37 +27,6 @@ TEXT_BEFORE_VERSION_CODE="VERSION='"
 # TEXT_AFTER_VERSION_CODE: unique text which will be just after version number (including spaces)
 # example: '",' (for variable "version" in json files so it can find line "version": "version_number")
 TEXT_AFTER_VERSION_CODE="'"
-
-# MODULE_ROOT_PATH: root path of the project code directory relative to the repository root.
-#   This variable can be used in git diff if IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES equals 'true'.
-# example: 'src' (for src directory in the repository root)
-MODULE_ROOT_PATH=''
-
-# IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES: if this variable set to 'true' and current branch has no difference
-#   with HEAD..origin/MAIN_BRANCH_NAME, vuh will not modify your current version if your current version
-#   is the same as main version.
-#   If this variable is 'false' (which is by default) vuh will suggest you to increase your current version.
-# example: 'true' ('false' by default)
-IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
-
-# <VERSION_PART>_CHANGING_LOCATIONS: if there are changes between HEAD..origin/MAIN_BRANCH_NAME and
-#   current branch in this files or directories, <VERSION_PART> version should be increased. Works only if you
-#   checking git diff (you configured your .vuh config such way or you using --check-git-diff parameter).
-#   Locations should be separated with spaces.
-#   Empty variable means there is no locations which leads to <VERSION_PART> increasing on every change in them.
-# example: 'openapi/schema.yaml very/important/directory' (for 'openapi/schema.yaml' and 'very/important/directory')
-MINOR_CHANGING_LOCATIONS=''
-MAJOR_CHANGING_LOCATIONS=''
-
-# You can override get_larger_prerelease_info function here. Here's a template for it:
-#
-# $1 - Prerelease information of the first version to compare
-# $2 - Prerelease information of the second version to compare
-#
-# Returns larger prerelease version or '=' if inputs are treated as equal.
-#function get_larger_prerelease_info() {
-#  <Your comparing logic>
-#}
 
 # ------------------------------------- end basic variables ------------------------------------- #
 
