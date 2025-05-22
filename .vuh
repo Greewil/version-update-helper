@@ -38,7 +38,7 @@ MODULE_ROOT_PATH=''
 #   is the same as main version.
 #   If this variable is 'false' (which is by default) vuh will suggest you to increase your current version.
 # example: 'true' ('false' by default)
-IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
+IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
 
 # <VERSION_PART>_CHANGING_LOCATIONS: if there are changes between HEAD..origin/MAIN_BRANCH_NAME and
 #   current branch in this files or directories, <VERSION_PART> version should be increased. Works only if you
