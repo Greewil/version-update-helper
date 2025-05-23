@@ -3,153 +3,171 @@ test_id,    branch_name,                correct_result,               asserting_
 # use '{{comma}}' if you want to use ',' in command column
 
 # basic operations
-bo1,        patch_smaller,              1.2.2,                        no,              no,                 {{vuh}} lv -q
-bo2,        patch_smaller,              1.2.4,                        no,              no,                 {{vuh}} sv -q
-bo3,        patch_smaller,              1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
-bo4,        patch_smaller,              2.0.0,                        no,              no,                 {{vuh}} sv -q -vp=major
-bo5,        patch_smaller,              1.2.5,                        no,              no,                 {{vuh}} sv -q -mb=test_fixture_patch_larger
-bo6,        patch_smaller,              1.2.4,                        no,              yes,                {{vuh}} uv -q
-bo7,        patch_larger,               1.2.4,                        no,              no,                 {{vuh}} lv -q
-bo8,        patch_larger,               1.2.4,                        no,              no,                 {{vuh}} sv -q
-bo9,        patch_larger,               1.2.4,                        no,              yes,                {{vuh}} uv -q
-bo10,       versions_equal,             1.2.3,                        no,              no,                 {{vuh}} lv -q
-bo11,       versions_equal,             1.2.4,                        no,              no,                 {{vuh}} sv -q
-bo12,       versions_equal,             1.2.4,                        no,              yes,                {{vuh}} uv -q
-bo13,       main,                       1.2.3,                        no,              no,                 {{vuh}} lv -q
-bo14,       main,                       1.2.4,                        no,              no,                 {{vuh}} sv -q
-bo15,       main,                       1.2.4,                        no,              yes,                {{vuh}} uv -q
-bo16,       minor_larger,               1.3.2,                        no,              no,                 {{vuh}} sv -q
-bo17,       minor_smaller,              1.2.4,                        no,              no,                 {{vuh}} sv -q
-bo18,       major_larger,               2.1.2,                        no,              no,                 {{vuh}} sv -q
-bo19,       major_smaller,              1.2.4,                        no,              no,                 {{vuh}} sv -q
-bo20,       major_smaller,              1.2.3,                        no,              no,                 {{vuh}} mv -q
-bo21,       major_smaller,              VERSION='1.2.4',              no,              yes,                {{vuh}} uv -q > /dev/null; cat 'version_file.txt'
-bo22,       custom_version_file,        1.2.4,                        no,              yes,                {{vuh}} uv -q > /dev/null; cat 'custom_version_file'
+bo1,        patch_smaller,                  1.2.2,                        no,              no,                 {{vuh}} lv -q
+bo2,        patch_smaller,                  1.2.4,                        no,              no,                 {{vuh}} sv -q
+bo3,        patch_smaller,                  1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
+bo4,        patch_smaller,                  2.0.0,                        no,              no,                 {{vuh}} sv -q -vp=major
+bo5,        patch_smaller,                  1.2.5,                        no,              no,                 {{vuh}} sv -q -mb=test_fixture_patch_larger
+bo6,        patch_smaller,                  1.2.4,                        no,              yes,                {{vuh}} uv -q
+bo7,        patch_larger,                   1.2.4,                        no,              no,                 {{vuh}} lv -q
+bo8,        patch_larger,                   1.2.4,                        no,              no,                 {{vuh}} sv -q
+bo9,        patch_larger,                   1.2.4,                        no,              yes,                {{vuh}} uv -q
+bo10,       versions_equal,                 1.2.3,                        no,              no,                 {{vuh}} lv -q
+bo11,       versions_equal,                 1.2.4,                        no,              no,                 {{vuh}} sv -q
+bo12,       versions_equal,                 1.2.4,                        no,              yes,                {{vuh}} uv -q
+bo13,       main,                           1.2.3,                        no,              no,                 {{vuh}} lv -q
+bo14,       main,                           1.2.4,                        no,              no,                 {{vuh}} sv -q
+bo15,       main,                           1.2.4,                        no,              yes,                {{vuh}} uv -q
+bo16,       minor_larger,                   1.3.2,                        no,              no,                 {{vuh}} sv -q
+bo17,       minor_smaller,                  1.2.4,                        no,              no,                 {{vuh}} sv -q
+bo18,       major_larger,                   2.1.2,                        no,              no,                 {{vuh}} sv -q
+bo19,       major_smaller,                  1.2.4,                        no,              no,                 {{vuh}} sv -q
+bo20,       major_smaller,                  1.2.3,                        no,              no,                 {{vuh}} mv -q
+bo21,       major_smaller,                  VERSION='1.2.4',              no,              yes,                {{vuh}} uv -q > /dev/null; cat 'version_file.txt'
+bo22,       custom_version_file,            1.2.4,                        no,              yes,                {{vuh}} uv -q > /dev/null; cat 'custom_version_file'
+
 
 # custom increments
-ci1,        patch_smaller,              1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
-ci2,        patch_larger,               1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
-ci3,        minor_smaller,              1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
-ci4,        minor_larger,               1.3.2,                        no,              no,                 {{vuh}} sv -q -vp=minor
-ci5,        major_smaller,              1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
-ci6,        major_larger,               2.1.2,                        no,              no,                 {{vuh}} sv -q -vp=minor
-ci7,        patch_smaller,              2.0.0,                        no,              no,                 {{vuh}} sv -q -vp=major
-ci8,        minor_smaller,              2.0.0,                        no,              no,                 {{vuh}} sv -q -vp=major
-ci9,        major_smaller,              2.0.0,                        no,              no,                 {{vuh}} sv -q -vp=major
-ci10,       major_larger,               2.1.2,                        no,              no,                 {{vuh}} sv -q -vp=major
+ci1,        patch_smaller,                  1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
+ci2,        patch_larger,                   1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
+ci3,        minor_smaller,                  1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
+ci4,        minor_larger,                   1.3.2,                        no,              no,                 {{vuh}} sv -q -vp=minor
+ci5,        major_smaller,                  1.3.0,                        no,              no,                 {{vuh}} sv -q -vp=minor
+ci6,        major_larger,                   2.1.2,                        no,              no,                 {{vuh}} sv -q -vp=minor
+ci7,        patch_smaller,                  2.0.0,                        no,              no,                 {{vuh}} sv -q -vp=major
+ci8,        minor_smaller,                  2.0.0,                        no,              no,                 {{vuh}} sv -q -vp=major
+ci9,        major_smaller,                  2.0.0,                        no,              no,                 {{vuh}} sv -q -vp=major
+ci10,       major_larger,                   2.1.2,                        no,              no,                 {{vuh}} sv -q -vp=major
+
 
 # specified version
-#sv1,        versions_equal,             1.2.4,                        no,              no,                 {{vuh}} sv -q -v=0.1.2
-#sv2,        versions_equal,             1.2.4,                        no,              no,                 {{vuh}} sv -q -v=1.2.3
+# sv1,        versions_equal,                 1.2.4,                        no,              no,                 {{vuh}} sv -q -v=0.1.2
+# sv2,        versions_equal,                 1.2.4,                        no,              no,                 {{vuh}} sv -q -v=1.2.3
 # TODO fix sv2
-#sv3,        minor_larger,               1.3.2,                        no,              no,                 {{vuh}} sv -q -v=1.3.0
-#sv4,        minor_smaller,              1.3.0,                        no,              no,                 {{vuh}} sv -q -v=1.3.0
-#sv5,        minor_larger,               1.3.2,                        no,              no,                 {{vuh}} sv -q -v=1.2.0
+# sv3,        minor_larger,                   1.3.2,                        no,              no,                 {{vuh}} sv -q -v=1.3.0
+# sv4,        minor_smaller,                  1.3.0,                        no,              no,                 {{vuh}} sv -q -v=1.3.0
+# sv5,        minor_larger,                   1.3.2,                        no,              no,                 {{vuh}} sv -q -v=1.2.0
+
 
 # custom configurations
-cc1,        custom_config_dir,          1.2.3,                        no,              no,                 {{vuh}} lv -q --config-dir=custom_config_dir
-cc2,        custom_config_dir,          1.2.4,                        no,              no,                 {{vuh}} sv -q --config-dir=custom_config_dir
-cc3,        custom_config_dir,          1.2.4,                        no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir
-cc4,        custom_version_file,        1.2.3,                        no,              no,                 {{vuh}} lv -q
-cc5,        custom_version_file,        1.2.4,                        no,              no,                 {{vuh}} sv -q
-cc6,        custom_version_file,        1.2.4,                        no,              yes,                {{vuh}} uv -q
-cc7,        custom_version_file,        1.2.5,                        no,              no,                 {{vuh}} sv -q -mb=test_fixture_patch_larger
-cc8,        patch_smaller,              1.2.4,                        no,              no,                 {{vuh}} sv -q --offline
-cc9,        patch_smaller,              1.2.4,                        no,              no,                 {{vuh}} sv -q --airplane-mode  # alias for --offline
-cc10,       dont_use_git,               1.2.3,                        no,              no,                 {{vuh}} lv -q --config-dir=custom_config_dir --dont-use-git
-cc11,       dont_use_git,               1.2.4,                        no,              no,                 {{vuh}} sv -q --config-dir=custom_config_dir --dont-use-git
-cc12,       dont_use_git,               1.2.4,                        no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git
-cc13,       dont_use_git,               1.2.4 1.2.5,                  no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git > /dev/null; {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git | tr '\n' ' '
+cc1,        custom_config_dir,              1.2.3,                        no,              no,                 {{vuh}} lv -q --config-dir=custom_config_dir
+cc2,        custom_config_dir,              1.2.4,                        no,              no,                 {{vuh}} sv -q --config-dir=custom_config_dir
+cc3,        custom_config_dir,              1.2.4,                        no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir
+cc4,        custom_version_file,            1.2.3,                        no,              no,                 {{vuh}} lv -q
+cc5,        custom_version_file,            1.2.4,                        no,              no,                 {{vuh}} sv -q
+cc6,        custom_version_file,            1.2.4,                        no,              yes,                {{vuh}} uv -q
+cc7,        custom_version_file,            1.2.5,                        no,              no,                 {{vuh}} sv -q -mb=test_fixture_patch_larger
+cc8,        patch_smaller,                  1.2.4,                        no,              no,                 {{vuh}} sv -q --offline
+cc9,        patch_smaller,                  1.2.4,                        no,              no,                 {{vuh}} sv -q --airplane-mode  # alias for --offline
+cc10,       dont_use_git,                   1.2.3,                        no,              no,                 {{vuh}} lv -q --config-dir=custom_config_dir --dont-use-git
+cc11,       dont_use_git,                   1.2.4,                        no,              no,                 {{vuh}} sv -q --config-dir=custom_config_dir --dont-use-git
+cc12,       dont_use_git,                   1.2.4,                        no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git
+cc13,       dont_use_git,                   1.2.4 1.2.5,                  no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git > /dev/null; {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git | tr '\n' ' '
 
 
 # monorepos operations
-mr1,        monorepo_equals,            MOD_1 MOD_2 MOD_3,            no,              no,                 {{vuh}} pm -q | sed -e 's/{{comma}}//g'
-mr2,        monorepo_equals,            1.2.3,                        no,              no,                 {{vuh}} lv -q -pm=MOD_1
-mr3,        monorepo_equals,            2.2.2,                        no,              no,                 {{vuh}} lv -q -pm=MOD_2
-mr4,        monorepo_equals,            3.2.1,                        no,              no,                 {{vuh}} lv -q -pm=MOD_3
-mr5,        monorepo_equals,            module_1,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_1
-mr6,        monorepo_equals,            module_2,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_2
-mr7,        monorepo_equals,            module_3,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_3
-mr8,        monorepo_equals,            1.2.4,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1
-mr9,        monorepo_equals,            2.2.3,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2
-mr10,       monorepo_equals,            3.2.2,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3
-mr11,       monorepo_equals,            1.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1 -vp=minor
-mr12,       monorepo_equals,            2.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2 -vp=minor
-mr13,       monorepo_equals,            3.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3 -vp=minor
-mr14,       monorepo_equals,            1.2.4,                        no,              yes,                {{vuh}} uv -q -pm=MOD_1
-mr15,       monorepo_equals,            2.2.3,                        no,              yes,                {{vuh}} uv -q -pm=MOD_2
-mr16,       monorepo_equals,            3.2.2,                        no,              yes,                {{vuh}} uv -q -pm=MOD_3
-mr17,       monorepo_reversed,          1.2.3,                        no,              yes,                {{vuh}} mv -q -pm=MOD_1
-mr18,       monorepo_reversed,          2.2.2,                        no,              yes,                {{vuh}} mv -q -pm=MOD_2
-mr19,       monorepo_reversed,          3.2.1,                        no,              yes,                {{vuh}} mv -q -pm=MOD_3
-mr20,       monorepo_reversed,          VERSION='3.2.2',              no,              yes,                {{vuh}} uv -q -pm=MOD_3 > /dev/null; cat 'module_3/version_file.txt'
-mr21,       monorepo_reversed,          VERSION = '2.2.2',            no,              yes,                {{vuh}} uv -q -pm=MOD_3 > /dev/null; cat 'module_2/version_file.txt'
+mr1,        monorepo_equals,                MOD_1 MOD_2 MOD_3,            no,              no,                 {{vuh}} pm -q | sed -e 's/{{comma}}//g'
+mr2,        monorepo_equals,                1.2.3,                        no,              no,                 {{vuh}} lv -q -pm=MOD_1
+mr3,        monorepo_equals,                2.2.2,                        no,              no,                 {{vuh}} lv -q -pm=MOD_2
+mr4,        monorepo_equals,                3.2.1,                        no,              no,                 {{vuh}} lv -q -pm=MOD_3
+mr5,        monorepo_equals,                module_1,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_1
+mr6,        monorepo_equals,                module_2,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_2
+mr7,        monorepo_equals,                module_3,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_3
+mr8,        monorepo_equals,                1.2.4,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1
+mr9,        monorepo_equals,                2.2.3,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2
+mr10,       monorepo_equals,                3.2.2,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3
+mr11,       monorepo_equals,                1.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1 -vp=minor
+mr12,       monorepo_equals,                2.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2 -vp=minor
+mr13,       monorepo_equals,                3.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3 -vp=minor
+mr14,       monorepo_equals,                1.2.4,                        no,              yes,                {{vuh}} uv -q -pm=MOD_1
+mr15,       monorepo_equals,                2.2.3,                        no,              yes,                {{vuh}} uv -q -pm=MOD_2
+mr16,       monorepo_equals,                3.2.2,                        no,              yes,                {{vuh}} uv -q -pm=MOD_3
+mr17,       monorepo_reversed,              1.2.3,                        no,              yes,                {{vuh}} mv -q -pm=MOD_1
+mr18,       monorepo_reversed,              2.2.2,                        no,              yes,                {{vuh}} mv -q -pm=MOD_2
+mr19,       monorepo_reversed,              3.2.1,                        no,              yes,                {{vuh}} mv -q -pm=MOD_3
+mr20,       monorepo_reversed,              VERSION='3.2.2',              no,              yes,                {{vuh}} uv -q -pm=MOD_3 > /dev/null; cat 'module_3/version_file.txt'
+mr21,       monorepo_reversed,              VERSION = '2.2.2',            no,              yes,                {{vuh}} uv -q -pm=MOD_3 > /dev/null; cat 'module_2/version_file.txt'
 
 
 # monorepos multiple operations
-mmo1,       monorepo_reversed,          3.2.1 2.2.2 1.2.3,            no,              no,                 {{vuh}} lv -q -pm=ALL | tr '\n' ' '
-mmo2,       monorepo_reversed,          1.2.3 2.2.2 3.2.1,            no,              no,                 {{vuh}} mv -q -pm=ALL | tr '\n' ' '
-mmo3,       monorepo_reversed,          3.2.1 2.2.3 3.2.2,            no,              no,                 {{vuh}} sv -q -pm=ALL | tr '\n' ' '
-mmo4,       monorepo_reversed,          3.2.1 2.2.3 3.2.2,            no,              yes,                {{vuh}} uv -q -pm=ALL | tr '\n' ' '
-mmo5,       monorepo_reversed,          3.2.1 1.2.3,                  no,              no,                 {{vuh}} lv -q -pm=MOD_1{{comma}}MOD_3 | tr '\n' ' '
-mmo6,       monorepo_reversed,          1.2.3 3.2.1,                  no,              no,                 {{vuh}} mv -q -pm=MOD_1{{comma}}MOD_3 | tr '\n' ' '
-mmo7,       monorepo_reversed,          3.2.1 3.2.2,                  no,              no,                 {{vuh}} sv -q -pm=MOD_1{{comma}}MOD_3 | tr '\n' ' '
-mmo8,       monorepo_reversed,          3.2.1 3.2.2,                  no,              yes,                {{vuh}} uv -q -pm=MOD_1{{comma}}MOD_3 | tr '\n' ' '
+mmo1,       monorepo_reversed,              3.2.1 2.2.2 1.2.3,            no,              no,                 {{vuh}} lv -q -pm=ALL | tr '\n' ' '
+mmo2,       monorepo_reversed,              1.2.3 2.2.2 3.2.1,            no,              no,                 {{vuh}} mv -q -pm=ALL | tr '\n' ' '
+mmo3,       monorepo_reversed,              3.2.1 2.2.3 3.2.2,            no,              no,                 {{vuh}} sv -q -pm=ALL | tr '\n' ' '
+mmo4,       monorepo_reversed,              3.2.1 2.2.3 3.2.2,            no,              yes,                {{vuh}} uv -q -pm=ALL | tr '\n' ' '
+mmo5,       monorepo_reversed,              3.2.1 1.2.3,                  no,              no,                 {{vuh}} lv -q -pm=MOD_1{{comma}}MOD_3 | tr '\n' ' '
+mmo6,       monorepo_reversed,              1.2.3 3.2.1,                  no,              no,                 {{vuh}} mv -q -pm=MOD_1{{comma}}MOD_3 | tr '\n' ' '
+mmo7,       monorepo_reversed,              3.2.1 3.2.2,                  no,              no,                 {{vuh}} sv -q -pm=MOD_1{{comma}}MOD_3 | tr '\n' ' '
+mmo8,       monorepo_reversed,              3.2.1 3.2.2,                  no,              yes,                {{vuh}} uv -q -pm=MOD_1{{comma}}MOD_3 | tr '\n' ' '
+
 
 # different directories
-nrd1,       versions_equal,             1.2.3,                        no,              yes,                mkdir tmp_dir; cd tmp_dir; {{vuh}} lv -q
-nrd2,       versions_equal,             1.2.4,                        no,              yes,                mkdir tmp_dir; cd tmp_dir; {{vuh}} sv -q
-nrd3,       versions_equal,             1.2.4,                        no,              yes,                mkdir tmp_dir; cd tmp_dir; {{vuh}} uv -q
-nrd4,       patch_larger,               1.2.3,                        no,              yes,                mkdir tmp_dir; cd tmp_dir; {{vuh}} mv -q
-nrd5,       monorepo_equals,            2.2.3,                        no,              no,                 cd module_2; {{vuh}} sv -q -cpm
-nrd6,       monorepo_equals,            3.2.2,                        no,              no,                 cd module_3; {{vuh}} sv -q -cpm
-nrd7,       monorepo_equals,            2.3.0,                        no,              no,                 cd module_2; {{vuh}} sv -q -cpm -vp=minor
-nrd8,       monorepo_equals,            3.3.0,                        no,              no,                 cd module_3; {{vuh}} sv -q -cpm -vp=minor
-nrd9,       monorepo_equals,            2.2.3,                        no,              yes,                cd module_2; {{vuh}} uv -q -cpm
-nrd10,      monorepo_equals,            3.2.2,                        no,              yes,                cd module_3; {{vuh}} uv -q -cpm
+nrd1,       versions_equal,                 1.2.3,                        no,              yes,                mkdir tmp_dir; cd tmp_dir; {{vuh}} lv -q
+nrd2,       versions_equal,                 1.2.4,                        no,              yes,                mkdir tmp_dir; cd tmp_dir; {{vuh}} sv -q
+nrd3,       versions_equal,                 1.2.4,                        no,              yes,                mkdir tmp_dir; cd tmp_dir; {{vuh}} uv -q
+nrd4,       patch_larger,                   1.2.3,                        no,              yes,                mkdir tmp_dir; cd tmp_dir; {{vuh}} mv -q
+nrd5,       monorepo_equals,                2.2.3,                        no,              no,                 cd module_2; {{vuh}} sv -q -cpm
+nrd6,       monorepo_equals,                3.2.2,                        no,              no,                 cd module_3; {{vuh}} sv -q -cpm
+nrd7,       monorepo_equals,                2.3.0,                        no,              no,                 cd module_2; {{vuh}} sv -q -cpm -vp=minor
+nrd8,       monorepo_equals,                3.3.0,                        no,              no,                 cd module_3; {{vuh}} sv -q -cpm -vp=minor
+nrd9,       monorepo_equals,                2.2.3,                        no,              yes,                cd module_2; {{vuh}} uv -q -cpm
+nrd10,      monorepo_equals,                3.2.2,                        no,              yes,                cd module_3; {{vuh}} uv -q -cpm
+
 
 # check git diff
-cgd1,       versions_equal,             1.2.3,                        no,              no,                 {{vuh}} sv -q --check-git-diff
-cgd2,       check_git_diff_equal,       1.2.3,                        no,              no,                 {{vuh}} sv -q
-cgd3,       check_git_diff_equal,       1.2.3,                        no,              no,                 {{vuh}} sv -q --check-git-diff
-cgd4,       check_git_diff_equal,       1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
-cgd5,       check_git_diff_smaller,     1.2.4,                        no,              no,                 {{vuh}} sv -q
-cgd6,       check_git_diff_smaller,     1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
-cgd7,       minor_updates_checks,       1.3.0,                        no,              no,                 {{vuh}} sv -q
-cgd8,       minor_updates_checks,       1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
-cgd9,       major_updates_checks,       2.0.0,                        no,              no,                 {{vuh}} sv -q
-cgd10,      major_updates_checks,       1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
-cgd11,      minor_major_updates_checks, 2.0.0,                        no,              no,                 {{vuh}} sv -q
-cgd12,      minor_major_updates_checks, 1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
-cgd13,      minor_updates_recommended,  1.3.0,                        no,              no,                 {{vuh}} sv -q --check-git-diff
-cgd14,      minor_updates_recommended,  1.2.4,                        no,              no,                 {{vuh}} sv -q
+cgd1,       versions_equal,                 1.2.3,                        no,              no,                 {{vuh}} sv -q --check-git-diff
+cgd2,       check_git_diff_equal,           1.2.3,                        no,              no,                 {{vuh}} sv -q
+cgd3,       check_git_diff_equal,           1.2.3,                        no,              no,                 {{vuh}} sv -q --check-git-diff
+cgd4,       check_git_diff_equal,           1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd5,       check_git_diff_smaller,         1.2.4,                        no,              no,                 {{vuh}} sv -q
+cgd6,       check_git_diff_smaller,         1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd7,       minor_updates_checks,           1.3.0,                        no,              no,                 {{vuh}} sv -q
+cgd8,       minor_updates_checks,           1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd9,       major_updates_checks,           2.0.0,                        no,              no,                 {{vuh}} sv -q
+cgd10,      major_updates_checks,           1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd11,      minor_major_updates_checks,     2.0.0,                        no,              no,                 {{vuh}} sv -q
+cgd12,      minor_major_updates_checks,     1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd13,      minor_updates_recommended,      1.3.0,                        no,              no,                 {{vuh}} sv -q --check-git-diff
+cgd14,      minor_updates_recommended,      1.2.4,                        no,              no,                 {{vuh}} sv -q
 # TODO issue #37 should make next two tests work
-# cgd15,      minor_updates_two_dirs,     1.3.0,                        no,              no,                 {{vuh}} sv -q
-# cgd16,      minor_updates_two_dirs,     1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
+# cgd15,      minor_updates_two_dirs,         1.3.0,                        no,              no,                 {{vuh}} sv -q
+# cgd16,      minor_updates_two_dirs,         1.2.4,                        no,              no,                 {{vuh}} sv -q --dont-check-git-diff
+
 
 # check git diff for monorepos
-# cgdmr1,     monorepo_minor_checks,      1.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1 --check-git-diff
-# cgdmr2,     monorepo_minor_checks,      2.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2 --check-git-diff
-# TODO --check-git-diff for monorepos
+cgdmr1,     monorepo_checks_1_min_2_maj,    1.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1
+cgdmr2,     monorepo_checks_1_min_2_maj,    3.0.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2
+cgdmr3,     monorepo_checks_1_min_2_maj,    3.2.2,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3
+cgdmr4,     monorepo_checks_1_min_2_maj,    1.2.4,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1 --dont-check-git-diff
+cgdmr5,     monorepo_checks_1_min_2_maj,    2.2.3,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2 --dont-check-git-diff
+cgdmr6,     monorepo_checks_1_min_2_maj,    3.2.2,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3 --dont-check-git-diff
+cgdmr7,     monorepo_checks_nr_1_min_2_maj, 1.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1 --check-git-diff
+cgdmr8,     monorepo_checks_nr_1_min_2_maj, 3.0.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2 --check-git-diff
+cgdmr9,     monorepo_checks_nr_1_min_2_maj, 3.2.1,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3 --check-git-diff
+cgdmr10,    monorepo_checks_nr_1_min_2_maj, 1.2.4,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1
+cgdmr11,    monorepo_checks_nr_1_min_2_maj, 2.2.3,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2
+cgdmr12,    monorepo_checks_nr_1_min_2_maj, 3.2.2,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3
+
 
 # override functions
-of1,        after_update_func,          1.2.4,                        no,              no,                 {{vuh}} sv -q
-of2,        after_update_func,          1.2.3 1.2.4 1.2.4,            no,              no,                 {{vuh}} uv -q | tr '\n' ' '
+of1,        after_update_func,              1.2.4,                        no,              no,                 {{vuh}} sv -q
+of2,        after_update_func,              1.2.3 1.2.4 1.2.4,            no,              no,                 {{vuh}} uv -q | tr '\n' ' '
+
 
 # assert errors
-ae1,        versions_equal,             vuh --help,                   yes,             no,                 {{vuh}} -q
-ae2,        versions_equal,             You can't use both commands,  yes,             no,                 {{vuh}} lv uv
-ae3,        versions_equal,             Unknown option '--bad-opt',   yes,             no,                 {{vuh}} lv --bad-opt
-ae4,        versions_equal,             wrong_config_dir/.vuh!,       yes,             no,                 {{vuh}} lv --config-dir=wrong_config_dir
-ae5,        versions_equal,             origin/wrong-branch-name,     yes,             no,                 {{vuh}} mv -mb=wrong-branch-name
-ae6,        versions_equal,             You can't use both,           yes,             no,                 {{vuh}} sv --check-git-diff --dont-check-git-diff
-ae7,        versions_equal,             You can't use both,           yes,             no,                 {{vuh}} sv --dont-check-git-diff --check-git-diff
-ae8,        versions_equal,             You can't use both,           yes,             no,                 {{vuh}} sv --dont-use-git --dont-check-git-diff
-ae9,        versions_equal,             You can't use both,           yes,             no,                 {{vuh}} sv --dont-check-git-diff --dont-use-git
-ae10,       versions_equal,             You can't use both,           yes,             no,                 {{vuh}} sv --dont-use-git --check-git-diff
-ae11,       versions_equal,             You can't use both,           yes,             no,                 {{vuh}} sv --check-git-diff --dont-use-git
-ae12,       monorepo_equals,            You can't use both,           yes,             no,                 {{vuh}} sv -cpm -pm=MOD_1
-ae13,       monorepo_equals,            You can't use both,           yes,             no,                 {{vuh}} sv -pm=MOD_1 -cpm
+ae1,        versions_equal,                 vuh --help,                   yes,             no,                 {{vuh}} -q
+ae2,        versions_equal,                 You can't use both commands,  yes,             no,                 {{vuh}} lv uv
+ae3,        versions_equal,                 Unknown option '--bad-opt',   yes,             no,                 {{vuh}} lv --bad-opt
+ae4,        versions_equal,                 wrong_config_dir/.vuh!,       yes,             no,                 {{vuh}} lv --config-dir=wrong_config_dir
+ae5,        versions_equal,                 origin/wrong-branch-name,     yes,             no,                 {{vuh}} mv -mb=wrong-branch-name
+ae6,        versions_equal,                 You can't use both,           yes,             no,                 {{vuh}} sv --check-git-diff --dont-check-git-diff
+ae7,        versions_equal,                 You can't use both,           yes,             no,                 {{vuh}} sv --dont-check-git-diff --check-git-diff
+ae8,        versions_equal,                 You can't use both,           yes,             no,                 {{vuh}} sv --dont-use-git --dont-check-git-diff
+ae9,        versions_equal,                 You can't use both,           yes,             no,                 {{vuh}} sv --dont-check-git-diff --dont-use-git
+ae10,       versions_equal,                 You can't use both,           yes,             no,                 {{vuh}} sv --dont-use-git --check-git-diff
+ae11,       versions_equal,                 You can't use both,           yes,             no,                 {{vuh}} sv --check-git-diff --dont-use-git
+ae12,       monorepo_equals,                You can't use both,           yes,             no,                 {{vuh}} sv -cpm -pm=MOD_1
+ae13,       monorepo_equals,                You can't use both,           yes,             no,                 {{vuh}} sv -pm=MOD_1 -cpm
+
 
 # TODO (more like e2e) check installer works correct
 # TODO (more like e2e) check autoupdates worked fine
