@@ -33,12 +33,14 @@ MOD_1_VERSION_FILE='module_1/version_file.txt'
 MOD_1_TEXT_BEFORE_VERSION_CODE="VERSION='"
 MOD_1_TEXT_AFTER_VERSION_CODE="'"
 MOD_1_MODULE_ROOT_PATH='module_1'
+MOD_1_MINOR_CHANGING_LOCATIONS='module_1/leading_to_minor_changes.txt'
 
 # variables for MOD_2 module
 MOD_2_VERSION_FILE='module_2/version_file.txt'
 MOD_2_TEXT_BEFORE_VERSION_CODE="VERSION = '"
 MOD_2_TEXT_AFTER_VERSION_CODE="'"
 MOD_2_MODULE_ROOT_PATH='module_2'
+MOD_2_MAJOR_CHANGING_LOCATIONS='module_2/leading_to_major_changes.txt'
 
 # variables for MOD_3 module
 MOD_3_VERSION_FILE='module_3/version_file.txt'
