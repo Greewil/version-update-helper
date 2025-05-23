@@ -16,4 +16,4 @@ jobs:
       - name: Unit tests
         working-directory: 'tests'
         run: |
-          ./run_tests.sh -tp ${{ matrix.test_group }} || exit 1
+          ./run_tests.sh -q -tp ${{ matrix.test_group }} || exit 1

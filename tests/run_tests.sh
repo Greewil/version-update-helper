@@ -23,6 +23,8 @@
 
 APP_NAME='run_tests.sh'
 
+VUH_REPO_ADDRESS='https://github.com/Greewil/version-update-helper.git'
+
 TRIMMED_HEADER='test_id,branch_name,correct_result,asserting_error,use_separate_env,command'
 ASSERT_DATA_FILE='assert_data.csv'
 TEXT_FOR_COMMA_REPLACEMENT='{{comma}}'
@@ -148,7 +150,7 @@ function _run_test_in_tmp_environment() {
   mkdir -p "tmp/$unique_test_dir"
   cd "tmp/$unique_test_dir" || exit 1
   repo_name='vuh-repo'
-  git clone 'git@github.com:Greewil/version-update-helper.git' "$repo_name"
+  git clone "$VUH_REPO_ADDRESS" "$repo_name"
   _run_test "$test_id" "$branch_name" "$correct_result" "$asserting_error" "$command" "$repo_name" || exit 1
   cd "$STARTING_DIR" || exit 1
   _show_success_message "Test '$test_id' successfully finished"
