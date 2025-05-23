@@ -49,15 +49,16 @@ IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 MINOR_CHANGING_LOCATIONS=''
 MAJOR_CHANGING_LOCATIONS=''
 
-# You can override get_larger_prerelease_info function here. Here's a template for it:
+# This function calls after each successful version update.
+# This realisation will generate new package-lock.json file after changing package.json.
 #
-# $1 - Prerelease information of the first version to compare
-# $2 - Prerelease information of the second version to compare
-#
-# Returns larger prerelease version or '=' if inputs are treated as equal.
-#function get_larger_prerelease_info() {
-#  <Your comparing logic>
-#}
+# $1 - Version before update
+# $2 - New version after update
+function after_successful_version_update() {
+  old_version=$1
+  new_version=$2
+  echo "$old_version" "$new_version"
+}
 
 # ------------------------------------- end basic variables ------------------------------------- #
 
