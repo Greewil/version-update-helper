@@ -23,7 +23,7 @@
 
 APP_NAME='run_tests.sh'
 
-TRIMMED_HEADER='test_id,branch_name,correct_result,use_separate_env,command'
+TRIMMED_HEADER='test_id,branch_name,correct_result,asserting_error,use_separate_env,command'
 ASSERT_DATA_FILE='assert_data.csv'
 TEXT_FOR_COMMA_REPLACEMENT='{{comma}}'
 TEXT_FOR_VUH_REPLACEMENT='{{vuh}}'
@@ -99,23 +99,34 @@ function _run_test() {
   test_id=$1
   branch_name=$2
   correct_result=$3
-  command=$4
-  repo_name=$5
+  asserting_error=$4
+  command=$5
+  repo_name=$6
   cd "$repo_name" || return 1
   git checkout "test_fixture_$branch_name" || return 1
   eval_command="${command//$TEXT_FOR_COMMA_REPLACEMENT/,}" || return 1
   eval_command="${eval_command//$TEXT_FOR_VUH_REPLACEMENT/\"$STARTING_DIR/../vuh.sh\"}" || return 1
-  vuh_output="$(eval "$eval_command")" || {
-    _show_error_message 'vuh throw an error during execution!'
-    eval "\"$STARTING_DIR/../vuh.sh\" $eval_command"
-    return 1
-  }
-  vuh_output=$(echo "$vuh_output" | awk '{$1=$1};1') || exit 1
-  if [ "$vuh_output" != "$correct_result" ]; then
-    _show_error_message "Incorrect vuh output!"
-    _show_error_message "Expected output: '$correct_result'"
-    _show_error_message "Obtained output: '$vuh_output'"
-    exit 1
+  if [ "$asserting_error" = 'yes' ]; then
+    vuh_output="$(eval "$eval_command" 2>&1)"
+    if ! [[ $vuh_output =~ $correct_result ]]; then
+      _show_error_message "Incorrect vuh error output!"
+      _show_error_message "Expected text in error output: '$correct_result'"
+      _show_error_message "Obtained error: '$vuh_output'"
+      exit 1
+    fi
+  else
+    vuh_output="$(eval "$eval_command")" || {
+      _show_error_message 'vuh throw an error during execution!'
+      eval "\"$STARTING_DIR/../vuh.sh\" $eval_command"
+      return 1
+    }
+    vuh_output=$(echo "$vuh_output" | awk '{$1=$1};1') || exit 1
+    if [ "$vuh_output" != "$correct_result" ]; then
+      _show_error_message "Incorrect vuh output!"
+      _show_error_message "Expected output: '$correct_result'"
+      _show_error_message "Obtained output: '$vuh_output'"
+      exit 1
+    fi
   fi
   cd - || return 1
 }
@@ -124,8 +135,9 @@ function _run_test_in_tmp_environment() {
   test_id=$1
   branch_name=$2
   correct_result=$3
-  command=$4
-  test_dir_name=$5
+  asserting_error=$4
+  command=$5
+  test_dir_name=$6
   _show_updated_message "Running test '$test_id' (using branch test_fixture_$branch_name) ..."
   if [ "$test_dir_name" = '' ]; then
     unique_test_dir="$test_id-$(date +%s%N)"
@@ -137,7 +149,7 @@ function _run_test_in_tmp_environment() {
   cd "tmp/$unique_test_dir" || exit 1
   repo_name='vuh-repo'
   git clone 'git@github.com:Greewil/version-update-helper.git' "$repo_name"
-  _run_test "$test_id" "$branch_name" "$correct_result" "$command" "$repo_name" || exit 1
+  _run_test "$test_id" "$branch_name" "$correct_result" "$asserting_error" "$command" "$repo_name" || exit 1
   cd "$STARTING_DIR" || exit 1
   _show_success_message "Test '$test_id' successfully finished"
 }
@@ -174,9 +186,11 @@ function run_tests() {
       branch_name=$(echo "$branch_name" | awk '{$1=$1};1') || exit 1
       correct_result=$(echo "$line_without_comments" | cut -d',' -f3) || incorrect_line='true'
       correct_result=$(echo "$correct_result" | awk '{$1=$1};1') || exit 1
-      use_separate_env=$(echo "$line_without_comments" | cut -d',' -f4) || incorrect_line='true'
+      asserting_error=$(echo "$line_without_comments" | cut -d',' -f4) || incorrect_line='true'
+      asserting_error=$(echo "$asserting_error" | awk '{$1=$1};1') || exit 1
+      use_separate_env=$(echo "$line_without_comments" | cut -d',' -f5) || incorrect_line='true'
       use_separate_env=$(echo "$use_separate_env" | awk '{$1=$1};1') || exit 1
-      command=$(echo "$line_without_comments" | cut -d',' -f5) || incorrect_line='true'
+      command=$(echo "$line_without_comments" | cut -d',' -f6) || incorrect_line='true'
       command=$(echo "$command" | awk '{$1=$1};1') || exit 1
       if [ "$incorrect_line" = 'true' ]; then
         _show_error_message 'Incorrect format in line:'
@@ -211,7 +225,8 @@ function run_tests() {
 
       # starting test
       if [ "$is_test_planned_to_start" = 'true' ]; then
-        _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$command" "$current_test_dir"
+        echo ""
+        _run_test_in_tmp_environment "$test_id" "$branch_name" "$correct_result" "$asserting_error" "$command" "$current_test_dir"
         tests_passed=$((tests_passed+1))
       else
         _show_info_message "test $test_id skipped"
