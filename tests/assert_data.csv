@@ -127,7 +127,9 @@ cgd14,      minor_updates_recommended,  1.2.4,              no,                 
 # cgdmr2,     monorepo_minor_checks,      2.3.0,              no,                 {{vuh}} sv -q -pm=MOD_2 --check-git-diff
 # TODO --check-git-diff for monorepos
 
-# TODO check functions override (fe. after_successful_version_update) (echo 'after_uv' fe.)
+# override functions
+of1,        after_update_func,          1.2.4,              no,                 {{vuh}} sv -q
+of2,        after_update_func,          1.2.3 1.2.4 1.2.4,  no,                 {{vuh}} uv -q | tr '\n' ' '
 
 # TODO add column for checking errors (additional column for asserting errors)
 # TODO check errors (config not found)
