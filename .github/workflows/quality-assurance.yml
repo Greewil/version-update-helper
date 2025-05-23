@@ -11,3 +11,7 @@ jobs:
   shellcheck:
     name: Shellcheck
     uses: ./.github/workflows/shellcheck.yml
+
+  installer-tests:
+    name: Installer tests
+    uses: ./.github/workflows/installer-tests.yml

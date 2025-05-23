@@ -320,8 +320,8 @@ vuh sv
 vuh sv -pm=YOUR_PROJECT_MODULE  # in case you have monorepository with multiple modules
 ```
 
-[//]: # (TODO link to example js repo, python repo, java repo, ...)
-[//]: # (TODO link to example monorepo, f.e. with WEB, BACKEND, OPENAPI_SCHEMA)
+[//]: # (TODO link to example js branches, python branches, java branches, ...)
+[//]: # (TODO link to example monorepo branche, f.e. with WEB, BACKEND, OPENAPI_SCHEMA)
 
 ## Version comparing logic
 

@@ -1,0 +1,23 @@
+name: Installer tests
+
+on: [workflow_call]
+
+jobs:
+
+  installer-tests:
+    name: Installer tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install vuh (default installation)
+        run: |
+          ./installer.sh -d || exit 1
+      - name: Run vuh lv works and don't throw any warnings
+        run: |
+          vuh lv -q || exit 1
+          [ "$(vuh lv -q)" = "$(./vuh.sh lv -q)" ] || exit 1
+          
+          vuh_full_output="$(vuh lv)" || exit 1
+          warning_text='(vuh : WARNING)'
+          [[ $vuh_full_output ~= $warning_text ]] && exit 1

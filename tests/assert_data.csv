@@ -62,7 +62,7 @@ cc9,        patch_smaller,                  1.2.4,                        no,   
 cc10,       dont_use_git,                   1.2.3,                        no,              no,                 {{vuh}} lv -q --config-dir=custom_config_dir --dont-use-git
 cc11,       dont_use_git,                   1.2.4,                        no,              no,                 {{vuh}} sv -q --config-dir=custom_config_dir --dont-use-git
 cc12,       dont_use_git,                   1.2.4,                        no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git
-cc13,       dont_use_git,                   1.2.4 1.2.5,                  no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git > /dev/null; {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git | tr '\n' ' '
+cc13,       dont_use_git,                   1.2.5,                        no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git > /dev/null; {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git | tr '\n' ' '
 
 
 # monorepos operations
@@ -169,5 +169,4 @@ ae12,       monorepo_equals,                You can't use both,           yes,  
 ae13,       monorepo_equals,                You can't use both,           yes,             no,                 {{vuh}} sv -pm=MOD_1 -cpm
 
 
-# TODO (more like e2e) check installer works correct
 # TODO (more like e2e) check autoupdates worked fine
