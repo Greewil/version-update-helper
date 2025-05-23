@@ -46,7 +46,7 @@ IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='true'
 #   Locations should be separated with spaces.
 #   Empty variable means there is no locations which leads to <VERSION_PART> increasing on every change in them.
 # example: 'openapi/schema.yaml very/important/directory' (for 'openapi/schema.yaml' and 'very/important/directory')
-MINOR_CHANGING_LOCATIONS=''
+MINOR_CHANGING_LOCATIONS='dir_leading_to_minor_updates'
 MAJOR_CHANGING_LOCATIONS=''
 
 # You can override get_larger_prerelease_info function here. Here's a template for it:
