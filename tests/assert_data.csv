@@ -110,16 +110,30 @@ cgd3,       check_git_diff_equal,       1.2.3,              no,                 
 cgd4,       check_git_diff_equal,       1.2.4,              no,                 {{vuh}} sv -q --dont-check-git-diff
 cgd5,       check_git_diff_smaller,     1.2.4,              no,                 {{vuh}} sv -q
 cgd6,       check_git_diff_smaller,     1.2.4,              no,                 {{vuh}} sv -q --dont-check-git-diff
-# TODO tests for --check-git-diff when in config specified minor and major increasing directories (also with -vp=minor -vp=major)
+cgd7,       minor_updates_checks,       1.3.0,              no,                 {{vuh}} sv -q
+cgd8,       minor_updates_checks,       1.2.4,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd9,       major_updates_checks,       2.0.0,              no,                 {{vuh}} sv -q
+cgd10,      major_updates_checks,       1.2.4,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd11,      minor_major_updates_checks, 2.0.0,              no,                 {{vuh}} sv -q
+cgd12,      minor_major_updates_checks, 1.2.4,              no,                 {{vuh}} sv -q --dont-check-git-diff
+cgd13,      minor_updates_recommended,  1.3.0,              no,                 {{vuh}} sv -q --check-git-diff
+cgd14,      minor_updates_recommended,  1.2.4,              no,                 {{vuh}} sv -q
+# TODO issue #37 should make next two tests work
+# cgd15,      minor_updates_two_dirs,     1.3.0,              no,                 {{vuh}} sv -q
+# cgd16,      minor_updates_two_dirs,     1.2.4,              no,                 {{vuh}} sv -q --dont-check-git-diff
+
+# check git diff for monorepos
+# cgdmr1,     monorepo_minor_checks,      1.3.0,              no,                 {{vuh}} sv -q -pm=MOD_1 --check-git-diff
+# cgdmr2,     monorepo_minor_checks,      2.3.0,              no,                 {{vuh}} sv -q -pm=MOD_2 --check-git-diff
 # TODO --check-git-diff for monorepos
 
+# TODO check functions override (fe. after_successful_version_update) (echo 'after_uv' fe.)
 
 # TODO add column for checking errors (additional column for asserting errors)
 # TODO check errors (config not found)
 # TODO check errors (params incompatible)
 
 # TODO check files updated correctly (maybe separate additional column in separate csv file)
-# TODO check functions override (fe. after_successful_version_update)
 
 # TODO (more like e2e) check installer works correct
 # TODO (more like e2e) check autoupdates worked fine
