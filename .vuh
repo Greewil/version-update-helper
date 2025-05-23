@@ -14,7 +14,7 @@
 
 # MAIN_BRANCH_NAME: the name of the main project's branch
 # example: 'main' or 'master'
-MAIN_BRANCH_NAME='test_fixture_monorepo_main'
+MAIN_BRANCH_NAME='test_fixture_monorepo_main_diff_checks'
 
 # ------------------------------------- begin mono repository variables ------------------------------------- #
 
