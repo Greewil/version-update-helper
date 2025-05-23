@@ -837,11 +837,11 @@ function _load_local_conf_file() {
     full_conf_dir="$ROOT_REPO_DIR/$SPECIFIED_CONFIG_DIR"
   fi
   conf_file=$(<"$full_conf_dir/.vuh") || {
-    _show_error_message "Failed to read local configuration file $ROOT_REPO_DIR/.vuh!"
+    _show_error_message "Failed to read local configuration file $full_conf_dir/.vuh!"
     return 1
   }
   _load_project_variables_from_config "$conf_file" || {
-    _show_error_message "Failed to load variables from local configuration file $ROOT_REPO_DIR/.vuh!"
+    _show_error_message "Failed to load variables from local configuration file $full_conf_dir/.vuh!"
     return 1
   }
   _check_conf_data_loaded_properly || return 1
