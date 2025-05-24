@@ -13,4 +13,8 @@ jobs:
       - name: Installer tests
         working-directory: 'installer-tests'
         run: |
-          ./run_tests.sh || exit 1
+          ./run_tests.sh ds 'installation-test' || exit 1
+      - name: Autoupdate tests
+        working-directory: 'installer-tests'
+        run: |
+          ./run_tests.sh ds 'autoupdate-test' || exit 1

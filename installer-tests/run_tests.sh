@@ -27,6 +27,7 @@ GREEN='\e[1;32m'      # for success
 COMMAND='docker-start'
 # -- Arguments:
 # -- Specified params:
+SPECIFIED_TEST_NAME='it'
 
 
 function _show_function_title() {
@@ -80,6 +81,7 @@ function _show_cant_use_both_arguments() {
 }
 
 function docker_starter() {
+  test_command=$1
   _show_function_title "Starting tests in docker ..."
   _show_updated_message "Building image ..."
   docker build . -t "$IMAGE_NAME" || {
@@ -90,7 +92,7 @@ function docker_starter() {
   docker ps -q -f name="$CONTAINER_NAME" | xargs -r docker stop
   docker ps -a -q -f name="$CONTAINER_NAME" | xargs -r docker rm
   _show_updated_message "Running tests ..."
-  docker run -d -e TESTS_COMMANDS='installation-test' \
+  docker run -d -e TESTS_COMMANDS="$SPECIFIED_TEST_NAME" \
                 -v "./..:$VUH_SRC_VOLUME" \
                 --name "$CONTAINER_NAME" \
                 "$IMAGE_NAME" || {
@@ -100,7 +102,7 @@ function docker_starter() {
   _show_updated_message "Waiting for success or error outputs ..."
   while true; do
     container_logs_output="$(docker logs "$CONTAINER_NAME")"
-    expecting_success_message='Installation tests successfully finished.'
+    expecting_success_message='tests successfully finished.'
     expecting_error_message='ERROR'
     container_exit_code="$(docker inspect "$CONTAINER_NAME" --format='{{.State.ExitCode}}')"
     if [ "$container_exit_code" = '0' ] && [[ $container_logs_output =~ $expecting_success_message ]]; then
@@ -142,16 +144,56 @@ function installation_test() {
   _show_success_message "Installation tests successfully finished."
 }
 
+function autoupdate_test() {
+  _show_function_title "Running autoupdate test ..."
+
+  tmp_vuh_src_dir='/opt/old_vuh_simulation'
+  mkdir -p "$tmp_vuh_src_dir" || exit 1
+  ls -la "$VUH_SRC_VOLUME"
+  cp -r "$VUH_SRC_VOLUME/." "$tmp_vuh_src_dir" || exit 1
+  ls -la "$tmp_vuh_src_dir"
+  # TODO downgrade versions
+
+  _show_updated_message "Installing vuh using installer.sh .."
+  ".$tmp_vuh_src_dir/installer.sh" -d
+
+  _show_updated_message "Cloning vuh repository ..."
+  repo_name='vuh-repo'
+  git clone "$VUH_REPO_ADDRESS" "$repo_name"
+  cd "$repo_name" || exit 1
+
+  # TODO check update required
+
+  # TODO start update
+
+  _show_updated_message "Trying to update vuh manually (when update not required) ..."
+  expecting_already_updated='you already have the latest vuh version'
+  vuh_update_output="$(vuh --update)" || exit 1
+  if ! [[ $vuh_update_output =~ $expecting_already_updated ]]; then
+    _show_error_message "Update command failed!"
+    _show_error_message "$vuh_update_output"
+    exit 1
+  fi
+
+  _show_success_message "Autoupdate tests successfully finished."
+}
+
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
   ds|docker-starter)
     _exit_if_using_multiple_commands "$1"
     COMMAND='docker-starter'
+    SPECIFIED_TEST_NAME="$2"
+    shift # past value
     shift ;;
   it|installation-test)
     _exit_if_using_multiple_commands "$1"
     COMMAND='installation-test'
+    shift ;;
+  at|autoupdate-test)
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='autoupdate-test'
     shift ;;
   -h|--help)
     _exit_if_using_multiple_commands "$1"
@@ -182,6 +224,10 @@ docker-starter)
   ;;
 installation-test)
   installation_test || exit 1
+  exit 0
+  ;;
+autoupdate-test)
+  autoupdate_test || exit 1
   exit 0
   ;;
 esac
