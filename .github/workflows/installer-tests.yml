@@ -13,4 +13,4 @@ jobs:
       - name: Installer tests
         working-directory: 'installer-tests'
         run: |
-          ./run_tests.sh -q -tp ${{ matrix.test_group }} || exit 1
+          ./run_tests.sh || exit 1

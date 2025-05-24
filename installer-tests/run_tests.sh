@@ -122,7 +122,7 @@ function installation_test() {
   _show_updated_message "Cloning vuh repository ..."
   repo_name='vuh-repo'
   git clone "$VUH_REPO_ADDRESS" "$repo_name"
-  cd "$repo_name"
+  cd "$repo_name" || exit 1
 
   _show_updated_message "Trying to use 'vuh lv -q' ..."
   vuh lv -q || exit 1
