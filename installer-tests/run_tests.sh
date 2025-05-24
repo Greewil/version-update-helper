@@ -90,7 +90,10 @@ function docker_starter() {
   docker ps -q -f name="$CONTAINER_NAME" | xargs -r docker stop
   docker ps -a -q -f name="$CONTAINER_NAME" | xargs -r docker rm
   _show_updated_message "Running tests ..."
-  docker run -d -v "./..:$VUH_SRC_VOLUME" --name "$CONTAINER_NAME" "$IMAGE_NAME" || {
+  docker run -d -e TESTS_COMMANDS='installation-test' \
+                -v "./..:$VUH_SRC_VOLUME" \
+                --name "$CONTAINER_NAME" \
+                "$IMAGE_NAME" || {
     _show_error_message "Failed to run docker container from image: '$IMAGE_NAME'!"
     exit 1
   }

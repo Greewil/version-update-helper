@@ -7,4 +7,6 @@ RUN set -xe \
 
 COPY run_tests.sh ./
 
-CMD ./run_tests.sh installation-test
+ENV TESTS_COMMANDS='installation-test'
+
+CMD ./run_tests.sh ${TESTS_COMMANDS}
