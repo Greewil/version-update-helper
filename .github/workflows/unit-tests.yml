@@ -14,6 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Unit tests
-        working-directory: 'tests'
+        working-directory: 'unit-tests'
         run: |
           ./run_tests.sh -q -tp ${{ matrix.test_group }} || exit 1

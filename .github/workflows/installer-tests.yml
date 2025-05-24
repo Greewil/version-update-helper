@@ -10,14 +10,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install vuh (default installation)
+      - name: Installer tests
+        working-directory: 'installer-tests'
         run: |
-          ./installer.sh -d || exit 1
-      - name: Run vuh lv works and don't throw any warnings
-        run: |
-          vuh lv -q || exit 1
-          [ "$(vuh lv -q)" = "$(./vuh.sh lv -q)" ] || exit 1
-          
-          vuh_full_output="$(vuh lv)" || exit 1
-          warning_text='(vuh : WARNING)'
-          [[ $vuh_full_output ~= $warning_text ]] && exit 1
+          ./run_tests.sh -q -tp ${{ matrix.test_group }} || exit 1

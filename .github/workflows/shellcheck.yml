@@ -13,4 +13,4 @@ jobs:
       - name: Lint
         uses: azohra/shell-linter@latest
         with:
-          path: "vuh.sh,vuh-completion.sh,installer.sh,tests/run_tests.sh,tests/_clean_tmp.sh"
+          path: "vuh.sh,vuh-completion.sh,installer.sh,unit-tests/run_tests.sh,unit-tests/_clean_tmp.sh,installer-tests/run_tests.sh"
