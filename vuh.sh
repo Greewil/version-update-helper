@@ -207,7 +207,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.11.0'
+VUH_VERSION='2.11.1'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -832,12 +832,16 @@ function _check_conf_data_loaded_properly() {
 function _load_local_conf_file() {
   _unset_conf_variables || return 1
   _get_root_repo_dir || return 1
-  conf_file=$(<"$ROOT_REPO_DIR/.vuh") || {
-    _show_error_message "Failed to read local configuration file $ROOT_REPO_DIR/.vuh!"
+  full_conf_dir="$ROOT_REPO_DIR"
+  if [ "$SPECIFIED_CONFIG_DIR" != '' ] && [ "$ARGUMENT_DONT_USE_GIT" = 'false' ]; then
+    full_conf_dir="$ROOT_REPO_DIR/$SPECIFIED_CONFIG_DIR"
+  fi
+  conf_file=$(<"$full_conf_dir/.vuh") || {
+    _show_error_message "Failed to read local configuration file $full_conf_dir/.vuh!"
     return 1
   }
   _load_project_variables_from_config "$conf_file" || {
-    _show_error_message "Failed to load variables from local configuration file $ROOT_REPO_DIR/.vuh!"
+    _show_error_message "Failed to load variables from local configuration file $full_conf_dir/.vuh!"
     return 1
   }
   _check_conf_data_loaded_properly || return 1
@@ -846,8 +850,12 @@ function _load_local_conf_file() {
 function _load_remote_conf_file() {
   _unset_conf_variables || return 1
   branch_name=$1
-  handling_config_file="origin/$branch_name:.vuh"
-  main_branch_config_file=$(_get_file_from_another_branch "origin/$branch_name" ".vuh") || {
+  conf_repo_relative_location='.vuh'
+  if [ "$SPECIFIED_CONFIG_DIR" != '' ]; then
+    conf_repo_relative_location="$SPECIFIED_CONFIG_DIR/.vuh"
+  fi
+  handling_config_file="origin/$branch_name:$conf_repo_relative_location"
+  main_branch_config_file=$(_get_file_from_another_branch "origin/$branch_name" "$conf_repo_relative_location") || {
     _show_error_message "Failed to read remote configuration file $handling_config_file!"
     return 1
   }

@@ -4,13 +4,14 @@ on: [workflow_call]
 
 jobs:
 
-  quality-assurance:
-    name: Quality Assurance
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Lint
-        uses: azohra/shell-linter@latest
-        with:
-          path: "vuh.sh,vuh-completion.sh,installer.sh"
+  unit-tests:
+    name: Unit tests
+    uses: ./.github/workflows/unit-tests.yml
+
+  shellcheck:
+    name: Shellcheck
+    uses: ./.github/workflows/shellcheck.yml
+
+  installer-tests:
+    name: Installer tests
+    uses: ./.github/workflows/installer-tests.yml
