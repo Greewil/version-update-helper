@@ -152,8 +152,6 @@ function autoupdate_test() {
   cp -r "$VUH_SRC_VOLUME/." "$tmp_vuh_src_dir" || exit 1
 
   _show_updated_message "Creating downgraded version of repository ..."
-  change_line="VUH_VERSION='"
-  line_with_downgraded_version="VUH_VERSION='1.0.0'"
   downgraded_vuh_file="$(sed "s/VUH_VERSION=.*/VUH_VERSION=\'1\.0\.0\'/" "$tmp_vuh_src_dir/vuh.sh")"
   echo "$downgraded_vuh_file" > "$tmp_vuh_src_dir/vuh.sh"
 
