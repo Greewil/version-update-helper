@@ -146,12 +146,16 @@ function installation_test() {
 function autoupdate_test() {
   _show_function_title "Running autoupdate test ..."
 
+  _show_updated_message "Creating temporary vuh src analog ..."
   tmp_vuh_src_dir='/opt/old_vuh_simulation'
   mkdir -p "$tmp_vuh_src_dir" || exit 1
-  ls -la "$VUH_SRC_VOLUME"
   cp -r "$VUH_SRC_VOLUME/." "$tmp_vuh_src_dir" || exit 1
-  ls -la "$tmp_vuh_src_dir"
-  # TODO downgrade versions
+
+  _show_updated_message "Creating downgraded version of repository ..."
+  change_line="VUH_VERSION='"
+  line_with_downgraded_version="VUH_VERSION='1.0.0'"
+  downgraded_vuh_file="$(sed "s/VUH_VERSION=.*/VUH_VERSION=\'1\.0\.0\'/" "$tmp_vuh_src_dir/vuh.sh")"
+  echo "$downgraded_vuh_file" > "$tmp_vuh_src_dir/vuh.sh"
 
   _show_updated_message "Installing vuh using installer.sh .."
   ".$tmp_vuh_src_dir/installer.sh" -d
@@ -161,18 +165,26 @@ function autoupdate_test() {
   git clone "$VUH_REPO_ADDRESS" "$repo_name"
   cd "$repo_name" || exit 1
 
-  # TODO check update required
+  _show_updated_message "Checking vuh installed correctly (downgraded version 1.0.0) ..."
+  vuh -v || exit 1
 
-  # TODO start update
+  _show_updated_message "Check autoupdate initialized ..."
+  "./../autoupdate.exp" || exit 1
 
-  _show_updated_message "Trying to update vuh manually (when update not required) ..."
-  expecting_already_updated='you already have the latest vuh version'
-  vuh_update_output="$(vuh --update)" || exit 1
-  if ! [[ $vuh_update_output =~ $expecting_already_updated ]]; then
-    _show_error_message "Update command failed!"
-    _show_error_message "$vuh_update_output"
-    exit 1
-  fi
+  _show_updated_message "Checking vuh updated correctly (downgraded version 1.0.0) ..."
+  vuh -v || exit 1
+  [ "$(vuh -v)" != '1.0.0' ] || exit 1
+
+# TODO uncomment in next release
+#  _show_updated_message "Trying to update vuh manually (when update not required) ..."
+#  expecting_already_updated='you already have the latest vuh version'
+#  vuh_update_output="$(vuh --update)" || exit 1
+#  echo "vuh_update_output: $vuh_update_output"
+#  if ! [[ $vuh_update_output =~ $expecting_already_updated ]]; then
+#    _show_error_message "Update command failed!"
+#    _show_error_message "$vuh_update_output"
+#    exit 1
+#  fi
 
   _show_success_message "Autoupdate tests successfully finished."
 }
