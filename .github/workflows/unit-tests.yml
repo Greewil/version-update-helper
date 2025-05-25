@@ -1,0 +1,19 @@
+name: Unit tests
+
+on: [workflow_call]
+
+jobs:
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test_group: ['bo', 'ci', 'sv', 'cc', 'mr', 'mmo', 'nrd', 'cgd', 'cgdmr', 'of', 'ae']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Unit tests
+        working-directory: 'unit-tests'
+        run: |
+          ./run_tests.sh -q -tp ${{ matrix.test_group }} || exit 1
