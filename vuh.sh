@@ -1109,8 +1109,8 @@ function _get_suggesting_version_using_git() {
       exit 1
     }
     if [ "$largest_version" = '=' ]; then
-      if [ "$fair_largest_version" = "$LOCAL_VERSION" ]; then
-        SUGGESTING_VERSION=$LOCAL_VERSION
+      if [ "$fair_largest_version" != "$MAIN_VERSION" ]; then
+        SUGGESTING_VERSION="$fair_largest_version"
       else
         SUGGESTING_VERSION=$(_get_incremented_version_if_allowed "$MAIN_VERSION" "$is_version_increasing_allowed")
       fi
