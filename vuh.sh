@@ -1229,12 +1229,12 @@ function check_available_updates() {
     exit 1
   }
   largest_version=$(_get_largest_version "$VUH_VERSION" "$AVAILABLE_VERSION") || exit 1
-  if [ "$largest_version" = "$VUH_VERSION" ]; then
-    _show_info_message "you already have the latest vuh version: $VUH_VERSION"
-  else
+  if [ "$largest_version" = "$AVAILABLE_VERSION" ]; then
     _show_info_message "your current vuh version: $VUH_VERSION"
     _show_info_message "latest vuh available version: $AVAILABLE_VERSION"
     _yes_no_question "Do you want to get update?" "_install_latest_vuh_version" "echo 'Update canceled'"
+  else
+    _show_info_message "you already have the latest vuh version: $VUH_VERSION"
   fi
 }
 
