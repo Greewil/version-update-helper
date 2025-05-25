@@ -81,7 +81,6 @@ function _show_cant_use_both_arguments() {
 }
 
 function docker_starter() {
-  test_command=$1
   _show_function_title "Starting tests in docker ..."
   _show_updated_message "Building image ..."
   docker build . -t "$IMAGE_NAME" || {
