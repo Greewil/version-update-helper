@@ -1,5 +1,30 @@
 #!/usr/bin/env bash
 
+#/ Usage: ./run_tests.sh [-h | --help] [ds | docker-starter <test_command>] [it | installation-test] [at | autoupdate-test]
+#/
+#/ Standalone commands:
+#/     -h, --help               show help text
+#/     ds | docker-starter <test_command>
+#/                              to run tests script inside of Docker container.
+#/                              It will run './run_tests.sh <test_command>', where <test_command> expected to be
+#/                              "installation-test" or "autoupdate-test".
+#/     it | installation-test   to run installation tests in current environment
+#/     at | autoupdate-test     to run autoupdate tests in current environment
+#/
+#/ Arguments for running tests:
+#/     -q, --quiet
+#/          to show only information about passed and failed tests.
+#/     -t <test_id>, --test-id <test_id>
+#/          to run only test with specified <test_id>.
+#/          This parameter can't be used with '-tp | --test-id-prefix'.
+#/          This parameter can't be used with '-ft | --from-test-id'.
+#/     -ft <test_id>, --from-test-id <test_id>
+#/          to run tests listed after test with specified <test_id> (including).
+#/          This parameter can't be used with '-t | --test-id'.
+#/     -tp <test_id_prefix>, --test-id-prefix <test_id_prefix>
+#/          to run only tests with specified prefixes.
+#/          This parameter can't be used with '-t | --test-id'.
+#/
 #/ This is script for testing vuh installation and auto updates mechanisms.
 
 APP_NAME='run_tests.sh'
@@ -173,16 +198,15 @@ function autoupdate_test() {
   vuh -v || exit 1
   [ "$(vuh -v)" != '1.0.0' ] || exit 1
 
-# TODO uncomment in next release
-#  _show_updated_message "Trying to update vuh manually (when update not required) ..."
-#  expecting_already_updated='you already have the latest vuh version'
-#  vuh_update_output="$(vuh --update)" || exit 1
-#  echo "vuh_update_output: $vuh_update_output"
-#  if ! [[ $vuh_update_output =~ $expecting_already_updated ]]; then
-#    _show_error_message "Update command failed!"
-#    _show_error_message "$vuh_update_output"
-#    exit 1
-#  fi
+  _show_updated_message "Trying to update vuh manually (when update not required) ..."
+  expecting_already_updated='you already have the latest vuh version'
+  vuh_update_output="$(vuh --update)" || exit 1
+  echo "vuh_update_output: $vuh_update_output"
+  if ! [[ $vuh_update_output =~ $expecting_already_updated ]]; then
+    _show_error_message "Update command failed!"
+    _show_error_message "$vuh_update_output"
+    exit 1
+  fi
 
   _show_success_message "Autoupdate tests successfully finished."
 }
