@@ -29,10 +29,10 @@ MAIN_BRANCH_NAME='test_fixture_monorepo_main'
 PROJECT_MODULES='MOD_1, MOD_2, MOD_3'
 
 # variables for MOD_1 module
-MOD_1_VERSION_FILE='module_1/version_file.txt'
+MOD_1_VERSION_FILE='module_1_3/version_file_mod_1.txt'
 MOD_1_TEXT_BEFORE_VERSION_CODE="VERSION='"
 MOD_1_TEXT_AFTER_VERSION_CODE="'"
-MOD_1_MODULE_ROOT_PATH='module_1'
+MOD_1_MODULE_ROOT_PATH='module_1_3'
 
 # variables for MOD_2 module
 MOD_2_VERSION_FILE='module_2/version_file.txt'
@@ -41,9 +41,9 @@ MOD_2_TEXT_AFTER_VERSION_CODE="'"
 MOD_2_MODULE_ROOT_PATH='module_2'
 
 # variables for MOD_3 module
-MOD_3_VERSION_FILE='module_3/version_file.txt'
+MOD_3_VERSION_FILE='module_1_3/version_file_mod_3.txt'
 MOD_3_TEXT_BEFORE_VERSION_CODE=""
 MOD_3_TEXT_AFTER_VERSION_CODE=""
-MOD_3_MODULE_ROOT_PATH='module_3'
+MOD_3_MODULE_ROOT_PATH='module_1_3'
 
 # ------------------------------------- end mono repository variables ------------------------------------- #
