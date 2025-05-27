@@ -83,7 +83,7 @@ function _show_success_message() {
 function _show_invalid_usage_error_message() {
   message=$1
   _show_error_message "$message"
-  _show_info_message 'Use "vuh --help" to see available commands and options information'
+  _show_info_message 'Use "./run_tests.sh --help" to see available commands and options information'
 }
 
 function _show_cant_use_both_arguments() {

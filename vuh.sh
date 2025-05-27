@@ -207,7 +207,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.11.2'
+VUH_VERSION='2.12.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -458,6 +458,13 @@ function _load_project_variables_from_config() {
       _show_error_message "Failed to get project module! Current directory doesn't belong to any project module."
       return 1
     }
+    if [ "$(echo "$SPECIFIED_PROJECT_MODULE" | wc -l)" != "1" ]; then
+      _show_info_message "Current directory owned by multiple modules:"
+      _show_info_message "$SPECIFIED_PROJECT_MODULE"
+      SPECIFIED_PROJECT_MODULE="$(echo "$SPECIFIED_PROJECT_MODULE" | tr '\n' ',')"
+      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
+      _handle_multiple_modules_call || exit 1
+    fi
   fi
   rm -f "/tmp/${APP_NAME}_projects_conf_file"
   [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
@@ -733,7 +740,6 @@ function _get_project_module_for_current_directory() {
   keep_searching='true'
   handling_module_root_path=''
   while [ "$keep_searching" = 'true' ]; do
-    # TODO handle case when one module is subdir of another module
     project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
     IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
     for module in "${ADDR[@]}"; do
@@ -742,13 +748,14 @@ function _get_project_module_for_current_directory() {
       if [ "$handling_module_root_path" != '' ]; then
         module_root_dir_for_find="$module_root_dir_for_find/$handling_module_root_path"
       fi
-      find_result=$(find "$module_root_dir_for_find" -type d -wholename "$handling_dir")
-      if [ "$find_result" != '' ]; then
-        echo "$module"
-        found_module='true'
-        keep_searching='false'
+      if [ -d "$module_root_dir_for_find" ] || [ -f "$module_root_dir_for_find" ]; then
+        find_result=$(find "$module_root_dir_for_find" -type d -wholename "$handling_dir")
+        if [ "$find_result" != '' ]; then
+          echo "$module"
+          found_module='true'
+          keep_searching='false'
+        fi
       fi
-#      _use_module_configuration "$next_handling_module" || return 1
     done
     if [ "$handling_dir" = '/' ] || [ "$handling_dir" = "$ROOT_REPO_DIR" ]; then
       keep_searching='false'
