@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test_group: ['bo', 'ci', 'sv', 'cc', 'mr', 'mmo', 'nrd', 'cgd', 'cgdmr', 'of', 'ae']
+        test_group: ['bo', 'ci', 'sv', 'cc', 'mr', 'mmo', 'nrd', 'rdi', 'cgd', 'cgdmr', 'of', 'ae']
     steps:
       - name: Checkout
         uses: actions/checkout@v4

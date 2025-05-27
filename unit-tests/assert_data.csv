@@ -115,6 +115,18 @@ nrd9,       monorepo_equals,                2.2.3,                        no,   
 nrd10,      monorepo_equals,                3.2.2,                        no,              yes,                cd module_3; {{vuh}} uv -q -cpm
 
 
+# root dir intersections
+rdi1,       monorepo_same_root_dirs,        2.2.2,                        no,              no,                 cd module_2; {{vuh}} lv -q -cpm
+rdi2,       monorepo_same_root_dirs,        2.2.3,                        no,              no,                 cd module_2; {{vuh}} sv -q -cpm
+rdi3,       monorepo_same_root_dirs,        2.2.3,                        no,              yes,                cd module_2; {{vuh}} uv -q -cpm
+rdi4,       monorepo_same_root_dirs,        1.2.3 3.2.1,                  no,              no,                 cd module_1_3; {{vuh}} lv -q -cpm | tr '\n' ' '
+rdi5,       monorepo_same_root_dirs,        1.2.4 3.2.2,                  no,              no,                 cd module_1_3; {{vuh}} sv -q -cpm | tr '\n' ' '
+rdi6,       monorepo_same_root_dirs,        1.2.4 3.2.2,                  no,              yes,                cd module_1_3; {{vuh}} uv -q -cpm | tr '\n' ' '
+rdi7,       monorepo_root_dir_intersection, 1.2.3 2.2.2 3.2.1,            no,              no,                 cd module_2/module_1_3; {{vuh}} lv -q -cpm | tr '\n' ' '
+rdi8,       monorepo_root_dir_intersection, 1.2.4 2.2.3 3.2.2,            no,              no,                 cd module_2/module_1_3; {{vuh}} sv -q -cpm | tr '\n' ' '
+rdi9,       monorepo_root_dir_intersection, 1.2.4 2.2.3 3.2.2,            no,              yes,                cd module_2/module_1_3; {{vuh}} uv -q -cpm | tr '\n' ' '
+
+
 # check git diff
 cgd1,       versions_equal,                 1.2.3,                        no,              no,                 {{vuh}} sv -q --check-git-diff
 cgd2,       check_git_diff_equal,           1.2.3,                        no,              no,                 {{vuh}} sv -q
