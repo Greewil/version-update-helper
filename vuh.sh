@@ -207,7 +207,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.12.0'
+VUH_VERSION='2.12.1'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -453,20 +453,27 @@ function _load_project_variables_from_config() {
     rm -f "/tmp/${APP_NAME}_projects_conf_file"
     return 1
   }
-  if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'true' ]; then
-    SPECIFIED_PROJECT_MODULE=$(_get_project_module_for_current_directory) || {
-      _show_error_message "Failed to get project module! Current directory doesn't belong to any project module."
-      return 1
-    }
-    if [ "$(echo "$SPECIFIED_PROJECT_MODULE" | wc -l)" != "1" ]; then
-      _show_info_message "Current directory owned by multiple modules:"
-      _show_info_message "$SPECIFIED_PROJECT_MODULE"
-      SPECIFIED_PROJECT_MODULE="$(echo "$SPECIFIED_PROJECT_MODULE" | tr '\n' ',')"
-      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
-      _handle_multiple_modules_call || exit 1
-    fi
-  fi
   rm -f "/tmp/${APP_NAME}_projects_conf_file"
+}
+
+function _use_current_project_module() {
+  SPECIFIED_PROJECT_MODULE=$(_get_project_module_for_current_directory) || {
+    _show_error_message "Failed to get project module! Current directory doesn't belong to any project module."
+    return 1
+  }
+  if [ "$(echo "$SPECIFIED_PROJECT_MODULE" | wc -l)" != "1" ]; then
+    _show_info_message "Current directory owned by multiple modules:"
+    _show_info_message "$SPECIFIED_PROJECT_MODULE"
+    SPECIFIED_PROJECT_MODULE="$(echo "$SPECIFIED_PROJECT_MODULE" | tr '\n' ',')"
+    SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
+    _handle_multiple_modules_call || exit 1
+  fi
+}
+
+function _select_specified_project_module() {
+  if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'true' ]; then
+    _use_current_project_module || return 1
+  fi
   [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
 }
 
@@ -851,6 +858,7 @@ function _load_local_conf_file() {
     _show_error_message "Failed to load variables from local configuration file $full_conf_dir/.vuh!"
     return 1
   }
+  _select_specified_project_module || return 1
   _check_conf_data_loaded_properly || return 1
 }
 
@@ -870,6 +878,7 @@ function _load_remote_conf_file() {
     _show_error_message "Failed to load variables from remote configuration file $handling_config_file!"
     return 1
   }
+  _select_specified_project_module || return 1
   _check_conf_data_loaded_properly || return 1
 }
 
