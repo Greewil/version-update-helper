@@ -1,1 +1,5 @@
-1.2.3
+# custom version file with # in version line
+some text
+# version = '1.2.3'
+
+another text
