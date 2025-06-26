@@ -65,6 +65,9 @@ cc10,       dont_use_git,                   1.2.3,                        no,   
 cc11,       dont_use_git,                   1.2.4,                        no,              no,                 {{vuh}} sv -q --config-dir=custom_config_dir --dont-use-git
 cc12,       dont_use_git,                   1.2.4,                        no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git
 cc13,       dont_use_git,                   1.2.5,                        no,              yes,                {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git > /dev/null; {{vuh}} uv -q --config-dir=custom_config_dir --dont-use-git | tr '\n' ' '
+cc14,       custom_version_file_1,          1.2.3,                        no,              no,                 {{vuh}} lv -q
+cc15,       custom_version_file_1,          1.2.4,                        no,              no,                 {{vuh}} sv -q
+cc16,       custom_version_file_1,          1.2.4,                        no,              yes,                {{vuh}} uv -q
 
 
 # monorepos operations

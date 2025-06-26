@@ -207,7 +207,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.12.1'
+VUH_VERSION='2.12.2'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -1214,6 +1214,7 @@ function update_version() {
       version_postfix=$(sed -r "s/.*($TEXT_AFTER_VERSION_CODE)/\1/" <<< "$version_and_postfix") || exit 1
     fi
     new_version_line="$version_prefix$new_version$version_postfix"
+    old_version_line=$(echo "$old_version_line" | sed -r "s/\#/\\\#/") || exit 1
     echo "${version_file/$old_version_line/$new_version_line}" > "$ROOT_REPO_DIR/$VERSION_FILE"
     after_successful_version_update "$LOCAL_VERSION" "$new_version"
     _show_updated_message "local version updated: $LOCAL_VERSION -> $new_version"
