@@ -42,7 +42,7 @@ To install vuh you can use one-liner (at any directory):
 
 or you can install vuh manually:
 
-    git clone git clone https://github.com/Greewil/version-update-helper.git
+    git clone https://github.com/Greewil/version-update-helper.git
     cd version-update-helper
     ./installer.sh
 
