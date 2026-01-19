@@ -207,7 +207,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.12.2'
+VUH_VERSION='2.13.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -470,9 +470,47 @@ function _use_current_project_module() {
   fi
 }
 
+function _select_project_module_interactively() {
+  asking_question='true'
+  question_text=''
+  project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+  _show_info_message "This project configured as mono repository (so it have several modules with distinct versions)"
+  _show_info_message "To run this operation you should specify project module which you want to handle."
+  echo -e "\n"
+  while [ "$asking_question" = 'true' ]; do
+    _show_info_message "Which module do you want to handle:"
+    _show_info_message "  0. ALL (to handle all modules)"
+    module_id=0
+    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+    for module in "${ADDR[@]}"; do
+      module_id=$((module_id+1))
+      _show_info_message "  $module_id. $module"
+    done
+    question_text='Write module name'
+    read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text: $NEUTRAL_COLOR")" -r answer
+#    TODO for module in $PROJECT_MODULES
+    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+    for module in "${ADDR[@]}"; do
+      if [ "$answer" = "$module" ]; then
+        SPECIFIED_PROJECT_MODULE="$module"
+        asking_question='false'
+      fi
+    done
+    if [ "$asking_question" = 'true' ]; then
+      echo -e "\n"
+      _show_warning_message "No such module in this project."
+      _show_warning_message "Please select another module."
+    fi
+    echo -e "\n"
+  done
+}
+
 function _select_specified_project_module() {
   if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'true' ]; then
     _use_current_project_module || return 1
+  fi
+  if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'false' ] && [ "$ARGUMENT_SPECIFIED_PROJECT_MODULE" = 'false' ]; then
+    _select_project_module_interactively || return 1
   fi
   [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
 }
@@ -832,8 +870,9 @@ function _check_conf_data_loaded_properly() {
       [ "$TEXT_BEFORE_VERSION_CODE" = 'NO_TEXT_BEFORE_VERSION_CODE' ] ||
       [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ]; then
     if [ "$PROJECT_MODULES" != '' ] && [ "$SPECIFIED_PROJECT_MODULE" = '' ]; then
-      this_is_monorepo_message="This repository was configured as mono repository with multiple modules."
-      specify_module_message="So you should specify module with which you want to work in parameter '-pm=MODULE_NAME'."
+      this_is_monorepo_message="This repository was configured as mono repository with multiple modules"
+      this_is_monorepo_message="$this_is_monorepo_message and vuh failed to select project module."
+      specify_module_message="So you can try to specify module with which you want to work in parameter '-pm=MODULE_NAME'."
       available_modules_message="Here is the list of available modules for this repository: '$PROJECT_MODULES'"
       _show_error_message "$this_is_monorepo_message $specify_module_message $available_modules_message"
     else
