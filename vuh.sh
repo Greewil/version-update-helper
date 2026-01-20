@@ -469,33 +469,62 @@ function _use_current_project_module() {
   fi
 }
 
-function _select_project_module_interactively() {
-  asking_question='true'
-  question_text=''
+function _show_available_modules() {
+  _show_info_message "Which module do you want to handle:"
+  _show_info_message "  0. ALL (to handle all modules)"
   project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
-  _show_info_message "This project configured as mono repository (so it have several modules with distinct versions)"
-  _show_info_message "To run this operation you should specify project module which you want to handle."
-  echo -e "\n"
-  while [ "$asking_question" = 'true' ]; do
-    _show_info_message "Which module do you want to handle:"
-    _show_info_message "  0. ALL (to handle all modules)"
-    module_id=0
+  module_id=0
+  IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+  for module in "${ADDR[@]}"; do
+    module_id=$((module_id+1))
+    _show_info_message "  $module_id. $module"
+  done
+}
+
+# This function checks if user selected project module/modules.
+# If user successfully selected project module this function will update script state!
+#
+# $1 - users input, which could be module name or module id
+#
+# Returns selected project module or modules if user successfully selected something and returns nothing otherwise.
+function _select_project_module_from_user_input() {
+  user_input=$1
+  project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+  module_id=0
+  if [ "$user_input" = "ALL" ] || [ "$user_input" = "0" ]; then
+    SPECIFIED_PROJECT_MODULE="$project_modules_without_spaces"
+    echo "$SPECIFIED_PROJECT_MODULE"
+  else
     IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
     for module in "${ADDR[@]}"; do
       module_id=$((module_id+1))
-      _show_info_message "  $module_id. $module"
-    done
-    question_text='Write module name'
-    read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text: $NEUTRAL_COLOR")" -r answer
-#    TODO for module in $PROJECT_MODULES
-    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
-    for module in "${ADDR[@]}"; do
-      if [ "$answer" = "$module" ]; then
+      if [ "$user_input" = "$module" ] || [ "$user_input" = "$module_id" ]; then
         SPECIFIED_PROJECT_MODULE="$module"
-        asking_question='false'
+        echo "$SPECIFIED_PROJECT_MODULE"
       fi
     done
-    if [ "$asking_question" = 'true' ]; then
+  fi
+}
+
+function _select_project_module_interactively() {
+#  TODO selecting multiple time when updating, suggesting etc
+  interactive_mode_finished='false'
+  question_text=''
+  _show_info_message "This project configured as mono repository (so it have several modules with distinct versions)"
+  _show_info_message "To run this operation you should specify project module which you want to handle."
+  echo -e "\n"
+  while [ "$interactive_mode_finished" = 'false' ]; do
+    _show_available_modules || return 1
+
+    question_text='Write module name'
+    read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text: $NEUTRAL_COLOR")" -r answer
+    SPECIFIED_PROJECT_MODULE=$(_select_project_module_from_user_input "$answer") || return 1
+    [ "$SPECIFIED_PROJECT_MODULE" != '' ] && interactive_mode_finished='true'
+    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]] || [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
+      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
+    fi
+
+    if [ "$interactive_mode_finished" = 'false' ]; then
       echo -e "\n"
       _show_warning_message "No such module in this project."
       _show_warning_message "Please select another module."
@@ -1018,23 +1047,21 @@ function _get_additional_arguments_from_variables() {
 }
 
 function _handle_multiple_modules_call() {
-  echo 'ALL called'
   project_modules_without_spaces=''
   if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
-    _load_local_conf_file || exit 1
     project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
   else
     project_modules_without_spaces=$(echo "$SPECIFIED_PROJECT_MODULE" | tr -d "[:space:]")
   fi
   is_first_handling_module='true'
   IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
-  for module in "${ADDR[@]}"; do
-    _show_recursion_message "Handling module: $module"
+  for handling_module in "${ADDR[@]}"; do
+    _show_recursion_message "Handling module: $handling_module"
     vuh_cmd="${BASH_SOURCE[0]}"
     additional_params=$(_get_additional_arguments_from_variables)
     [ "$is_first_handling_module" = 'false' ] && additional_params="$additional_params --offline"
     # shellcheck disable=SC2086
-    $vuh_cmd "$COMMAND" -pm="$module" $additional_params
+    $vuh_cmd "$COMMAND" -pm="$handling_module" $additional_params
     is_first_handling_module='false'
   done
   exit 0
@@ -1355,8 +1382,6 @@ while [[ $# -gt 0 ]]; do
     _exit_if_using_multiple_commands "$1"
     COMMAND='project-modules'
     STANDALONE_COMMAND='true'
-#    TODO multiple calls when specifying modules with params or interactively
-#    TODO infinite loop when calling with -pm=ALL
     shift ;;
   uv|update-version)
     _exit_if_using_multiple_commands "$1"
@@ -1440,10 +1465,6 @@ if [[ "$STANDALONE_COMMAND" = 'false' ]] &&
   SPECIFIED_PROJECT_MODULE=''
   _regular_check_available_updates
   SPECIFIED_PROJECT_MODULE="$tmp_specified_project_module"
-fi
-
-if [ "$STANDALONE_COMMAND" = 'false' ] && [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ]; then
-  _handle_multiple_modules_call
 fi
 
 case "$COMMAND" in
