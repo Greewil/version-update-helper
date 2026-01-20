@@ -466,7 +466,6 @@ function _use_current_project_module() {
     _show_info_message "$SPECIFIED_PROJECT_MODULE"
     SPECIFIED_PROJECT_MODULE="$(echo "$SPECIFIED_PROJECT_MODULE" | tr '\n' ',')"
     SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
-    _handle_multiple_modules_call || exit 1
   fi
 }
 
@@ -509,10 +508,16 @@ function _select_specified_project_module() {
   if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'true' ]; then
     _use_current_project_module || return 1
   fi
+
   if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'false' ] && [ "$ARGUMENT_SPECIFIED_PROJECT_MODULE" = 'false' ]; then
     _select_project_module_interactively || return 1
   fi
-  [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
+
+  if [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ]; then
+    _handle_multiple_modules_call || exit 1
+  else
+    _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
+  fi
 }
 
 function _check_version_syntax() {
@@ -897,7 +902,9 @@ function _load_local_conf_file() {
     _show_error_message "Failed to load variables from local configuration file $full_conf_dir/.vuh!"
     return 1
   }
-  _select_specified_project_module || return 1
+  if [ "$STANDALONE_COMMAND" = 'false' ]; then
+    _select_specified_project_module || return 1
+  fi
   _check_conf_data_loaded_properly || return 1
 }
 
@@ -917,7 +924,9 @@ function _load_remote_conf_file() {
     _show_error_message "Failed to load variables from remote configuration file $handling_config_file!"
     return 1
   }
-  _select_specified_project_module || return 1
+  if [ "$STANDALONE_COMMAND" = 'false' ]; then
+    _select_specified_project_module || return 1
+  fi
   _check_conf_data_loaded_properly || return 1
 }
 
@@ -1009,6 +1018,7 @@ function _get_additional_arguments_from_variables() {
 }
 
 function _handle_multiple_modules_call() {
+  echo 'ALL called'
   project_modules_without_spaces=''
   if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
     _load_local_conf_file || exit 1
@@ -1344,6 +1354,9 @@ while [[ $# -gt 0 ]]; do
   pm|project-modules)
     _exit_if_using_multiple_commands "$1"
     COMMAND='project-modules'
+    STANDALONE_COMMAND='true'
+#    TODO multiple calls when specifying modules with params or interactively
+#    TODO infinite loop when calling with -pm=ALL
     shift ;;
   uv|update-version)
     _exit_if_using_multiple_commands "$1"
@@ -1365,10 +1378,7 @@ while [[ $# -gt 0 ]]; do
     _show_cant_use_both_arguments '--current-project-module' '-pm=' "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" 'false'
     ARGUMENT_SPECIFIED_PROJECT_MODULE='true'
     SPECIFIED_PROJECT_MODULE=${1#*=}
-    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]]; then
-      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
-    fi
-    if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
+    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]] || [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
       SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
     fi
     shift ;;
@@ -1432,8 +1442,8 @@ if [[ "$STANDALONE_COMMAND" = 'false' ]] &&
   SPECIFIED_PROJECT_MODULE="$tmp_specified_project_module"
 fi
 
-if [[ "$STANDALONE_COMMAND" = 'false' ]]; then
-  [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] && _handle_multiple_modules_call
+if [ "$STANDALONE_COMMAND" = 'false' ] && [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ]; then
+  _handle_multiple_modules_call
 fi
 
 case "$COMMAND" in
