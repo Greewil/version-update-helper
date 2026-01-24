@@ -71,13 +71,13 @@ MAJOR_CHANGING_LOCATIONS=''
 #   Configuration variable for module should looks like: <MODULE_NAME>_<VARIABLE_NAME>.
 # example: 'UI,API' (for mono repository with two modules: UI and API)
 #   Also you can see example here: https://github.com/Greewil/version-update-helper/blob/main/.vuh
-PROJECT_MODULES='VUH'
-
-# variables for VUH module (in this case VUH module mirrors default settings)
-VUH_VERSION_FILE="$VERSION_FILE"
-VUH_TEXT_BEFORE_VERSION_CODE="$TEXT_BEFORE_VERSION_CODE"
-VUH_TEXT_AFTER_VERSION_CODE="$TEXT_AFTER_VERSION_CODE"
-VUH_MODULE_ROOT_PATH="$MODULE_ROOT_PATH"
-VUH_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES="$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES"
+#PROJECT_MODULES='VUH'
+#
+## variables for VUH module (in this case VUH module mirrors default settings)
+#VUH_VERSION_FILE="$VERSION_FILE"
+#VUH_TEXT_BEFORE_VERSION_CODE="$TEXT_BEFORE_VERSION_CODE"
+#VUH_TEXT_AFTER_VERSION_CODE="$TEXT_AFTER_VERSION_CODE"
+#VUH_MODULE_ROOT_PATH="$MODULE_ROOT_PATH"
+#VUH_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES="$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES"
 
 # ------------------------------------- end mono repository variables ------------------------------------- #

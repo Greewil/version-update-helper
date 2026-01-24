@@ -207,7 +207,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.12.2'
+VUH_VERSION='2.13.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -466,15 +466,94 @@ function _use_current_project_module() {
     _show_info_message "$SPECIFIED_PROJECT_MODULE"
     SPECIFIED_PROJECT_MODULE="$(echo "$SPECIFIED_PROJECT_MODULE" | tr '\n' ',')"
     SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
-    _handle_multiple_modules_call || exit 1
   fi
+}
+
+function _show_available_modules() {
+  _show_info_message "Which module do you want to handle:"
+  _show_info_message "  0. ALL (to handle all modules)"
+  project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+  module_id=0
+  IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+  for module in "${ADDR[@]}"; do
+    module_id=$((module_id+1))
+    _show_info_message "  $module_id. $module"
+  done
+}
+
+# This function checks if user selected project module/modules.
+# If user successfully selected project module this function will update script state!
+#
+# $1 - users input, which could be module name or module id
+#
+# Returns selected project module or modules if user successfully selected something and returns nothing otherwise.
+function _select_project_module_from_user_input() {
+  user_input=$1
+  project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
+  module_id=0
+  if [ "$user_input" = "ALL" ] || [ "$user_input" = "0" ]; then
+    SPECIFIED_PROJECT_MODULE="$project_modules_without_spaces"
+    echo "$SPECIFIED_PROJECT_MODULE"
+  else
+    IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
+    for module in "${ADDR[@]}"; do
+      module_id=$((module_id+1))
+      if [ "$user_input" = "$module" ] || [ "$user_input" = "$module_id" ]; then
+        SPECIFIED_PROJECT_MODULE="$module"
+        echo "$SPECIFIED_PROJECT_MODULE"
+      fi
+    done
+  fi
+}
+
+function _select_project_module_interactively() {
+  interactive_mode_finished='false'
+  question_text=''
+  _show_info_message "This project configured as mono repository (so it have several modules with distinct versions)"
+  _show_info_message "To run this operation you should specify project module which you want to handle."
+  echo -e "\n"
+  while [ "$interactive_mode_finished" = 'false' ]; do
+    _show_available_modules || return 1
+
+    question_text='Write module name'
+    read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text: $NEUTRAL_COLOR")" -r answer
+    SPECIFIED_PROJECT_MODULE=$(_select_project_module_from_user_input "$answer") || return 1
+    [ "$SPECIFIED_PROJECT_MODULE" != '' ] && interactive_mode_finished='true'
+    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]] || [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
+      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
+    fi
+
+    if [ "$interactive_mode_finished" = 'false' ]; then
+      echo -e "\n"
+      _show_warning_message "No such module in this project."
+      _show_warning_message "Please select another module."
+    fi
+    echo -e "\n"
+  done
 }
 
 function _select_specified_project_module() {
   if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'true' ]; then
     _use_current_project_module || return 1
   fi
-  [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] || _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
+
+  if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'false' ] &&
+      [ "$ARGUMENT_SPECIFIED_PROJECT_MODULE" = 'false' ] &&
+      [ "$PROJECT_MODULES" != '' ]; then
+    _select_project_module_interactively || return 1
+    ARGUMENT_SPECIFIED_PROJECT_MODULE='true'
+    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]]; then
+      _show_info_message "$SPECIFIED_PROJECT_MODULE modules was selected interactively"
+    else
+      _show_info_message "$SPECIFIED_PROJECT_MODULE module was selected interactively"
+    fi
+  fi
+
+  if [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ]; then
+    _handle_multiple_modules_call || exit 1
+  else
+    _use_module_configuration_if_it_exists "$SPECIFIED_PROJECT_MODULE"
+  fi
 }
 
 function _check_version_syntax() {
@@ -832,8 +911,9 @@ function _check_conf_data_loaded_properly() {
       [ "$TEXT_BEFORE_VERSION_CODE" = 'NO_TEXT_BEFORE_VERSION_CODE' ] ||
       [ "$TEXT_AFTER_VERSION_CODE" = 'NO_TEXT_AFTER_VERSION_CODE' ]; then
     if [ "$PROJECT_MODULES" != '' ] && [ "$SPECIFIED_PROJECT_MODULE" = '' ]; then
-      this_is_monorepo_message="This repository was configured as mono repository with multiple modules."
-      specify_module_message="So you should specify module with which you want to work in parameter '-pm=MODULE_NAME'."
+      this_is_monorepo_message="This repository was configured as mono repository with multiple modules"
+      this_is_monorepo_message="$this_is_monorepo_message and vuh failed to select project module."
+      specify_module_message="So you can try to specify module with which you want to work in parameter '-pm=MODULE_NAME'."
       available_modules_message="Here is the list of available modules for this repository: '$PROJECT_MODULES'"
       _show_error_message "$this_is_monorepo_message $specify_module_message $available_modules_message"
     else
@@ -858,7 +938,9 @@ function _load_local_conf_file() {
     _show_error_message "Failed to load variables from local configuration file $full_conf_dir/.vuh!"
     return 1
   }
-  _select_specified_project_module || return 1
+  if [ "$STANDALONE_COMMAND" = 'false' ]; then
+    _select_specified_project_module || return 1
+  fi
   _check_conf_data_loaded_properly || return 1
 }
 
@@ -878,7 +960,9 @@ function _load_remote_conf_file() {
     _show_error_message "Failed to load variables from remote configuration file $handling_config_file!"
     return 1
   }
-  _select_specified_project_module || return 1
+  if [ "$STANDALONE_COMMAND" = 'false' ]; then
+    _select_specified_project_module || return 1
+  fi
   _check_conf_data_loaded_properly || return 1
 }
 
@@ -972,20 +1056,19 @@ function _get_additional_arguments_from_variables() {
 function _handle_multiple_modules_call() {
   project_modules_without_spaces=''
   if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
-    _load_local_conf_file || exit 1
     project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
   else
     project_modules_without_spaces=$(echo "$SPECIFIED_PROJECT_MODULE" | tr -d "[:space:]")
   fi
   is_first_handling_module='true'
   IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
-  for module in "${ADDR[@]}"; do
-    _show_recursion_message "Handling module: $module"
+  for handling_module in "${ADDR[@]}"; do
+    _show_recursion_message "Handling module: $handling_module"
     vuh_cmd="${BASH_SOURCE[0]}"
     additional_params=$(_get_additional_arguments_from_variables)
     [ "$is_first_handling_module" = 'false' ] && additional_params="$additional_params --offline"
     # shellcheck disable=SC2086
-    $vuh_cmd "$COMMAND" -pm="$module" $additional_params
+    $vuh_cmd "$COMMAND" -pm="$handling_module" $additional_params
     is_first_handling_module='false'
   done
   exit 0
@@ -1305,6 +1388,7 @@ while [[ $# -gt 0 ]]; do
   pm|project-modules)
     _exit_if_using_multiple_commands "$1"
     COMMAND='project-modules'
+    STANDALONE_COMMAND='true'
     shift ;;
   uv|update-version)
     _exit_if_using_multiple_commands "$1"
@@ -1326,10 +1410,7 @@ while [[ $# -gt 0 ]]; do
     _show_cant_use_both_arguments '--current-project-module' '-pm=' "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" 'false'
     ARGUMENT_SPECIFIED_PROJECT_MODULE='true'
     SPECIFIED_PROJECT_MODULE=${1#*=}
-    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]]; then
-      SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
-    fi
-    if [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
+    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]] || [ "$SPECIFIED_PROJECT_MODULE" = "ALL" ]; then
       SPECIFIED_MULTIPLE_PROJECT_MODULES='true'
     fi
     shift ;;
@@ -1391,10 +1472,6 @@ if [[ "$STANDALONE_COMMAND" = 'false' ]] &&
   SPECIFIED_PROJECT_MODULE=''
   _regular_check_available_updates
   SPECIFIED_PROJECT_MODULE="$tmp_specified_project_module"
-fi
-
-if [[ "$STANDALONE_COMMAND" = 'false' ]]; then
-  [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ] && _handle_multiple_modules_call
 fi
 
 case "$COMMAND" in
