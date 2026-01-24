@@ -21,4 +21,4 @@ jobs:
 #          chmod +x vuh.sh
       - name: Compare versions
         run: |
-          ./vuh.sh sv -q && [ "$(./vuh.sh lv -q)" = "$(./vuh.sh sv -q)" ] || exit 1
+          ./vuh.sh sv -pm=VUH -q && [ "$(./vuh.sh lv -pm=VUH -q)" = "$(./vuh.sh sv -pm=VUH -q)" ] || exit 1
