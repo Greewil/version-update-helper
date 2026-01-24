@@ -507,7 +507,6 @@ function _select_project_module_from_user_input() {
 }
 
 function _select_project_module_interactively() {
-#  TODO selecting multiple time when updating, suggesting etc
   interactive_mode_finished='false'
   question_text=''
   _show_info_message "This project configured as mono repository (so it have several modules with distinct versions)"
@@ -538,8 +537,16 @@ function _select_specified_project_module() {
     _use_current_project_module || return 1
   fi
 
-  if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'false' ] && [ "$ARGUMENT_SPECIFIED_PROJECT_MODULE" = 'false' ]; then
+  if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'false' ] &&
+      [ "$ARGUMENT_SPECIFIED_PROJECT_MODULE" = 'false' ] &&
+      [ "$PROJECT_MODULES" != '' ]; then
     _select_project_module_interactively || return 1
+    ARGUMENT_SPECIFIED_PROJECT_MODULE='true'
+    if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]]; then
+      _show_info_message "$SPECIFIED_PROJECT_MODULE modules was selected interactively"
+    else
+      _show_info_message "$SPECIFIED_PROJECT_MODULE module was selected interactively"
+    fi
   fi
 
   if [ "$SPECIFIED_MULTIPLE_PROJECT_MODULES" = 'true' ]; then
