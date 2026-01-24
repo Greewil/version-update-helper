@@ -153,15 +153,15 @@ function installation_test() {
   git clone "$VUH_REPO_ADDRESS" "$repo_name"
   cd "$repo_name" || exit 1
 
-  _show_updated_message "Trying to use 'vuh lv -q' ..."
-  vuh lv -q || exit 1
-  [ "$(vuh lv -q)" = "$(./vuh.sh lv -q)" ] || exit 1
+  _show_updated_message "Trying to use 'vuh lv -pm=ALL -q' ..."
+  vuh lv -pm=ALL -q || exit 1
+  [ "$(vuh lv -pm=ALL -q)" = "$(./vuh.sh lv -pm=ALL -q)" ] || exit 1
 
-  _show_updated_message "Checking full 'vuh lv' output have no warnings ..."
+  _show_updated_message "Checking full 'vuh lv -pm=ALL' output have no warnings ..."
   warning_text='(vuh : WARNING)'
-  vuh_full_output="$(vuh lv)" || exit 1
+  vuh_full_output="$(vuh lv -pm=ALL)" || exit 1
   if [[ $vuh_full_output =~ $warning_text ]]; then
-    _show_error_message "Full output of 'vuh lv' shouldn't have any warnings!"
+    _show_error_message "Full output of 'vuh lv -pm=ALL' shouldn't have any warnings!"
     _show_error_message "$vuh_full_output"
     exit 1
   fi
