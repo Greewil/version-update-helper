@@ -207,7 +207,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.13.0'
+VUH_VERSION='2.14.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -471,13 +471,17 @@ function _use_current_project_module() {
 
 function _show_available_modules() {
   _show_info_message "Which module do you want to handle:"
-  _show_info_message "  0. ALL (to handle all modules)"
+  _show_info_message "  0. ALL  (to handle all modules)"
   project_modules_without_spaces=$(echo "$PROJECT_MODULES" | tr -d "[:space:]")
   module_id=0
   IFS=',' read -ra ADDR <<< "$project_modules_without_spaces"
   for module in "${ADDR[@]}"; do
     module_id=$((module_id+1))
-    _show_info_message "  $module_id. $module"
+    eval module_description='$'"$module"'_MODULE_DESCRIPTION'
+    if [ "$module_description" != '' ]; then
+      module_description="($module_description)"
+    fi
+    _show_info_message "  $module_id. $module  $module_description"
   done
 }
 
