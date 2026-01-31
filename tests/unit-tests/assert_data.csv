@@ -185,8 +185,3 @@ ae10,       versions_equal,                 You can't use both,           yes,  
 ae11,       versions_equal,                 You can't use both,           yes,             no,                 {{vuh}} sv --check-git-diff --dont-use-git
 ae12,       monorepo_equals,                You can't use both,           yes,             no,                 {{vuh}} sv -cpm -pm=MOD_1
 ae13,       monorepo_equals,                You can't use both,           yes,             no,                 {{vuh}} sv -pm=MOD_1 -cpm
-
-
-# tests for interactive mode
-# TODO with custom stdin inputs
-# TODO check custom module descriptions

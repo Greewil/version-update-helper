@@ -1,0 +1,28 @@
+name: Shellcheck
+
+on: [workflow_call]
+
+jobs:
+
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Shellcheck vuh
+        uses: azohra/shell-linter@latest
+        with:
+          path: "vuh.sh,vuh-completion.sh,installer.sh"
+      - name: Shellcheck unit tests
+        uses: azohra/shell-linter@latest
+        with:
+          path: "tests/unit-tests/run_tests.sh,tests/unit-tests/_clean_tmp.sh"
+      - name: Shellcheck integration tests
+        uses: azohra/shell-linter@latest
+        with:
+          path: "tests/integration-tests/run_tests.sh"
+      - name: Shellcheck installer tests
+        uses: azohra/shell-linter@latest
+        with:
+          path: "tests/installer-tests/run_tests.sh"
