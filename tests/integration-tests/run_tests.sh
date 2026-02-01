@@ -13,8 +13,10 @@
 
 APP_NAME='run_tests.sh'
 
+VUH_REPO_ADDRESS='https://github.com/Greewil/version-update-helper.git'
+
 # shellcheck disable=SC2034
-STARTING_DIR="$(pwd)"
+STARTING_DIR="$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)"
 
 # Output colors
 NEUTRAL_COLOR='\e[0m'
@@ -72,12 +74,44 @@ function _exit_if_using_multiple_commands() {
   fi
 }
 
+function _run_test_in_tmp_environment() {
+  test_dir_name=$1
+  _show_updated_message "Running test '$SPECIFIED_TEST_NAME' ..."
+  cd "$SPECIFIED_TEST_NAME" || return 1
+  # shellcheck source=/dev/null
+  . test_parameters.sh || return 1
+  _show_updated_message "(using branch test_fixture_$TEST_BRANCH, running command '$TEST_COMMAND')"
+
+  unique_test_dir="$test_dir_name/$(date +%s%N)"
+  cd "$STARTING_DIR" || exit 1
+  mkdir -p "tmp/$unique_test_dir"
+  cd "tmp/$unique_test_dir" || exit 1
+  repo_name='vuh-repo'
+  git clone "$VUH_REPO_ADDRESS" "$repo_name"
+  cd "$repo_name" || exit 1
+  git checkout "test_fixture_$TEST_BRANCH" || exit 1
+  cp "$STARTING_DIR/$test_dir_name/script.exp" '.' || exit 1
+
+  "./script.exp" > tmp_output || return 1
+  test_output=$(cat tmp_output)
+  # shellcheck disable=SC2002
+  test_output="$(cat tmp_output | tr -d '[:space:]')"
+  expected_text_trimmed="$(echo "$TEST_EXPECTED_TEXT" | tr -d '[:space:]')"
+  # shellcheck disable=SC2076
+  if [[ ! "$test_output" =~ "$expected_text_trimmed" ]]; then
+    _show_error_message "Expected output not found!"
+    exit 1
+  fi
+  cd "$STARTING_DIR" || exit 1
+  _show_success_message "Test '$test_dir_name' successfully finished"
+}
+
 function run_all_tests() {
   echo "TODO"
 }
 
 function run_specified_test() {
-  echo "TODO"
+  _run_test_in_tmp_environment "$SPECIFIED_TEST_NAME" || return 1
 }
 
 
