@@ -14,22 +14,20 @@ runs:
       run: |
         VERSION="${{ inputs.version }}"
         if [ -n "$VERSION" ]; then
-          if [[ $VERSION != v* ]]; then VERSION="v$VERSION"; fi
+          if [[ $VERSION != v* ]]; then 
+            VERSION="v$VERSION"
+          fi
           echo "Downloading VUH from tag: $VERSION"
           curl -f -L -o installer.sh \
             "https://raw.githubusercontent.com/Greewil/version-update-helper/${VERSION}/installer.sh"
           curl -f -L -o vuh.sh \
             "https://raw.githubusercontent.com/Greewil/version-update-helper/${VERSION}/vuh.sh"
-          curl -f -L -o vuh-completion.sh \
-            "https://raw.githubusercontent.com/Greewil/version-update-helper/${VERSION}/vuh-completion.sh"
         else
           echo "Downloading latest VUH from main branch"
           curl -f -L -o installer.sh \
             "https://raw.githubusercontent.com/Greewil/version-update-helper/main/installer.sh"
           curl -f -L -o vuh.sh \
             "https://raw.githubusercontent.com/Greewil/version-update-helper/main/vuh.sh"
-          curl -f -L -o vuh-completion.sh \
-            "https://raw.githubusercontent.com/Greewil/version-update-helper/main/vuh-completion.sh"
         fi
         chmod +x installer.sh
         chmod +x vuh.sh
