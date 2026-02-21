@@ -140,8 +140,14 @@ function _install() {
   cp -f "$installer_path/$APP_TO_INSTALL" "$INSTALLATION_DIR/$INSTALLING_APP_NAME" || return 1
 
   # install autocompletion script
-  mkdir -p "$COMPLETION_DIR" || return 1
-  cp -f "$installer_path/$COMPLETION_TO_INSTALL" "$COMPLETION_DIR/$COMPLETION_SCRIPT_NAME" || return 1
+  if [ -f "$installer_path/$COMPLETION_TO_INSTALL" ]; then
+    is_installing_without_completion='false'
+    mkdir -p "$COMPLETION_DIR" || return 1
+    cp -f "$installer_path/$COMPLETION_TO_INSTALL" "$COMPLETION_DIR/$COMPLETION_SCRIPT_NAME" || return 1
+  else
+    is_installing_without_completion='true'
+    echo 'Installing without completion'
+  fi
 
   # create data dir and configuration files
   mkdir -p "$DATA_DIR" || return 1
@@ -172,7 +178,9 @@ function _install() {
   _check_installed_version || return 1
 
   # warning to restart completion script
-  _warning_should_restart || return 1
+  if [ "$is_installing_without_completion" = 'false' ]; then
+    _warning_should_restart || return 1
+  fi
 }
 
 function _is_dir_exists() {

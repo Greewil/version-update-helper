@@ -71,6 +71,23 @@ sudo vuh --update
 To use vuh with your project you should first create .vuh file in root folder of your project 
 (read more about configuring in [configuring projects](#Configuring-projects)).
 
+### Usage in github actions
+
+You can install vuh in your github action by calling ```Greewil/version-update-helper@gha/install/v1``` action.
+
+If all you need is latest vuh version, simply add this to your workflow:
+```yaml
+- name: Install VUH
+  uses: Greewil/version-update-helper@gha/install/v1
+```
+
+Then you can use it as basic console app.
+
+More about this github action you can read here: 
+[install vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/install/v1?tab=readme-ov-file#installing-vuh-action).
+
+### Help
+
     Usage: vuh [-v | --version] [-h | --help] [--configuration] [--update] <command> [<args>]
     
     Standalone commands:
