@@ -7,15 +7,15 @@ inputs:
     required: false
     type: string
   module:
-    description: "If its monorepo you can specify application module (example: WEB). If its not you can leave module empty."
+    description: "If you working with monorepo, you can specify application module (example: WEB), otherwise you can leave the module field blank."
     required: false
     default: ""
     type: string
   check-git-diff:
     description: "Checking git diff for project/module. If vuh checking git diff it's require to increase version only if current branch has git difference with HEAD..origin/MAIN_BRANCH_NAME."
-    type: boolean
-    default: true
     required: false
+    default: true
+    type: boolean
 
 runs:
   using: composite
