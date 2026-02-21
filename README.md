@@ -24,10 +24,13 @@ if you are using repository with multiple modules:
 ## Input parameters
 
 - ```version``` - vuh release version (example: v2.13.0 or 2.13.0).
-  By dafault it will use latest vuh version
+  
+  By dafault it will use latest vuh version.
 - ```module``` - if you working with mono repository, you can specify application module (example: WEB), otherwise you can leave the module field     blank.
+  
   By default its empty.
 - ```check-git-diff``` - checking git diff for project/module. 
   If vuh checking git diff it's require to increase version only if current branch has git difference with HEAD..origin/MAIN_BRANCH_NAME.
+  
   By dafault its true.
 
