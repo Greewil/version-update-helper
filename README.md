@@ -73,6 +73,8 @@ To use vuh with your project you should first create .vuh file in root folder of
 
 ### Usage in github actions
 
+#### Install
+
 You can install vuh in your github action by calling ```Greewil/version-update-helper@gha/install/v1``` action.
 
 If all you need is latest vuh version, simply add this to your workflow:
@@ -85,6 +87,27 @@ Then you can use it as basic console app.
 
 More about this github action you can read here: 
 [install vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/install/v1?tab=readme-ov-file#installing-vuh-action).
+
+#### Validate version
+
+You can check that current project version is greater than main branch version 
+by calling ```Greewil/version-update-helper@gha/validate-version/v1``` action:
+```yaml
+- name: Validating version using VUH
+  uses: Greewil/version-update-helper@gha/validate-version/v1
+```
+
+Or you can validate version for specific module, 
+if you are using repository with multiple modules:
+```yaml
+- name: Validating version using VUH
+  uses: Greewil/version-update-helper@gha/validate-version/v1
+  with:
+    module: "WEB"
+```
+
+More about this github action you can read here:
+[install vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/validate-version/v1?tab=readme-ov-file#validating-versions-vuh-action).
 
 ### Help
 
