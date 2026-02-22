@@ -22,23 +22,8 @@ runs:
 
     - name: Collect project module info
       id: module_info
-      shell: bash
       run: |
-        pm_param=''
-        
-        root_path=$(vuh mrp -q "$pm_param")
+        root_path=$(vuh mrp -q)
         echo "module root path: $root_path" 
         echo "MODULE_ROOT_PATH=$root_path" >> "$GITHUB_OUTPUT"
-
-        local_version=$(vuh lv -q "$pm_param")
-        echo "local version: $local_version" 
-        echo "LOCAL_VERSION=$local_version" >> "$GITHUB_OUTPUT"        
-
-        main_version=$(vuh lv -q "$pm_param")
-        echo "main version: $main_version" 
-        echo "MAIN_VERSION=$main_version" >> "$GITHUB_OUTPUT"        
-
-        suggested_version=$(vuh lv -q "$pm_param")
-        echo "suggested version: $suggested_version" 
-        echo "SUGGESTED_VERSION=$suggested_version" >> "$GITHUB_OUTPUT"        
 
