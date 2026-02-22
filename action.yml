@@ -26,7 +26,7 @@ runs:
 
     - name: Collect project module info
       id: module_info
-      shell: bash
+      shell: sh
       run: |
         root_path=$(vuh mrp -q)
         echo "module root path: $root_path" 
