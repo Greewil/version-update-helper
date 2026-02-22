@@ -12,6 +12,10 @@ inputs:
     default: ""
     type: string
 
+outputs:
+  module-root-path:
+    description: "Module root path from .vuh config"
+
 runs:
   using: composite
   steps:
@@ -26,5 +30,5 @@ runs:
       run: |
         root_path=$(vuh mrp -q)
         echo "module root path: $root_path" 
-        echo "MODULE_ROOT_PATH=$root_path" >> "$GITHUB_OUTPUT"
+        echo "module-root-path=$root_path" >> "$GITHUB_OUTPUT"
 
