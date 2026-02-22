@@ -25,9 +25,9 @@ runs:
         version: "${{ inputs.version }}"
 
     - name: Collect project module info
-      shell: sh
+      shell: bash
       run: |
-        root_path=$(vuh mrp -q)
+        root_path=$(vuh lv -q)
         echo "module root path: $root_path" 
         echo "module-root-path=$root_path" >> "$GITHUB_OUTPUT"
 
