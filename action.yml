@@ -25,7 +25,6 @@ runs:
         version: "${{ inputs.version }}"
 
     - name: Collect project module info
-      id: module_info
       shell: sh
       run: |
         root_path=$(vuh mrp -q)
