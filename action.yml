@@ -29,5 +29,6 @@ runs:
       run: |
         root_path=$(vuh lv -q)
         echo "module root path: $root_path" 
-        echo "module-root-path=$root_path" >> "$GITHUB_OUTPUT"
+        echo "local-version=$root_path" >> "$GITHUB_OUTPUT"
+        echo "module-root-path=weq" >> "$GITHUB_OUTPUT"
 
