@@ -1,5 +1,5 @@
-name: Install VUH
-description: Install VUH from tag using raw files
+name: Validate version with VUH
+description: Validate project module version using vuh
 
 inputs:
   version:
