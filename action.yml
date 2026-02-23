@@ -13,8 +13,18 @@ inputs:
     type: string
 
 outputs:
+  local-version:
+    description: "Module local (current) version"
+    value: ${{ steps.vuh_collect_info.outputs.local-version }}
+  main-version:
+    description: "Module main version"
+    value: ${{ steps.vuh_collect_info.outputs.main-version }}
+  suggested-version:
+    description: "Module suggested new version"
+    value: ${{ steps.vuh_collect_info.outputs.suggested-version }}
   module-root-path:
     description: "Module root path from .vuh config"
+    value: ${{ steps.vuh_collect_info.outputs.module-root-path }}
 
 runs:
   using: composite
@@ -25,10 +35,27 @@ runs:
         version: "${{ inputs.version }}"
 
     - name: Collect project module info
+      id: vuh_collect_info
       shell: bash
       run: |
-        root_path=$(vuh lv -q)
-        echo "module root path: $root_path" 
-        echo "local-version=$root_path" >> "$GITHUB_OUTPUT"
-        echo "module-root-path=weq" >> "$GITHUB_OUTPUT"
+        pm_param=''
+        [ ! "${{ inputs.vuh-module }}" = '' ] && pm_param="-pm=${{ inputs.vuh-module }}"
+
+	if [ ! "$pm_param" = '' ]; then
+          root_path=$(vuh mrp -q "$pm_param")
+          echo "module root path: $root_path"
+          echo "module-root-path=$root_path" >> "$GITHUB_OUTPUT"
+        fi
+
+        local_version=$(vuh lv -q "$pm_param")
+        echo "local version: $local_version"
+        echo "local-version=$local_version" >> "$GITHUB_OUTPUT"
+
+        main_version=$(vuh mv -q "$pm_param")
+        echo "main version: $main_version"
+        echo "main-version=$main_version" >> "$GITHUB_OUTPUT"
+
+        suggested_version=$(vuh sv -q "$pm_param")
+        echo "suggested version: $suggested_version"
+        echo "suggested-version=$suggested_version" >> "$GITHUB_OUTPUT"
 
