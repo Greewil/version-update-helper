@@ -128,7 +128,7 @@ if you are using repository with multiple modules:
 ```
 
 More about this github action you can read here:
-[validate-version vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/validate-version/v1?tab=readme-ov-file#validating-versions-vuh-action).
+[collect-info vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/collect-info/v1?tab=readme-ov-file#vuh-action-for-collecting-project-info).
 
 ### Help
 
