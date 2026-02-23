@@ -42,20 +42,20 @@ runs:
         [ ! "${{ inputs.vuh-module }}" = '' ] && pm_param="-pm=${{ inputs.vuh-module }}"
 
 	if [ ! "$pm_param" = '' ]; then
-          root_path=$(vuh mrp -q "$pm_param")
+          root_path=$(vuh mrp -q $pm_param)
           echo "module root path: $root_path"
           echo "module-root-path=$root_path" >> "$GITHUB_OUTPUT"
         fi
 
-        local_version=$(vuh lv -q "$pm_param")
+        local_version=$(vuh lv -q $pm_param)
         echo "local version: $local_version"
         echo "local-version=$local_version" >> "$GITHUB_OUTPUT"
 
-        main_version=$(vuh mv -q "$pm_param")
+        main_version=$(vuh mv -q $pm_param)
         echo "main version: $main_version"
         echo "main-version=$main_version" >> "$GITHUB_OUTPUT"
 
-        suggested_version=$(vuh sv -q "$pm_param")
+        suggested_version=$(vuh sv -q $pm_param)
         echo "suggested version: $suggested_version"
         echo "suggested-version=$suggested_version" >> "$GITHUB_OUTPUT"
 
