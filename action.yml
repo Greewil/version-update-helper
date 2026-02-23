@@ -39,6 +39,10 @@ runs:
       shell: bash
       run: |
         pm_param=''
+        if [ ! "${{ inputs.vuh-module }}" = '' ]; then 
+          pm_param="-pm=${{ inputs.vuh-module }}"
+        fi
+
         local_version=$(vuh lv -q $pm_param)
         echo "local version: $local_version"
         echo "local-version=$local_version" >> "$GITHUB_OUTPUT"
