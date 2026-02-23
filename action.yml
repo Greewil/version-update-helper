@@ -6,7 +6,7 @@ inputs:
     description: "VUH release tag (example: v2.13.0 or 2.13.0). If not specified, latest from main will be used."
     required: false
     type: string
-  vuh-module:
+  module:
     description: "Project module name from .vuh config."
     required: false
     default: ""
@@ -39,8 +39,8 @@ runs:
       shell: bash
       run: |
         pm_param=''
-        if [ ! "${{ inputs.vuh-module }}" = '' ]; then 
-          pm_param="-pm=${{ inputs.vuh-module }}"
+        if [ ! "${{ inputs.module }}" = '' ]; then 
+          pm_param="-pm=${{ inputs.module }}"
         fi
 
         if [ ! "$pm_param" = '' ]; then
