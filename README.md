@@ -107,7 +107,28 @@ if you are using repository with multiple modules:
 ```
 
 More about this github action you can read here:
-[install vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/validate-version/v1?tab=readme-ov-file#validating-versions-vuh-action).
+[validate-version vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/validate-version/v1?tab=readme-ov-file#validating-versions-vuh-action).
+
+#### Collect module info
+
+You can collect project version info (local, main and suggested versions)
+by calling ```Greewil/version-update-helper@gha/collect-info/v1``` action:
+```yaml
+- name: Validating version using VUH
+  uses: Greewil/version-update-helper@gha/collect-info/v1
+```
+
+Or you can collect information for specific module,
+if you are using repository with multiple modules:
+```yaml
+- name: Validating version using VUH
+  uses: Greewil/version-update-helper@gha/collect-info/v1
+  with:
+    vuh-module: "WEB"
+```
+
+More about this github action you can read here:
+[validate-version vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/validate-version/v1?tab=readme-ov-file#validating-versions-vuh-action).
 
 ### Help
 
