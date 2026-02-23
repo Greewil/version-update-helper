@@ -35,8 +35,9 @@ runs:
         if [ "${{ inputs.check-git-diff }}" = 'true' ]; then
           additional_params="$additional_params --check-git-diff"
         fi
-        vuh sv $additional_params || exit 1
         suggested_version="$(vuh sv -q $additional_params)" || exit 1
+        echo "suggested_version: $suggested_version"
         current_version="$(vuh lv -q $additional_params)" || exit 1
+        echo "current_version: $current_version"
         [ "$current_version" = "$suggested_version" ] || exit 1
 
