@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
+#/ Usage: installer.sh [-h | --help] [<args>]
+#/
+#/ Standalone commands:
+#/     -h, --help         Show help text.
+#/
+#/ Parameters:
+#/     -d, --default      Use default directories for installation.
+#/     -n, --no-updates   Turn off vuh daily update checks.
+#/
+#/ Tool for version-update-helper (vuh) installation.
+
 # Installer configuration
 INSTALLING_APP_NAME='vuh'
 APP_TO_INSTALL='vuh.sh'
@@ -14,7 +25,9 @@ BROWN='\e[0;33m'      # for inputs
 LIGHT_CYAN='\e[1;36m' # for changes
 
 # Variables from input parameters
+COMMAND='install'
 DEFAULT_INSTALLATION='false'
+TURN_ON_DAILY_UPDATE_CHECKS='true'
 
 # Installer's global variables (Please don't modify!)
 INSTALLATION_DIR=''
@@ -40,6 +53,12 @@ function _show_warning_message() {
 function _show_updated_message() {
   message=$1
   echo -en "$LIGHT_CYAN($APP_NAME : CHANGED) $message$NEUTRAL_COLOR\n"
+}
+
+function _show_invalid_usage_error_message() {
+  message=$1
+  _show_error_message "$message"
+  echo 'Use "./installer.sh --help" to see available commands and options information'
 }
 
 function _yes_no_question() {
@@ -161,6 +180,8 @@ function _install() {
   echo "$completion_dir_info" >> "$DATA_DIR/.installation_info" || return 1
   completion_script_name_info="COMPLETION_SCRIPT_NAME='$COMPLETION_SCRIPT_NAME'"
   echo "$completion_script_name_info" >> "$DATA_DIR/.installation_info" || return 1
+  daily_update_checks_info="DAILY_UPDATE_CHECKS='$TURN_ON_DAILY_UPDATE_CHECKS'"
+  echo "$daily_update_checks_info" >> "$DATA_DIR/.installation_info" || return 1
 
   # create latest_update_check file
   touch "$DATA_DIR/latest_update_check"
@@ -339,8 +360,34 @@ function try_select_os_and_install() {
   esac
 }
 
-if [ "$1" = '-d' ]; then
-  DEFAULT_INSTALLATION='true'
-fi
+function show_help() {
+  grep '^#/' <"$0" | cut -c4-
+}
 
-try_select_os_and_install $$ exit 0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  -h|--help)
+    COMMAND='--help'
+    shift ;;
+  -d|--default)
+    DEFAULT_INSTALLATION='true'
+    shift ;;
+  -n|--no-updates)
+    TURN_ON_DAILY_UPDATE_CHECKS='false'
+    shift ;;
+  *)
+    _show_invalid_usage_error_message "Unknown argument '$1'!"
+    shift ;;
+  esac
+done
+
+case "$COMMAND" in
+--help)
+  show_help
+  exit 0
+  ;;
+install)
+  try_select_os_and_install
+  exit 0
+  ;;
+esac
