@@ -34,7 +34,7 @@ runs:
 
     - name: Install VUH
       shell: bash
-      run: sudo ./installer.sh -d || true
+      run: sudo ./installer.sh -d -n || true
 
     - name: Verify VUH installation
       shell: bash
