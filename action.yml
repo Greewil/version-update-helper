@@ -36,6 +36,12 @@ runs:
       shell: bash
       run: sudo ./installer.sh -d -n || true
 
+    - name: Remove installer
+      shell: bash
+      run: |
+        rm installer.sh
+        rm vuh.sh
+
     - name: Verify VUH installation
       shell: bash
       run: |
