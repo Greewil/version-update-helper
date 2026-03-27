@@ -4,7 +4,7 @@ A Github action for collecting project info using [vuh](https://github.com/Greew
 
 ## Usage
 
-If all you need is kust collect project versions info, simply add this to your workflow:
+If all you need is just collect project versions info, simply add this to your workflow:
 ```yaml
 - name: Collecting project versions info
   uses: Greewil/version-update-helper@gha/collect-info/v1
