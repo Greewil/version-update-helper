@@ -34,7 +34,7 @@ If you want to collect info for mono repository module:
 If you working with single version applocation, 
 you can get ```local-version```, ```main-version```, ```suggested-version``` outputs from this action.
 
-If this actionhas some ```module``` input, you can also get ```module-root-path``` from output.
+If this action has some ```module``` input, you can also get ```module-root-path``` from output.
 
 All outputs:
 ```
