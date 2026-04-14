@@ -125,6 +125,12 @@ To use vuh with your project you should first create .vuh file in root folder of
                                      to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
 
+        svi, suggesting-version-interactively           
+                                     Show suggesting version which this branch should use.
+                                     Version part will be selected interactively.
+                                     Project module will be selected interactively (if it wasn't selected before).
+                                     All parameters are the same as for "sv, suggesting-version" command (next command).
+
         sv, suggesting-version       Show suggesting version which this branch should use.
 
             [-q | --quiet]           to show only version number (or errors messages if there are so).
@@ -178,6 +184,12 @@ To use vuh with your project you should first create .vuh file in root folder of
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
                                      You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
+
+        uvi, update-version-interactively           
+                                     Replace your local version with suggesting version which this branch should use.
+                                     Version part will be selected interactively.
+                                     Project module will be selected interactively (if it wasn't selected before).
+                                     All parameters are the same as for "uv, update-version" command (next command).
 
         uv, update-version           Replace your local version with suggesting version which this branch should use.
 

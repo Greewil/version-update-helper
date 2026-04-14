@@ -55,6 +55,12 @@
 #/                                  to work offline without updating origin/MAIN_BRANCH_NAME
 #/                                  and to stop searching for vuh updates.
 #/
+#/     svi, suggesting-version-interactively           
+#/                                  Show suggesting version which this branch should use.
+#/                                  Version part will be selected interactively.
+#/                                  Project module will be selected interactively (if it wasn't selected before).
+#/                                  All parameters are the same as for "sv, suggesting-version" command (next command).
+#/
 #/     sv, suggesting-version       Show suggesting version which this branch should use.
 #/
 #/         [-q | --quiet]           to show only version number (or errors messages if there are so).
@@ -108,6 +114,12 @@
 #/         [--config-dir=<path>]    Search for .vuh configuration file in another directory.
 #/                                  You don't need to specify it if you are working with git repository.
 #/                                  Suggesting to use this parameter with '--dont-use-git' parameter.
+#/
+#/     uvi, update-version-interactively           
+#/                                  Replace your local version with suggesting version which this branch should use.
+#/                                  Version part will be selected interactively.
+#/                                  Project module will be selected interactively (if it wasn't selected before).
+#/                                  All parameters are the same as for "uv, update-version" command (next command).
 #/
 #/     uv, update-version           Replace your local version with suggesting version which this branch should use.
 #/
@@ -207,7 +219,7 @@
 # Written by Shishkin Sergey <shishkin.sergey.d@gmail.com>
 
 # Current vuh version
-VUH_VERSION='2.14.0'
+VUH_VERSION='2.16.0'
 
 # Installation variables (Please don't modify!)
 DATA_DIR='<should_be_replace_after_installation:DATA_DIR>'
@@ -536,6 +548,54 @@ function _select_project_module_interactively() {
   done
 }
 
+function _show_available_version_parts() {
+  _show_info_message "Please select updating version part ('patch', 'minor', 'major') or leave empty to select 'patch'."
+  _show_info_message "Which version part do you want to handle:"
+  _show_info_message "  1. patch (1.1.X)"
+  _show_info_message "  2. minor (1.X.1)"
+  _show_info_message "  3. major (X.1.1)"
+}
+
+# This function checks if user selected project module/modules.
+# If user successfully selected project module this function will update script state!
+#
+# $1 - users input, which could be module name or module id
+#
+# Returns selected project module or modules if user successfully selected something and returns nothing otherwise.
+function _select_version_part_from_user_input() {
+  user_input=$1
+  if [ "$user_input" = "patch" ] || [ "$user_input" = "1" ] || [ "$user_input" = "" ]; then
+    SPECIFIED_INCREASING_VERSION_PART="patch"
+    echo "patch"
+  elif [ "$user_input" = "minor" ] || [ "$user_input" = "2" ]; then
+    SPECIFIED_INCREASING_VERSION_PART="minor"
+    echo "minor"
+  elif [ "$user_input" = "major" ] || [ "$user_input" = "3" ]; then
+    SPECIFIED_INCREASING_VERSION_PART="major"
+    echo "major"
+  fi
+}
+
+function _select_version_part_interactively() {
+  interactive_mode_finished='false'
+  echo -e "\n"
+  while [ "$interactive_mode_finished" = 'false' ]; do
+    _show_available_version_parts || return 1
+
+    question_text='Write version part'
+    read -p "$(echo -e "$BROWN($APP_NAME : INPUT) $question_text: $NEUTRAL_COLOR")" -r answer
+    SPECIFIED_INCREASING_VERSION_PART=$(_select_version_part_from_user_input "$answer") || return 1
+    if [ "$SPECIFIED_INCREASING_VERSION_PART" != '' ]; then 
+      interactive_mode_finished='true'
+      _update_increasing_version_part "$SPECIFIED_INCREASING_VERSION_PART"
+    else
+      echo -e "\n"
+      _show_warning_message "Such version part is not supported for this project configuration."
+    fi
+    echo -e "\n"
+  done
+}
+
 function _select_specified_project_module() {
   if [ "$ARGUMENT_USE_CURRENT_PROJECT_MODULE" = 'true' ]; then
     _use_current_project_module || return 1
@@ -547,7 +607,7 @@ function _select_specified_project_module() {
     _select_project_module_interactively || return 1
     ARGUMENT_SPECIFIED_PROJECT_MODULE='true'
     if [[ "$SPECIFIED_PROJECT_MODULE" == *","* ]]; then
-      _show_info_message "$SPECIFIED_PROJECT_MODULE modules was selected interactively"
+      _show_info_message "$SPECIFIED_PROJECT_MODULE modules were selected interactively"
     else
       _show_info_message "$SPECIFIED_PROJECT_MODULE module was selected interactively"
     fi
@@ -1385,6 +1445,10 @@ while [[ $# -gt 0 ]]; do
     _exit_if_using_multiple_commands "$1"
     COMMAND='suggest-version'
     shift ;;
+  svi|suggest-version-interactively)
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='suggest-version-interactively'
+    shift ;;
   mrp|module-root-path)
     _exit_if_using_multiple_commands "$1"
     COMMAND='module-root-path'
@@ -1397,6 +1461,10 @@ while [[ $# -gt 0 ]]; do
   uv|update-version)
     _exit_if_using_multiple_commands "$1"
     COMMAND='update-version'
+    shift ;;
+  uvi|update-version-interactively)
+    _exit_if_using_multiple_commands "$1"
+    COMMAND='update-version-interactively'
     shift ;;
   -v=*)
     _check_arg "$1"
@@ -1507,17 +1575,28 @@ suggest-version)
   get_suggesting_version
   exit 0
   ;;
+suggest-version-interactively)
+  _select_version_part_interactively || exit 1
+  get_suggesting_version
+  exit 0
+  ;;
+update-version)
+  get_suggesting_version
+  update_version "$SUGGESTING_VERSION"
+  exit 0
+  ;;
+update-version-interactively)
+  _select_version_part_interactively || exit 1
+  get_suggesting_version
+  update_version "$SUGGESTING_VERSION"
+  exit 0
+  ;;
 project-modules)
   get_project_modules
   exit 0
   ;;
 module-root-path)
   show_module_root_path
-  exit 0
-  ;;
-update-version)
-  get_suggesting_version
-  update_version "$SUGGESTING_VERSION"
   exit 0
   ;;
 esac
