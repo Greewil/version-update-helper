@@ -11,20 +11,6 @@
 #/     it | installation-test   to run installation tests in current environment
 #/     at | autoupdate-test     to run autoupdate tests in current environment
 #/
-#/ Arguments for running tests:
-#/     -q, --quiet
-#/          to show only information about passed and failed tests.
-#/     -t <test_id>, --test-id <test_id>
-#/          to run only test with specified <test_id>.
-#/          This parameter can't be used with '-tp | --test-id-prefix'.
-#/          This parameter can't be used with '-ft | --from-test-id'.
-#/     -ft <test_id>, --from-test-id <test_id>
-#/          to run tests listed after test with specified <test_id> (including).
-#/          This parameter can't be used with '-t | --test-id'.
-#/     -tp <test_id_prefix>, --test-id-prefix <test_id_prefix>
-#/          to run only tests with specified prefixes.
-#/          This parameter can't be used with '-t | --test-id'.
-#/
 #/ This is script for testing vuh installation and auto updates mechanisms.
 
 APP_NAME='run_tests.sh'
@@ -117,7 +103,7 @@ function docker_starter() {
   docker ps -a -q -f name="$CONTAINER_NAME" | xargs -r docker rm
   _show_updated_message "Running tests ..."
   docker run -d -e TESTS_COMMANDS="$SPECIFIED_TEST_NAME" \
-                -v "./..:$VUH_SRC_VOLUME" \
+                -v "./../..:$VUH_SRC_VOLUME" \
                 --name "$CONTAINER_NAME" \
                 "$IMAGE_NAME" || {
     _show_error_message "Failed to run docker container from image: '$IMAGE_NAME'!"
@@ -153,15 +139,15 @@ function installation_test() {
   git clone "$VUH_REPO_ADDRESS" "$repo_name"
   cd "$repo_name" || exit 1
 
-  _show_updated_message "Trying to use 'vuh lv -pm=ALL -q' ..."
-  vuh lv -pm=ALL -q || exit 1
-  [ "$(vuh lv -pm=ALL -q)" = "$(./vuh.sh lv -pm=ALL -q)" ] || exit 1
+  _show_updated_message "Trying to use 'vuh lv -q' ..."
+  vuh lv -q || exit 1
+  [ "$(vuh lv -q)" = "$(./vuh.sh lv -q)" ] || exit 1
 
-  _show_updated_message "Checking full 'vuh lv -pm=ALL' output have no warnings ..."
+  _show_updated_message "Checking full 'vuh lv' output have no warnings ..."
   warning_text='(vuh : WARNING)'
-  vuh_full_output="$(vuh lv -pm=ALL)" || exit 1
+  vuh_full_output="$(vuh lv)" || exit 1
   if [[ $vuh_full_output =~ $warning_text ]]; then
-    _show_error_message "Full output of 'vuh lv -pm=ALL' shouldn't have any warnings!"
+    _show_error_message "Full output of 'vuh lv' shouldn't have any warnings!"
     _show_error_message "$vuh_full_output"
     exit 1
   fi

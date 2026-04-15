@@ -107,7 +107,7 @@ function _run_test() {
   cd "$repo_name" || return 1
   git checkout "test_fixture_$branch_name" || return 1
   eval_command="${command//$TEXT_FOR_COMMA_REPLACEMENT/,}" || return 1
-  eval_command="${eval_command//$TEXT_FOR_VUH_REPLACEMENT/\"$STARTING_DIR/../vuh.sh\"}" || return 1
+  eval_command="${eval_command//$TEXT_FOR_VUH_REPLACEMENT/\"$STARTING_DIR/../../vuh.sh\"}" || return 1
   if [ "$asserting_error" = 'yes' ]; then
     vuh_output="$(eval "$eval_command" 2>&1)"
     if ! [[ $vuh_output =~ $correct_result ]]; then

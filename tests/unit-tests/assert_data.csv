@@ -1,4 +1,4 @@
-test_id,    branch_name,                correct_result,               asserting_error, use_separate_env,   command
+test_id,    branch_name,                    correct_result,               asserting_error, use_separate_env,   command
 # use '{{vuh}}' in command column to use current vuh version
 # use '{{comma}}' if you want to use ',' in command column
 
@@ -72,26 +72,27 @@ cc16,       custom_version_file_1,          1.2.4,                        no,   
 
 # monorepos operations
 mr1,        monorepo_equals,                MOD_1 MOD_2 MOD_3,            no,              no,                 {{vuh}} pm -q | sed -e 's/{{comma}}//g'
-mr2,        monorepo_equals,                1.2.3,                        no,              no,                 {{vuh}} lv -q -pm=MOD_1
-mr3,        monorepo_equals,                2.2.2,                        no,              no,                 {{vuh}} lv -q -pm=MOD_2
-mr4,        monorepo_equals,                3.2.1,                        no,              no,                 {{vuh}} lv -q -pm=MOD_3
-mr5,        monorepo_equals,                module_1,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_1
-mr6,        monorepo_equals,                module_2,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_2
-mr7,        monorepo_equals,                module_3,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_3
-mr8,        monorepo_equals,                1.2.4,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1
-mr9,        monorepo_equals,                2.2.3,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2
-mr10,       monorepo_equals,                3.2.2,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3
-mr11,       monorepo_equals,                1.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1 -vp=minor
-mr12,       monorepo_equals,                2.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2 -vp=minor
-mr13,       monorepo_equals,                3.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3 -vp=minor
-mr14,       monorepo_equals,                1.2.4,                        no,              yes,                {{vuh}} uv -q -pm=MOD_1
-mr15,       monorepo_equals,                2.2.3,                        no,              yes,                {{vuh}} uv -q -pm=MOD_2
-mr16,       monorepo_equals,                3.2.2,                        no,              yes,                {{vuh}} uv -q -pm=MOD_3
-mr17,       monorepo_reversed,              1.2.3,                        no,              yes,                {{vuh}} mv -q -pm=MOD_1
-mr18,       monorepo_reversed,              2.2.2,                        no,              yes,                {{vuh}} mv -q -pm=MOD_2
-mr19,       monorepo_reversed,              3.2.1,                        no,              yes,                {{vuh}} mv -q -pm=MOD_3
-mr20,       monorepo_reversed,              VERSION='3.2.2',              no,              yes,                {{vuh}} uv -q -pm=MOD_3 > /dev/null; cat 'module_3/version_file.txt'
-mr21,       monorepo_reversed,              VERSION = '2.2.2',            no,              yes,                {{vuh}} uv -q -pm=MOD_3 > /dev/null; cat 'module_2/version_file.txt'
+mr2,        monorepo_equals,                MOD_1 MOD_2 MOD_3,            no,              no,                 {{vuh}} pm -q -pm=ALL | sed -e 's/{{comma}}//g'
+mr3,        monorepo_equals,                1.2.3,                        no,              no,                 {{vuh}} lv -q -pm=MOD_1
+mr4,        monorepo_equals,                2.2.2,                        no,              no,                 {{vuh}} lv -q -pm=MOD_2
+mr5,        monorepo_equals,                3.2.1,                        no,              no,                 {{vuh}} lv -q -pm=MOD_3
+mr6,        monorepo_equals,                module_1,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_1
+mr7,        monorepo_equals,                module_2,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_2
+mr8,        monorepo_equals,                module_3,                     no,              no,                 {{vuh}} mrp -q -pm=MOD_3
+mr9,        monorepo_equals,                1.2.4,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1
+mr10,       monorepo_equals,                2.2.3,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2
+mr11,       monorepo_equals,                3.2.2,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3
+mr12,       monorepo_equals,                1.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_1 -vp=minor
+mr13,       monorepo_equals,                2.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_2 -vp=minor
+mr14,       monorepo_equals,                3.3.0,                        no,              no,                 {{vuh}} sv -q -pm=MOD_3 -vp=minor
+mr15,       monorepo_equals,                1.2.4,                        no,              yes,                {{vuh}} uv -q -pm=MOD_1
+mr16,       monorepo_equals,                2.2.3,                        no,              yes,                {{vuh}} uv -q -pm=MOD_2
+mr17,       monorepo_equals,                3.2.2,                        no,              yes,                {{vuh}} uv -q -pm=MOD_3
+mr18,       monorepo_reversed,              1.2.3,                        no,              yes,                {{vuh}} mv -q -pm=MOD_1
+mr19,       monorepo_reversed,              2.2.2,                        no,              yes,                {{vuh}} mv -q -pm=MOD_2
+mr20,       monorepo_reversed,              3.2.1,                        no,              yes,                {{vuh}} mv -q -pm=MOD_3
+mr21,       monorepo_reversed,              VERSION='3.2.2',              no,              yes,                {{vuh}} uv -q -pm=MOD_3 > /dev/null; cat 'module_3/version_file.txt'
+mr22,       monorepo_reversed,              VERSION = '2.2.2',            no,              yes,                {{vuh}} uv -q -pm=MOD_3 > /dev/null; cat 'module_2/version_file.txt'
 
 
 # monorepos multiple operations

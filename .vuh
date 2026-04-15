@@ -78,6 +78,7 @@ MAJOR_CHANGING_LOCATIONS=''
 #VUH_TEXT_BEFORE_VERSION_CODE="$TEXT_BEFORE_VERSION_CODE"
 #VUH_TEXT_AFTER_VERSION_CODE="$TEXT_AFTER_VERSION_CODE"
 #VUH_MODULE_ROOT_PATH="$MODULE_ROOT_PATH"
+#VUH_MODULE_DESCRIPTION="This is tool for checking and updating versions in projects"
 #VUH_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES="$IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES"
 
 # ------------------------------------- end mono repository variables ------------------------------------- #

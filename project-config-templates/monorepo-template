@@ -74,7 +74,8 @@ PROJECT_MODULES='API, WEB'
 API_VERSION_FILE='api/build.gradle.kts'
 API_TEXT_BEFORE_VERSION_CODE='version = "'
 API_TEXT_AFTER_VERSION_CODE='"'
-API_MODULE_ROOT_PATH="api"
+API_MODULE_ROOT_PATH='api'
+API_MODULE_DESCRIPTION='Backend'
 API_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 
 # variables for WEB module
@@ -82,6 +83,7 @@ WEB_VERSION_FILE='web/package.json'
 WEB_TEXT_BEFORE_VERSION_CODE='"version": "'
 WEB_TEXT_AFTER_VERSION_CODE='",'
 WEB_MODULE_ROOT_PATH="web"
+WEB_MODULE_DESCRIPTION='Frontend'
 WEB_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES='false'
 
 # ------------------------------------- end mono repository variables ------------------------------------- #

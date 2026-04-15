@@ -28,10 +28,10 @@ function _vuh_completion()
     mv|main-version)
       words="-q -mb= -pm= -cpm --current-project-module --quiet --offline --airplane-mode --dont-use-git --config-dir="
       ;;
-    sv|suggest-version)
+    sv|suggest-version|svi|suggesting-version-interactively)
       words="-q -v= -vp= -mb= -pm= -cpm --current-project-module --quiet --check-git-diff --dont-check-git-diff --offline --airplane-mode --dont-use-git --config-dir="
       ;;
-    uv|update-version)
+    uv|update-version|uvi|update-version-interactively)
       words="-q -v= -vp= -mb= -pm= -cpm --current-project-module --quiet --check-git-diff --dont-check-git-diff --offline --airplane-mode --dont-use-git --config-dir="
 #      words="'-q ' -v= -vp= -mb= -pm= '-cpm ' '--current-project-module ' '--quiet ' '--check-git-diff ' '--dont-check-git-diff ' '--offline ' '--airplane-mode ' '--dont-use-git ' --config-dir="
       ;;

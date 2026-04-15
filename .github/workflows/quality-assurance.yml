@@ -4,14 +4,18 @@ on: [workflow_call]
 
 jobs:
 
+  shellcheck-tests:
+    name: Shellcheck
+    uses: ./.github/workflows/tests-shellcheck.yml
+
   unit-tests:
     name: Unit tests
-    uses: ./.github/workflows/unit-tests.yml
+    uses: ./.github/workflows/tests-unit.yml
 
-  shellcheck:
-    name: Shellcheck
-    uses: ./.github/workflows/shellcheck.yml
+  integration-tests:
+    name: Integration tests
+    uses: ./.github/workflows/tests-integration.yml
 
   installer-tests:
     name: Installer tests
-    uses: ./.github/workflows/installer-tests.yml
+    uses: ./.github/workflows/tests-installer.yml

@@ -186,6 +186,12 @@ More about this github action you can read here:
                                      to work offline without updating origin/MAIN_BRANCH_NAME
                                      and to stop searching for vuh updates.
 
+        svi, suggesting-version-interactively           
+                                     Show suggesting version which this branch should use.
+                                     Version part will be selected interactively.
+                                     Project module will be selected interactively (if it wasn't selected before).
+                                     All parameters are the same as for "sv, suggesting-version" command (next command).
+
         sv, suggesting-version       Show suggesting version which this branch should use.
 
             [-q | --quiet]           to show only version number (or errors messages if there are so).
@@ -239,6 +245,12 @@ More about this github action you can read here:
             [--config-dir=<path>]    Search for .vuh configuration file in another directory.
                                      You don't need to specify it if you are working with git repository.
                                      Suggesting to use this parameter with '--dont-use-git' parameter.
+
+        uvi, update-version-interactively           
+                                     Replace your local version with suggesting version which this branch should use.
+                                     Version part will be selected interactively.
+                                     Project module will be selected interactively (if it wasn't selected before).
+                                     All parameters are the same as for "uv, update-version" command (next command).
 
         uv, update-version           Replace your local version with suggesting version which this branch should use.
 
@@ -362,9 +374,10 @@ List of all config variables for monorepos:
 | \<MODULE>_VERSION_FILE                          |         2.0.0          |       Yes       | File which contains version information (for specific \<MODULE>).                                                                                                                                                                                                                                                                                                                                                                                                   | 'package.json' <br/> (for node.js application)                                                                  |
 | \<MODULE>_TEXT_BEFORE_VERSION_CODE              |         2.0.0          |       Yes       | Unique text which will be just before version number including spaces (for specific \<MODULE>). All special symbols ('/', '\\', '^', '$', '*', '(', ')', '{', '}', '[', ']') should be escaped with '\\'.                                                                                                                                                                                                                                                           | '"version": "' <br/> (for variable "version" in json files so it can find line "version": "version_number")     |
 | \<MODULE>_TEXT_AFTER_VERSION_CODE               |         2.0.0          |       Yes       | Unique text which will be just after version number including spaces (for specific \<MODULE>). All special symbols ('/', '\\', '^', '$', '*', '(', ')', '{', '}', '[', ']') should be escaped with '\\'.                                                                                                                                                                                                                                                            | '",' <br/> (for variable "version" in json files so it can find line "version": "version_number")               |
-| \<MODULE>_MODULE_ROOT_PATH                      |         2.0.0          |       No        | Root path of the project module code directory relative to the repository root (this variable can be used in git diff if \<MODULE>_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES equals 'true').                                                                                                                                                                                                                                                                            | 'frontend' (for frontend directory in the repository root)                                                      |
+| \<MODULE>_MODULE_ROOT_PATH                      |         2.0.0          |       No        | Root path of the project module code directory that is relative to the repository root (this variable can be used in git diff if \<MODULE>_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES equals 'true').                                                                                                                                                                                                                                                                    | 'frontend' (for frontend directory in the repository root)                                                      |
 | \<MODULE>_IS_INCREMENT_REQUIRED_ONLY_ON_CHANGES |         2.2.0          |       No        | If this variable set to 'true' and current branch has no difference with HEAD..origin/\<MODULE>_MAIN_BRANCH_NAME, vuh will not modify your current version if your current version is the same as main version. If this variable is 'false' (which is by default) vuh will suggest you to increase your current version.                                                                                                                                            | 'true' or 'false' ('false' by default)                                                                          |
 | \<MODULE>_<VERSION_PART>_CHANGING_LOCATIONS     |         2.3.0          |       No        | If there are changes between HEAD..origin/\<MODULE>MAIN_BRANCH_NAME and current branch in this files or directories, <VERSION_PART> version should be increased. Works only if you checking git diff (you configured your .vuh config such way for this \<MODULE> or you using --check-git-diff parameter). Locations should be separated with spaces. Empty variable means there is no locations which leads to <VERSION_PART> increasing on every change in them. | 'openapi/schema.yaml very/important/directory' <br/> (for 'openapi/schema.yaml' and 'very/important/directory') |
+| \<MODULE>_MODULE_DESCRIPTION                    |         2.14.0         |       No        | Short description for project module. It will be displayed if users will use vuh in interactive mode.                                                                                                                                                                                                                                                                                                                                                               | 'This is auth service.'                                                                                         |
 
 To configure your own project you should select one of the configuration template from [project-config-templates]
 and copy it to the root directory of your project as '.vuh'.
