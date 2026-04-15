@@ -16,16 +16,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Collect project info
-        id: vuh_collect_info
-        uses: Greewil/version-update-helper@gha/collect-info/v1
-#        with:
-#          version: "${{ inputs.VUH_VERSION }}"
-##      Here you can select vuh version
+      - name: get release tag_name
+        id: release_version
+        run: |
+          cur_version=$(./vuh.sh lv -q)
+          echo "release version: $cur_version" 
+          echo "RELEASE_VERSION=$cur_version" >> "$GITHUB_OUTPUT"
 
       - name: Generate release with release-notes-generator
         uses: Greewil/release-notes-generator@gha/generate-release-notes/v1
         with:
           rng_version: "${{ inputs.CHANGELOG_GENERATOR_VERSION }}"
           create_release: 'true'
-          tag_name: "${{ steps.vuh_collect_info.outputs.local-version }}"
+          tag_name: "${{ steps.release_version.outputs.RELEASE_VERSION }}"
+
