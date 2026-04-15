@@ -71,6 +71,67 @@ sudo vuh --update
 To use vuh with your project you should first create .vuh file in root folder of your project 
 (read more about configuring in [configuring projects](#Configuring-projects)).
 
+### Usage in github actions
+
+#### Install
+
+You can install vuh in your github action by calling ```Greewil/version-update-helper@gha/install/v1``` action.
+
+If all you need is latest vuh version, simply add this to your workflow:
+```yaml
+- name: Install VUH
+  uses: Greewil/version-update-helper@gha/install/v1
+```
+
+Then you can use it as basic console app.
+
+More about this github action you can read here: 
+[install vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/install/v1?tab=readme-ov-file#installing-vuh-action).
+
+#### Validate version
+
+You can check that current project version is greater than main branch version 
+by calling ```Greewil/version-update-helper@gha/validate-version/v1``` action:
+```yaml
+- name: Validating version using VUH
+  uses: Greewil/version-update-helper@gha/validate-version/v1
+```
+
+Or you can validate version for specific module, 
+if you are using repository with multiple modules:
+```yaml
+- name: Validating version using VUH
+  uses: Greewil/version-update-helper@gha/validate-version/v1
+  with:
+    module: "WEB"
+```
+
+More about this github action you can read here:
+[validate-version vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/validate-version/v1?tab=readme-ov-file#validating-versions-vuh-action).
+
+#### Collect module info
+
+You can collect project version info (local, main and suggested versions)
+by calling ```Greewil/version-update-helper@gha/collect-info/v1``` action:
+```yaml
+- name: Validating version using VUH
+  uses: Greewil/version-update-helper@gha/collect-info/v1
+```
+
+Or you can collect information for specific module,
+if you are using repository with multiple modules:
+```yaml
+- name: Validating version using VUH
+  uses: Greewil/version-update-helper@gha/collect-info/v1
+  with:
+    vuh-module: "WEB"
+```
+
+More about this github action you can read here:
+[collect-info vuh action usage](https://github.com/Greewil/version-update-helper/tree/gha/collect-info/v1?tab=readme-ov-file#vuh-action-for-collecting-project-info).
+
+### Help
+
     Usage: vuh [-v | --version] [-h | --help] [--configuration] [--update] <command> [<args>]
     
     Standalone commands:

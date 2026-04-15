@@ -1071,11 +1071,22 @@ function _regular_check_available_updates() {
     _show_warning_message "If you want to install vuh properly read more in $OFFICIAL_REPO_FULL."
     return 1
   fi
+  # don't sourcing .installation_info because someone can potentially install malware there
+  daily_update_checks_line="$(grep 'DAILY_UPDATE_CHECKS' < "$configuration_file")" || {
+    _show_error_message "Failed to load vuh configuration file ($configuration_file)!"
+    return 1
+  }
+  disable_update_checks_line=$(echo "$daily_update_checks_line" | grep 'false')
+  if [[ "$disable_update_checks_line" != '' ]]; then
+    # don't check updates if they turned off
+    return 0
+  fi
+
   cur_date=$(date +%Y-%j)
   last_update_check='0-0' # dates like: 'date +%Y-%j' (f.e. 2022-213)
   update_info_file="$DATA_DIR/latest_update_check"
   if [[ -d "$update_info_file" ]] || [[ -s "$update_info_file" ]]; then
-    last_update_check=$(<"$DATA_DIR/latest_update_check")
+    last_update_check=$(<"$update_info_file")
   else
     echo "$cur_date" > "$update_info_file"
   fi
