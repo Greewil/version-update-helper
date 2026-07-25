@@ -33,4 +33,8 @@ if you are using repository with multiple modules:
   If vuh checking git diff it's require to increase version only if current branch has git difference with HEAD..origin/MAIN_BRANCH_NAME.
   
   By dafault its true.
+- ```install-vuh``` - run step that installs specified vuh version.
+  If you don't want to install vuh and use vuh from the environment you can skip installation step.
+  
+  By dafault its true.
 
