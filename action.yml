@@ -11,6 +11,11 @@ inputs:
     required: false
     default: ""
     type: string
+  install-vuh:
+    description: "If set true then version-update-helper@gha/install/v1 will run too."
+    required: false
+    default: true
+    type: boolean
 
 outputs:
   local-version:
@@ -31,6 +36,7 @@ runs:
   steps:
     - name: Install VUH
       uses: Greewil/version-update-helper@gha/install/v1
+      if: inputs.install-vuh == 'true'
       with:
         version: "${{ inputs.version }}"
 

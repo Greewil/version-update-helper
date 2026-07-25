@@ -29,6 +29,14 @@ If you want to collect info for mono repository module:
     module: 'WEB'
 ```
 
+If you don't want to install vuh and vuh from the environment:
+```
+- name: Collecting project versions info
+  uses: Greewil/version-update-helper@gha/collect-info/v1
+  with:
+    install-vuh: false
+```
+
 ### Outputs
 
 If you working with single version applocation, 
